@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宣传活动样式 - 社小智</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 图片裁剪组件 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            /* 确保父页面有滚动条 */
+            overflow-y: auto;
+        }
+        
+        /* 文档选择弹窗样式 */
+        .docs-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        /* 弹框显示状态样式 - 最高优先级 */
+        .docs-modal-visible {
+            display: flex !important;
+        }
+        
+        .docs-modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .docs-modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .docs-modal-body {
+            display: flex;
+            height: 500px;
+            overflow: hidden;
+        }
+        
+        .docs-sidebar {
+            width: 220px;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+        }
+        
+        .docs-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .doc-sidebar-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .doc-sidebar-item:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .doc-sidebar-item.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+        
+        .docs-modal-footer {
+            padding: 12px 24px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        
+        .doc-item {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        
+        .doc-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .doc-item-icon {
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .doc-item-info {
+            flex: 1;
+        }
+        
+        .doc-item-title {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .doc-item-meta {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .search-docs {
+            padding: 12px;
+            background: #f9f9f9;
+        }
+        
+        .search-docs input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        :root {
+            --primary-color: #2479CC;
+            --primary-light: #e6f2ff;
+            --primary-dark: #1a5b99;
+            --accent-color: #ff6a00;
+            --text-color: #333;
+            --light-gray: #f6f6f6;
+        }
+
+        .top-nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-nav .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item {
+            padding: 0 20px;
+            color: #333;
+            position: relative;
+            height: 64px;
+            line-height: 64px;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            margin-left: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2479CC;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .user-name {
+            color: #374151;
+            font-size: 14px;
+        }
+
+        /* 确保在移动设备上菜单隐藏 */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+        }
+
+        .topic-tabs {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid white;
+            font-weight: 500;
+        }
+        
+        .filter-bar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 12px 24px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 12px;
+            background-color: white;
+            color: #333;
+            min-width: 120px;
+            font-size: 13px;
+        }
+        
+        .filter-select option {
+            font-size: 13px;
+        }
+        
+        .filter-label {
+            color: #666;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+        
+        .resource-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eaeaea;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .resource-image {
+            height: 160px;
+            width: 100%;
+            object-fit: cover;
+            position: relative;
+        }
+        
+        .resource-image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+            color: white;
+            padding: 8px 12px;
+            font-weight: 500;
+            font-size: 16px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        }
+        
+        .resource-body {
+            padding: 16px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .resource-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        
+        .resource-desc {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+        
+        .resource-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .resource-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .btn-download {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn-download:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-upload {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-upload i {
+            margin-right: 8px;
+        }
+        
+        .btn-upload:hover {
+            background-color: #e05d00;
+        }
+        
+        .btn-manage {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-manage i {
+            margin-right: 8px;
+        }
+        
+        .btn-manage:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-manage.active {
+            background-color: #28a745;
+        }
+        
+        .btn-manage.active:hover {
+            background-color: #218838;
+        }
+        
+        .edit-actions {
+            display: none;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+        }
+        
+        .edit-mode .edit-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-edit, .btn-delete {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-edit:hover {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .edit-mode .resource-card {
+            position: relative;
+        }
+        
+        .sort-select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 12px;
+            background-color: white;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .sort-select option {
+            font-size: 13px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .header-banner {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 24px 0;
+        }
+        
+        .banner-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-box {
+            background-color: white;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            max-width: 360px;
+        }
+        
+        .search-input {
+            border: none;
+            padding: 10px 16px;
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .search-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 16px;
+            cursor: pointer;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb span {
+            margin: 0 8px;
+        }
+        
+        .ai-helper-button {
+            background-color: #ffaa00;
+            color: white;
+            border-radius: 4px;
+            padding: 8px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .ai-helper-button:hover {
+            background-color: #ee9900;
+        }
+        
+        .ai-helper-button i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        .empty-resource {
+            text-align: center;
+            padding: 80px 0;
+            background-color: white;
+            border-radius: 8px;
+            color: #666;
+        }
+        
+        .empty-resource i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 16px;
+        }
+        
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .format-tag {
+            background-color: #f0f7ff;
+            color: #0066cc;
+            border: 1px solid #cce0ff;
+        }
+        
+
+        
+        /* 开关按钮样式 */
+        .toggle-switch input:checked + div {
+            background-color: #2479CC;
+        }
+        
+        .toggle-switch input:checked + div .toggle-dot {
+            transform: translateX(100%);
+        }
+        
+        .toggle-switch input:focus + div {
+            box-shadow: 0 0 0 2px rgba(36, 121, 204, 0.3);
+        }
+        
+        .toggle-switch div {
+            transition: all 0.3s ease;
+        }
+
+        /* 内容区域iframe统一样式，允许内容撑开父容器 */
+        iframe.content-iframe {
+            border: none;
+            width: 100%;
+            min-height: 600px; /* 提供一个最小高度 */
+            height: auto; /* 允许高度根据内容自动扩展 */
+            overflow: hidden; /* 防止iframe自身产生滚动条 */
+        }
+        
+        /* 内容区域容器样式 */
+        .content-section {
+            width: 100%;
+            height: auto; /* 允许高度自动扩展 */
+            overflow: visible; /* 允许内容撑开容器 */
+        }
+
+        /* 主内容区样式 */
+        #mainContentArea {
+            min-height: 500px; /* 确保有足够的内容高度 */
+            overflow: visible; /* 允许内容超出时显示 */
+        }
+
+        /* 模态框样式 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-hidden {
+            display: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="content-wrapper">
+            <!-- 左侧Logo -->
+            <div class="logo-section">
+                <a href="#" class="logo-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#2479CC">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                    <div class="logo-text">社小智</div>
+                </a>
+            </div>
+            
+            <!-- 中间导航菜单 -->
+            <nav class="nav-menu">
+                <a href="#" class="nav-item">首页</a>
+                <a href="#" class="nav-item">工单办理助手</a>
+                <a href="#" class="nav-item">公文模板</a>
+                <a href="#" class="nav-item">找找云文档</a>
+                <a href="#" class="nav-item">工单分析办理PRO</a>
+                <a href="#" class="nav-item">社情民意助手</a>
+                <a href="work_area.html" class="nav-item active">工作专区</a>
+            </nav>
+            
+            <!-- 右侧用户信息 -->
+            <div class="user-section">
+                <div class="user-avatar">
+                    <img src="https://via.placeholder.com/32" alt="用户头像">
+                </div>
+                <span class="user-name">用户名</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 专题名称显示区域 -->
+    <div class="bg-blue-600 text-white py-4" style="background-color: var(--primary-color) !important;">
+        <div class="content-wrapper px-4">
+            <div class="flex items-center justify-center">
+                <span class="text-xl font-semibold" id="topicName">宣传活动样式的专题名称</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 专题选项卡 -->
+    <div class="topic-tabs">
+        <div class="content-wrapper px-4">
+            <div class="flex overflow-x-auto">
+                <a href="#" class="tab-item flex items-center active" data-content="publicity">
+                    <i class="fas fa-home mr-2"></i>
+                    主页
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <main class="content-wrapper px-4 py-6" id="mainContentArea">
+        <!-- 宣传教育内容区域 - 默认显示 -->
+        <div class="content-section" id="content-publicity">
+            <!-- 工作总结专题指引 -->
+            <div class="bg-blue-50 rounded-lg shadow-sm p-4 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-semibold text-blue-800">专题指引</h2>
+                        <p class="text-sm text-gray-600 mt-1"></p>
+                    </div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center" id="btnWorkflowGuide">
+                        <i class="fas fa-tasks mr-2"></i>
+                        查看工作流程引导
+                    </button>
+                </div>
+                
+                <!-- 专题说明文字 -->
+                <div class="mt-4 p-4 bg-white rounded-lg border border-blue-100">
+                    <div class="text-gray-700 leading-relaxed">
+                        <p class="mb-3">社区治安工作总结是系统评估安全防范成效、梳理问题短板、提炼经验做法的重要工具。本专题围绕社区治安巡逻、矛盾纠纷调解、安全隐患排查、特殊人群管理等核心工作，提供全面系统的总结撰写方法与模板，助力提升社区安全治理水平。</p>
+                        <p class="mb-3">高质量的治安工作总结应突出数据支撑、案例说明和实效评估，客观反映社区安全态势变化、群众安全感满意度提升、突出问题整改情况等关键指标。通过科学的总结分析，可有效识别治安管理薄弱环节，为下阶段精准施策提供有力依据。</p>
+                        <p>本专题提供社区治安工作总结全流程指引，包括数据收集、成效分析、经验总结、问题梳理及改进建议等环节，同时配套提供各类专业模板，帮助基层工作者高效完成治安任务总结，构建共建共治共享的社区安全环境。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 当前专题活动列表 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">活动日历</h2>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center" id="btnAddTopicActivity">
+                        <i class="fas fa-plus mr-2"></i>
+                        添加活动
+                    </button>
+                </div>
+                
+                <!-- 活动日历控制区 -->
+                <div class="flex flex-wrap justify-between items-center mb-4">
+                    <div class="flex items-center mb-2 sm:mb-0">
+                        <button id="btnPrevMonth" class="bg-gray-100 hover:bg-gray-200 text-gray-600 rounded p-2 mr-2">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 class="text-lg font-medium" id="currentMonthYear">2025年5月</h3>
+                        <button id="btnNextMonth" class="bg-gray-100 hover:bg-gray-200 text-gray-600 rounded p-2 ml-2">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="activityTypeFilter" class="border border-gray-300 rounded py-1 px-3 text-sm">
+                            <option value="all">全部活动</option>
+                            <option value="my">我的活动</option>
+                            <option value="system">活动提示</option>
+                        </select>
+                        <button id="btnManageSystemActivity" class="bg-gray-600 hover:bg-gray-700 text-white py-1 px-3 rounded text-sm flex items-center">
+                            <i class="fas fa-cog mr-1"></i>
+                            活动提示
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 活动日历视图 -->
+                <div id="calendarView" class="mb-6">
+                    <!-- 星期标题行 -->
+                    <div class="grid grid-cols-7 text-center py-2 border-b">
+                        <div class="text-gray-600 font-medium">日</div>
+                        <div class="text-gray-600 font-medium">一</div>
+                        <div class="text-gray-600 font-medium">二</div>
+                        <div class="text-gray-600 font-medium">三</div>
+                        <div class="text-gray-600 font-medium">四</div>
+                        <div class="text-gray-600 font-medium">五</div>
+                        <div class="text-gray-600 font-medium">六</div>
+                    </div>
+                    
+                    <!-- 日历主体 - 示例呈现5月 -->
+                    <div class="grid grid-cols-7 gap-1 mt-1">
+                        <!-- 上个月最后几天 -->
+                        <div class="calendar-day text-gray-400 p-1 border rounded min-h-[80px]">
+                            <div class="text-right">28</div>
+                        </div>
+                        <div class="calendar-day text-gray-400 p-1 border rounded min-h-[80px]">
+                            <div class="text-right">29</div>
+                        </div>
+                        <div class="calendar-day text-gray-400 p-1 border rounded min-h-[80px]">
+                            <div class="text-right">30</div>
+                        </div>
+                        
+                        <!-- 本月日期 - 第一行 -->
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-01">
+                            <div class="text-right">1</div>
+                            <div class="calendar-event bg-gray-100 text-gray-700 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="5" data-event-type="system">
+                                劳动节活动
+                            </div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-02">
+                            <div class="text-right">2</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-03">
+                            <div class="text-right">3</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-04">
+                            <div class="text-right">4</div>
+                            <div class="calendar-event bg-gray-100 text-gray-700 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="1" data-event-type="system">
+                                社区文艺排练
+                            </div>
+                        </div>
+                        
+                        <!-- 第二行 -->
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-05">
+                            <div class="text-right">5</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-06">
+                            <div class="text-right">6</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-07">
+                            <div class="text-right">7</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-08">
+                            <div class="text-right">8</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-09">
+                            <div class="text-right">9</div>
+                            <div class="calendar-event bg-gray-100 text-gray-700 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="2" data-event-type="system">
+                                居民议事会
+                            </div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-10">
+                            <div class="text-right">10</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-11">
+                            <div class="text-right">11</div>
+                        </div>
+                        
+                        <!-- 第三行 -->
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-12">
+                            <div class="text-right">12</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-13">
+                            <div class="text-right">13</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-14">
+                            <div class="text-right">14</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-15">
+                            <div class="text-right">15</div>
+                            <div class="calendar-event bg-gray-100 text-gray-700 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="3" data-event-type="system">
+                                垃圾分类宣讲
+                            </div>
+                            <div class="calendar-event bg-green-100 text-green-800 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="4" data-event-type="my">
+                                读书会活动
+                            </div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-16">
+                            <div class="text-right">16</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-17">
+                            <div class="text-right">17</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-18">
+                            <div class="text-right">18</div>
+                        </div>
+                        
+                        <!-- 第四行 -->
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-19">
+                            <div class="text-right">19</div>
+                            <div class="calendar-event bg-gray-100 text-gray-700 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="5" data-event-type="system">
+                                社区健步走
+                            </div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-20">
+                            <div class="text-right">20</div>
+                            <div class="calendar-event bg-green-100 text-green-800 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="6" data-event-type="my">
+                                青少年环保知识竞赛
+                            </div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-21">
+                            <div class="text-right">21</div>
+                            <div class="calendar-event bg-green-100 text-green-800 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="6" data-event-type="my">
+                                志愿者招募
+                            </div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-22">
+                            <div class="text-right">22</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-23">
+                            <div class="text-right">23</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-24">
+                            <div class="text-right">24</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-25">
+                            <div class="text-right">25</div>
+                            <div class="calendar-event bg-gray-100 text-gray-700 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="7" data-event-type="system">
+                                邻里节筹备会
+                            </div>
+                        </div>
+                        
+                        <!-- 第五行 -->
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-26">
+                            <div class="text-right">26</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-27">
+                            <div class="text-right">27</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-28">
+                            <div class="text-right">28</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-29">
+                            <div class="text-right">29</div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-30">
+                            <div class="text-right">30</div>
+                            <div class="calendar-event bg-gray-100 text-gray-700 text-xs p-1 rounded mt-1 cursor-pointer" data-event-id="8" data-event-type="system">
+                                社区文艺汇演
+                            </div>
+                        </div>
+                        <div class="calendar-day p-1 border rounded bg-white min-h-[80px]" data-date="2025-05-31">
+                            <div class="text-right">31</div>
+                        </div>
+                        
+                        <!-- 下个月前几天 -->
+                        <div class="calendar-day text-gray-400 p-1 border rounded min-h-[80px]">
+                            <div class="text-right">1</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 我的活动列表 -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium text-gray-700 mb-3">专题名称我的活动</h3>
+                    <div class="border rounded-lg overflow-hidden bg-white">
+                        <!-- 表格头部 -->
+                        <div class="bg-gray-50 border-b">
+                            <div class="grid grid-cols-5 gap-4 p-4 text-sm font-medium text-gray-700">
+                                <div>活动名称</div>
+                                <div>时间</div>
+                                <div>活动人群</div>
+                                <div>找找云文档群组</div>
+                                <div>操作</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 表格内容 -->
+                        <div class="divide-y divide-gray-200">
+                            <!-- 活动行1 -->
+                            <div class="grid grid-cols-5 gap-4 p-4 hover:bg-gray-50">
+                                <div class="font-medium text-gray-900">读书会活动</div>
+                                <div class="text-gray-600">2025-05-15</div>
+                                <div class="text-gray-600">面向社区青少年</div>
+                                <div class="flex items-center text-green-600">
+                                    <i class="fas fa-folder mr-1"></i>
+                                    <span class="text-sm">读书会活动文档群组</span>
+                            </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium edit-activity-btn" data-activity-id="4">编辑</button>
+                                    <button class="text-red-600 hover:text-red-800 text-sm font-medium delete-activity-btn" data-activity-id="4">删除</button>
+                            </div>
+                        </div>
+                        
+                            <!-- 活动行2 -->
+                            <div class="grid grid-cols-5 gap-4 p-4 hover:bg-gray-50">
+                                <div class="font-medium text-gray-900">青少年环保知识竞赛</div>
+                                <div class="text-gray-600">2025-05-20</div>
+                                <div class="text-gray-600">面向社区青少年</div>
+                                <div class="flex items-center text-gray-500">
+                                            <i class="fas fa-folder-open mr-1"></i>
+                                    <span class="text-sm">未关联文档群组</span>
+                                    </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium edit-activity-btn" data-activity-id="6">编辑</button>
+                                    <button class="text-red-600 hover:text-red-800 text-sm font-medium delete-activity-btn" data-activity-id="6">删除</button>
+                    </div>
+                </div>
+                
+                            <!-- 活动行3 -->
+                            <div class="grid grid-cols-5 gap-4 p-4 hover:bg-gray-50">
+                                <div class="font-medium text-gray-900">志愿者招募</div>
+                                <div class="text-gray-600">2025-05-21</div>
+                                <div class="text-gray-600">18-45岁居民</div>
+                                <div class="flex items-center text-green-600">
+                                    <i class="fas fa-folder mr-1"></i>
+                                    <span class="text-sm">志愿者招募活动群组</span>
+                        </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium edit-activity-btn" data-activity-id="7">编辑</button>
+                                    <button class="text-red-600 hover:text-red-800 text-sm font-medium delete-activity-btn" data-activity-id="7">删除</button>
+                        </div>
+                        </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+
+        </div>
+        </div>
+    </main>
+
+    <!-- 工作流程引导抽屉 -->
+    <div id="workflowGuideDrawer" class="fixed inset-0 z-[9999] modal-hidden">
+        <!-- 遮罩层 -->
+        <div id="workflowGuideOverlay" class="absolute inset-0 bg-black bg-opacity-30"></div>
+        
+        <!-- 右侧抽屉 -->
+        <div class="absolute right-0 top-0 bottom-0 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 bg-white shadow-xl transform transition-transform duration-300 translate-x-full" id="workflowGuideContent">
+            <!-- 抽屉头部 -->
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <h2 class="text-xl font-bold">宣传活动样式 · 活动策划执行指南</h2>
+                </div>
+                <button id="closeWorkflowGuide" class="text-white p-2 rounded-full hover:bg-blue-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 抽屉内容区 - 工作流程 -->
+            <div class="p-6 overflow-y-auto" style="max-height: calc(100vh - 70px);">
+                <!-- 返回首页按钮 -->
+                <div class="mb-8">
+                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span>返回首页</span>
+                    </a>
+                </div>
+                
+                <!-- 工作流程时间线 -->
+                <div class="relative">
+                    <!-- 垂直时间线 -->
+                    <div class="absolute left-8 top-0 bottom-0 w-1 bg-blue-200"></div>
+                    
+                    <!-- 步骤1：活动策划与准备 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-blue-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-lightbulb text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-blue-600 font-semibold">1. 活动策划与准备</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>活动策划人员、社区工作者、志愿者协调员</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>活动策划方案 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>活动预算表 (Excel)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：明确活动主题、目标人群、时间地点，制定详细的活动流程和预算计划，确保活动的可行性和有效性。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤2：宣传推广与报名 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-green-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-bullhorn text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-green-600 font-semibold">2. 宣传推广与报名</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>宣传文员、社区网格员、志愿者团队</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <a href="#" class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center hover:bg-purple-100">
+                                                <i class="far fa-file-powerpoint text-purple-500 mr-2"></i>
+                                                <span>宣传海报设计 (PPT)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>参与者报名表 (Excel)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：通过多渠道宣传活动信息，制作吸引人的宣传材料，建立便民的报名渠道，确保活动覆盖目标群体。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤3：活动执行与管理 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-yellow-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-calendar-check text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-yellow-600 font-semibold">3. 活动执行与管理</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>活动主持人、现场协调员、安全保障人员</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>活动现场记录 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-red-50 text-red-600 rounded flex items-center hover:bg-red-100">
+                                                <i class="fas fa-image text-red-500 mr-2"></i>
+                                                <span>活动照片集</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：按照活动流程组织实施，做好现场秩序维护和安全保障，及时记录活动过程和参与情况。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤4：效果评估与反馈 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-pink-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-pink-600 font-semibold">4. 效果评估与反馈</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>活动负责人、调研员、数据分析员</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>参与者满意度调查 (Excel)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>活动效果分析报告 (Word)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：通过问卷调查、访谈等方式收集参与者反馈，分析活动达成效果，为后续活动改进提供依据。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤5：总结宣传与推广 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-purple-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-file-alt text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-purple-600 font-semibold">5. 总结宣传与推广</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>活动总结撰写人、宣传推广人员、媒体联系人</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>活动总结报告 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="fas fa-newspaper text-green-500 mr-2"></i>
+                                                <span>新闻稿件</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center hover:bg-purple-100">
+                                                <i class="far fa-file-powerpoint text-purple-500 mr-2"></i>
+                                                <span>成果展示PPT</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：撰写活动总结，提炼成功经验和创新做法，通过多媒体渠道宣传活动成果，扩大活动影响力。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+    <!-- 添加活动弹框 -->
+    <div id="addActivityModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">添加活动</h3>
+                    <button id="closeAddActivityModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="addActivityForm">
+                    <div class="space-y-4">
+                        <!-- 活动名称 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                活动名称 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="activityName" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动名称">
+                            </div>
+                            
+                        <!-- 活动日期 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                活动日期 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" id="activityDate" class="w-full border border-gray-300 rounded-md px-3 py-2" value="2025-05-23">
+                        </div>
+                        
+                        <!-- 活动人群 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">活动人群</label>
+                            <input type="text" id="activityTarget" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动面向的人群">
+                                    </div>
+                                    
+                        <!-- 活动描述 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">活动描述</label>
+                            <textarea id="activityDescription" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动描述"></textarea>
+                                    </div>
+                                    
+                        <!-- 云文档群组 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">云文档群组</label>
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <p class="text-sm text-gray-600 mb-3">创建或关联云文档群组可便于活动相关文件管理与协作</p>
+                                <div class="flex gap-3">
+                                    <button type="button" id="createDocGroup" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        创建群组
+                                    </button>
+                                    <button type="button" id="linkDocGroup" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center">
+                                        <i class="fas fa-link mr-2"></i>
+                                        关联群组
+                                    </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </form>
+                    </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancelAddActivity" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">取消</button>
+                <button id="saveActivity" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">保存活动</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑活动弹框 -->
+    <div id="editActivityModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">编辑活动</h3>
+                    <button id="closeEditActivityModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            </div>
+            <div class="p-6">
+                <form id="editActivityForm">
+                    <div class="space-y-4">
+                        <!-- 活动名称 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                活动名称 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="editActivityName" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动名称">
+                </div>
+                
+                        <!-- 活动日期 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                活动日期 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" id="editActivityDate" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                        </div>
+                        
+                        <!-- 活动人群 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">活动人群</label>
+                            <input type="text" id="editActivityTarget" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动面向的人群">
+                        </div>
+                        
+                        <!-- 活动描述 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">活动描述</label>
+                            <textarea id="editActivityDescription" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动描述"></textarea>
+                                </div>
+                        
+                        <!-- 云文档群组 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">云文档群组</label>
+                            
+                            <!-- 已关联文件夹显示 -->
+                            <div id="linkedDocGroupSection" class="bg-green-50 rounded-lg p-4 border border-green-200 mb-4 hidden">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-folder text-green-600 mr-2"></i>
+                                        <span class="text-sm font-medium text-green-800" id="linkedDocGroupName">活动文档群组</span>
+                            </div>
+                                    <button type="button" id="unlinkDocGroup" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                        取消关联
+                                    </button>
+                        </div>
+                                <p class="text-xs text-green-600 mt-2">文档群组已成功关联，可在此进行活动相关文件管理</p>
+                    </div>
+                    
+                            <!-- 未关联时的操作区域 -->
+                            <div id="noDocGroupSection" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <p class="text-sm text-gray-600 mb-3">创建或关联云文档群组可便于活动相关文件管理与协作</p>
+                                <div class="flex gap-3">
+                                    <button type="button" id="editCreateDocGroup" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        创建群组
+                                    </button>
+                                    <button type="button" id="editLinkDocGroup" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center">
+                                        <i class="fas fa-link mr-2"></i>
+                                        关联群组
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="deleteEditActivity" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 mr-auto">删除活动</button>
+                <button id="cancelEditActivity" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">取消</button>
+                <button id="updateActivity" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">保存活动</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系统活动管理弹框 -->
+    <div id="systemActivityModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">管理活动提示</h3>
+                    <button id="closeSystemActivityModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="mb-4 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-base font-medium text-gray-900 mb-1">活动提示列表</h4>
+                    </div>
+                    <button id="addSystemActivity" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                        添加活动提示
+                    </button>
+                        </div>
+                        
+                <!-- 活动提示表格 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <!-- 表格头部 -->
+                    <div class="bg-gray-50 border-b border-gray-200">
+                        <div class="grid grid-cols-4 gap-4 p-4 text-sm font-medium text-gray-700">
+                            <div>活动名称</div>
+                            <div>活动日期</div>
+                            <div>活动人群</div>
+                            <div>操作</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 表格内容 -->
+                    <div class="divide-y divide-gray-200 bg-white">
+                        <!-- 活动行1 -->
+                        <div class="grid grid-cols-4 gap-4 p-4 hover:bg-gray-50">
+                            <div class="text-gray-900">社区文艺排练</div>
+                            <div class="text-gray-600">2025-05-04</div>
+                            <div class="text-gray-600">社区文艺爱好者</div>
+                            <div class="flex items-center gap-3">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm edit-system-activity" data-id="1">编辑</button>
+                                <button class="text-red-600 hover:text-red-800 text-sm delete-system-activity" data-id="1">删除</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 活动行2 -->
+                        <div class="grid grid-cols-4 gap-4 p-4 hover:bg-gray-50">
+                            <div class="text-gray-900">居民议事会</div>
+                            <div class="text-gray-600">2025-05-09</div>
+                            <div class="text-gray-600">社区居民代表</div>
+                            <div class="flex items-center gap-3">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm edit-system-activity" data-id="2">编辑</button>
+                                <button class="text-red-600 hover:text-red-800 text-sm delete-system-activity" data-id="2">删除</button>
+                    </div>
+                </div>
+                
+                        <!-- 活动行3 -->
+                        <div class="grid grid-cols-4 gap-4 p-4 hover:bg-gray-50">
+                            <div class="text-gray-900">垃圾分类宣讲</div>
+                            <div class="text-gray-600">2025-05-15</div>
+                            <div class="text-gray-600">全体社区居民</div>
+                            <div class="flex items-center gap-3">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm edit-system-activity" data-id="3">编辑</button>
+                                <button class="text-red-600 hover:text-red-800 text-sm delete-system-activity" data-id="3">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end">
+                <button id="closeSystemActivityManagement" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">关闭</button>
+            </div>
+                    </div>
+                </div>
+                
+    <!-- 删除确认弹框 -->
+    <div id="deleteConfirmModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-gray-900">确认删除</h3>
+                        <p class="text-sm text-gray-500 mt-1">此操作无法撤销，确定要删除这个活动吗？</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancelDelete" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">取消</button>
+                <button id="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建群组弹框 -->
+    <div id="createGroupModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">添加群组</h3>
+                    <button id="closeCreateGroupModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="createGroupForm">
+                    <div class="space-y-4">
+                        <!-- 群组名称 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">群组名称：</label>
+                            <input type="text" id="groupName" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入群组名称">
+                        </div>
+                        
+                        <!-- 权限设置 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">权限设置：</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="permission" value="all" class="mr-3 w-4 h-4 text-blue-600" checked>
+                                    <span class="text-sm text-gray-700">所有人可添加文件并读该群组</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="permission" value="owner" class="mr-3 w-4 h-4 text-blue-600">
+                                    <span class="text-sm text-gray-700">只有创建者可添加文件</span>
+                                </label>
+        </div>
+    </div>
+
+                        <!-- 备注 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">备注：</label>
+                            <textarea id="groupRemark" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancelCreateGroup" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">取消</button>
+                <button id="confirmCreateGroup" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关联群组选择弹框 -->
+    <div id="linkGroupModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">关联群组</h3>
+                    <button id="closeLinkGroupModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600">请选择要关联的云文档群组：</p>
+                </div>
+                
+                <!-- 群组列表 -->
+                <div class="space-y-3 max-h-80 overflow-y-auto">
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="selectGroup" value="group_001" class="mr-3 w-4 h-4 text-blue-600">
+                        <span class="font-medium text-gray-900">宣传教育资料库</span>
+                    </label>
+                    
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="selectGroup" value="group_002" class="mr-3 w-4 h-4 text-blue-600">
+                        <span class="font-medium text-gray-900">志愿服务专区</span>
+                    </label>
+                    
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="selectGroup" value="group_003" class="mr-3 w-4 h-4 text-blue-600">
+                        <span class="font-medium text-gray-900">文化体育活动</span>
+                    </label>
+                    
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="selectGroup" value="group_004" class="mr-3 w-4 h-4 text-blue-600">
+                        <span class="font-medium text-gray-900">应急安全管理</span>
+                    </label>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancelLinkGroup" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">取消</button>
+                <button id="confirmLinkGroup" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">确定关联</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加活动提示弹框 -->
+    <div id="addSystemActivityModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">添加活动提示</h3>
+                    <button id="closeAddSystemActivityModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="addSystemActivityForm">
+                    <div class="space-y-4">
+                        <!-- 活动名称 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                活动名称 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="systemActivityName" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动名称">
+                        </div>
+                        
+                        <!-- 活动日期 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                活动日期 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" id="systemActivityDate" class="w-full border border-gray-300 rounded-md px-3 py-2" value="2025-05-23">
+                        </div>
+                        
+                        <!-- 活动人群 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">活动人群</label>
+                            <input type="text" id="systemActivityTarget" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动面向的人群">
+                        </div>
+                        
+                        <!-- 活动描述 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">活动描述</label>
+                            <textarea id="systemActivityDescription" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="请输入活动描述"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancelAddSystemActivity" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">取消</button>
+                <button id="saveSystemActivity" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看活动提示弹框 -->
+    <div id="viewSystemActivityModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">查看活动提示</h3>
+                    <button id="closeViewSystemActivityModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <!-- 活动名称 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">活动名称</label>
+                        <div id="viewSystemActivityName" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50 text-gray-700"></div>
+                    </div>
+                    
+                    <!-- 活动日期 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">活动日期</label>
+                        <div id="viewSystemActivityDate" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50 text-gray-700"></div>
+                    </div>
+                    
+                    <!-- 活动人群 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">活动人群</label>
+                        <div id="viewSystemActivityTarget" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50 text-gray-700"></div>
+                    </div>
+                    
+                    <!-- 活动描述 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">活动描述</label>
+                        <div id="viewSystemActivityDescription" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50 text-gray-700 min-h-[100px]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end">
+                <button id="closeViewSystemActivity" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-100 border-t border-gray-200 py-8" id="pageFooter" style="display: none;">
+        <div class="container mx-auto px-4">
+            <div class="text-center text-gray-500 text-sm">
+                © 2025 社小智平台 版权所有
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 设置URL参数中的专题名称
+        const urlParams = new URLSearchParams(window.location.search);
+        const topicName = urlParams.get('topicName') || urlParams.get('name');
+        
+        if (topicName) {
+            document.getElementById('topicName').textContent = decodeURIComponent(topicName);
+            document.title = decodeURIComponent(topicName) + ' - 社小智';
+        }
+
+        // 工作流程引导弹框功能
+        const btnWorkflowGuide = document.getElementById('btnWorkflowGuide');
+        const workflowGuideDrawer = document.getElementById('workflowGuideDrawer');
+        const workflowGuideOverlay = document.getElementById('workflowGuideOverlay');
+        const closeWorkflowGuide = document.getElementById('closeWorkflowGuide');
+        const workflowGuideContent = document.getElementById('workflowGuideContent');
+
+        // 打开工作流程引导弹框
+        if (btnWorkflowGuide) {
+            btnWorkflowGuide.addEventListener('click', function() {
+                // 显示抽屉容器
+                workflowGuideDrawer.classList.remove('modal-hidden');
+                
+                // 添加动画效果，滑入抽屉
+                setTimeout(() => {
+                    workflowGuideContent.classList.remove('translate-x-full');
+                }, 10);
+            });
+        }
+
+        // 关闭工作流程引导弹框 - 点击关闭按钮
+        if (closeWorkflowGuide) {
+            closeWorkflowGuide.addEventListener('click', closeWorkflowDrawer);
+        }
+
+        // 关闭工作流程引导弹框 - 点击遮罩层
+        if (workflowGuideOverlay) {
+            workflowGuideOverlay.addEventListener('click', closeWorkflowDrawer);
+        }
+
+        // 关闭抽屉的函数
+        function closeWorkflowDrawer() {
+            // 添加滑出动画
+            workflowGuideContent.classList.add('translate-x-full');
+            
+            // 等待动画完成后隐藏整个抽屉
+            setTimeout(() => {
+                workflowGuideDrawer.classList.add('modal-hidden');
+            }, 300); // 等待300ms，与CSS中的transition-duration相匹配
+        }
+
+        // ==================== 活动弹框功能 ====================
+
+        // 弹框元素
+        const addActivityModal = document.getElementById('addActivityModal');
+        const editActivityModal = document.getElementById('editActivityModal');
+        const systemActivityModal = document.getElementById('systemActivityModal');
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const createGroupModal = document.getElementById('createGroupModal');
+        const linkGroupModal = document.getElementById('linkGroupModal');
+        const addSystemActivityModal = document.getElementById('addSystemActivityModal');
+        const viewSystemActivityModal = document.getElementById('viewSystemActivityModal');
+
+        // 触发按钮
+        const btnAddTopicActivity = document.getElementById('btnAddTopicActivity');
+        const btnAddActivity = document.getElementById('btnAddActivity');
+        const btnManageSystemActivity = document.getElementById('btnManageSystemActivity');
+
+        // 模拟活动数据
+        let myActivities = [
+            {
+                id: 4,
+                name: '读书会活动',
+                date: '2025-05-15',
+                target: '面向社区青少年',
+                description: '组织青少年阅读分享交流活动',
+                status: '未开始',
+                docGroup: {
+                    id: 'group_001',
+                    name: '读书会活动文档群组',
+                    linked: true,
+                    fileCount: 12
+                }
+            },
+            {
+                id: 6,
+                name: '青少年环保知识竞赛',
+                date: '2025-05-20',
+                target: '面向社区青少年',
+                description: '通过竞赛形式普及环保知识',
+                status: '进行中',
+                docGroup: null
+            },
+            {
+                id: 7,
+                name: '志愿者招募',
+                date: '2025-05-21',
+                target: '18-45岁居民',
+                description: '招募社区志愿者，服务社区建设',
+                status: '进行中',
+                docGroup: {
+                    id: 'group_002',
+                    name: '志愿者招募活动群组',
+                    linked: true,
+                    fileCount: 8
+                }
+            }
+        ];
+
+        let currentEditingActivity = null;
+
+        // 可关联的群组列表数据
+        const availableGroups = {
+            'group_001': {
+                id: 'group_001',
+                name: '宣传教育资料库',
+                description: '宣传海报、教育材料等资源文档',
+                fileCount: 45,
+                linked: true
+            },
+            'group_002': {
+                id: 'group_002',
+                name: '志愿服务专区',
+                description: '志愿者相关活动和培训资料',
+                fileCount: 18,
+                linked: true
+            },
+            'group_003': {
+                id: 'group_003',
+                name: '文化体育活动',
+                description: '文化演出、体育比赛等活动资料',
+                fileCount: 31,
+                linked: true
+            },
+            'group_004': {
+                id: 'group_004',
+                name: '应急安全管理',
+                description: '应急预案、安全培训等文档',
+                fileCount: 12,
+                linked: true
+            }
+        };
+
+        // ==================== 打开弹框功能 ====================
+
+        // 打开添加活动弹框
+        function openAddActivityModal() {
+            resetAddActivityForm();
+            addActivityModal.classList.remove('modal-hidden');
+        }
+
+        // 打开编辑活动弹框
+        function openEditActivityModal(activityId) {
+            const activity = myActivities.find(a => a.id == activityId);
+            if (activity) {
+                currentEditingActivity = activity;
+                populateEditForm(activity);
+                editActivityModal.classList.remove('modal-hidden');
+            }
+        }
+
+        // 打开系统活动管理弹框
+        function openSystemActivityModal() {
+            systemActivityModal.classList.remove('modal-hidden');
+        }
+
+        // 打开删除确认弹框
+        function openDeleteConfirmModal() {
+            deleteConfirmModal.classList.remove('modal-hidden');
+        }
+
+        // 打开创建群组弹框
+        function openCreateGroupModal() {
+            // 重置表单
+            resetCreateGroupForm();
+            createGroupModal.classList.remove('modal-hidden');
+        }
+
+        // 打开关联群组弹框
+        function openLinkGroupModal() {
+            // 重置选择状态
+            resetLinkGroupForm();
+            linkGroupModal.classList.remove('modal-hidden');
+        }
+
+        // 打开添加活动提示弹框
+        function openAddSystemActivityModal() {
+            // 重置表单
+            resetAddSystemActivityForm();
+            addSystemActivityModal.classList.remove('modal-hidden');
+        }
+
+        // ==================== 关闭弹框功能 ====================
+
+        // 关闭所有弹框
+        function closeModal(modal) {
+            modal.classList.add('modal-hidden');
+        }
+
+        // ==================== 表单操作功能 ====================
+
+        // 重置添加活动表单
+        function resetAddActivityForm() {
+            document.getElementById('activityName').value = '';
+            document.getElementById('activityDate').value = '2025-05-23';
+            document.getElementById('activityTarget').value = '';
+            document.getElementById('activityDescription').value = '';
+            
+            // 重置云文档群组显示
+            const addActivityModal = document.getElementById('addActivityModal');
+            const docGroupSection = addActivityModal.querySelector('.bg-gray-50, .bg-green-50');
+            if (docGroupSection) {
+                docGroupSection.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200';
+                docGroupSection.innerHTML = `
+                    <p class="text-sm text-gray-600 mb-3">创建或关联云文档群组可便于活动相关文件管理与协作</p>
+                    <div class="flex gap-3">
+                        <button type="button" id="createDocGroup" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            创建群组
+                        </button>
+                        <button type="button" id="linkDocGroup" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center">
+                            <i class="fas fa-link mr-2"></i>
+                            关联群组
+                        </button>
+                    </div>
+                `;
+                
+                // 重新绑定事件监听器
+                docGroupSection.querySelector('#createDocGroup').addEventListener('click', function() {
+                    openCreateGroupModal();
+                });
+                docGroupSection.querySelector('#linkDocGroup').addEventListener('click', function() {
+                    openLinkGroupModal();
+                });
+            }
+            
+            // 清除临时群组数据
+            if (window.tempDocGroup) {
+                delete window.tempDocGroup;
+            }
+        }
+
+        // 重置创建群组表单
+        function resetCreateGroupForm() {
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupRemark').value = '';
+            // 重置单选按钮为默认选中第一个
+            document.querySelector('input[name="permission"][value="all"]').checked = true;
+        }
+
+        // 重置关联群组表单
+        function resetLinkGroupForm() {
+            // 取消所有单选按钮的选择
+            const radioButtons = document.querySelectorAll('input[name="selectGroup"]');
+            radioButtons.forEach(radio => {
+                radio.checked = false;
+            });
+        }
+
+        // 重置添加活动提示表单
+        function resetAddSystemActivityForm() {
+            document.getElementById('systemActivityName').value = '';
+            document.getElementById('systemActivityDate').value = '2025-05-23';
+            document.getElementById('systemActivityTarget').value = '';
+            document.getElementById('systemActivityDescription').value = '';
+        }
+
+        // 填充编辑表单
+        function populateEditForm(activity) {
+            document.getElementById('editActivityName').value = activity.name;
+            document.getElementById('editActivityDate').value = activity.date;
+            document.getElementById('editActivityTarget').value = activity.target;
+            document.getElementById('editActivityDescription').value = activity.description;
+            
+            // 显示文档群组状态
+            updateDocGroupDisplay(activity.docGroup);
+        }
+
+        // 更新文档群组显示状态
+        function updateDocGroupDisplay(docGroup) {
+            const linkedSection = document.getElementById('linkedDocGroupSection');
+            const noDocSection = document.getElementById('noDocGroupSection');
+            const groupNameElement = document.getElementById('linkedDocGroupName');
+            
+            if (docGroup && docGroup.linked) {
+                // 显示已关联状态
+                linkedSection.classList.remove('hidden');
+                noDocSection.classList.add('hidden');
+                
+                // 更新群组名称
+                groupNameElement.innerHTML = `${docGroup.name}`;
+            } else {
+                // 显示未关联状态
+                linkedSection.classList.add('hidden');
+                noDocSection.classList.remove('hidden');
+            }
+        }
+
+        // 更新添加活动弹框中云文档群组区域的显示（创建群组后）
+        function updateDocGroupCreateDisplay(docGroup) {
+            const addActivityModal = document.getElementById('addActivityModal');
+            const docGroupSection = addActivityModal.querySelector('.bg-gray-50');
+            
+            if (docGroup) {
+                // 更新显示内容
+                const statusText = docGroup.isNewCreated ? '已创建' : '已关联';
+                const descriptionText = docGroup.isNewCreated ? 
+                    '群组已创建成功，将在保存活动时自动关联' : 
+                    '群组已选择，将在保存活动时自动关联';
+                
+                docGroupSection.innerHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-folder text-green-600 mr-2"></i>
+                                <span class="text-sm font-medium text-green-800">${docGroup.name}</span>
+                            </div>
+                            <span class="text-xs text-green-600">已创建</span>
+                        </div>
+                        <p class="text-xs text-green-600 mt-2">群组已创建成功，将在保存活动时自动关联</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== 云文档群组功能 ====================
+        
+        // 创建云文档群组（添加活动）
+        document.getElementById('createDocGroup').addEventListener('click', function() {
+            openCreateGroupModal();
+        });
+        
+        // 关联云文档群组（添加活动）
+        document.getElementById('linkDocGroup').addEventListener('click', function() {
+            openLinkGroupModal();
+        });
+
+        // 创建云文档群组（编辑活动）
+        document.getElementById('editCreateDocGroup').addEventListener('click', function() {
+            if (currentEditingActivity) {
+                // 模拟创建并自动关联
+                const newDocGroup = {
+                    id: 'group_' + Date.now(),
+                    name: currentEditingActivity.name + '文档群组',
+                    linked: true,
+                    fileCount: 0
+                };
+                currentEditingActivity.docGroup = newDocGroup;
+                updateDocGroupDisplay(newDocGroup);
+                alert('文档群组创建成功并已自动关联！');
+            }
+        });
+        
+        // 关联云文档群组（编辑活动）
+        document.getElementById('editLinkDocGroup').addEventListener('click', function() {
+            if (currentEditingActivity) {
+                // 模拟关联现有群组
+                const existingDocGroup = {
+                    id: 'existing_group_001',
+                    name: '现有文档群组',
+                    linked: true,
+                    fileCount: 15
+                };
+                currentEditingActivity.docGroup = existingDocGroup;
+                updateDocGroupDisplay(existingDocGroup);
+                alert('文档群组关联成功！');
+            }
+        });
+
+        // 取消关联文档群组
+        document.getElementById('unlinkDocGroup').addEventListener('click', function() {
+            if (currentEditingActivity && currentEditingActivity.docGroup) {
+                if (confirm('确定要取消关联文档群组吗？取消后可以重新创建或关联其他群组。')) {
+                    currentEditingActivity.docGroup = null;
+                    updateDocGroupDisplay(null);
+                    alert('文档群组关联已取消');
+                }
+            }
+        });
+
+        // ==================== 事件监听器 ====================
+
+        // 打开添加活动弹框
+        if (btnAddTopicActivity) {
+            btnAddTopicActivity.addEventListener('click', openAddActivityModal);
+        }
+
+        // 打开系统活动管理
+            if (btnManageSystemActivity) {
+            btnManageSystemActivity.addEventListener('click', openSystemActivityModal);
+        }
+
+        // 添加活动弹框 - 关闭按钮
+        document.getElementById('closeAddActivityModal').addEventListener('click', () => {
+            closeModal(addActivityModal);
+        });
+        document.getElementById('cancelAddActivity').addEventListener('click', () => {
+            closeModal(addActivityModal);
+        });
+
+        // 编辑活动弹框 - 关闭按钮
+        document.getElementById('closeEditActivityModal').addEventListener('click', () => {
+            closeModal(editActivityModal);
+        });
+        document.getElementById('cancelEditActivity').addEventListener('click', () => {
+            closeModal(editActivityModal);
+        });
+
+        // 系统活动弹框 - 关闭按钮
+        document.getElementById('closeSystemActivityModal').addEventListener('click', () => {
+            closeModal(systemActivityModal);
+        });
+        document.getElementById('closeSystemActivityManagement').addEventListener('click', () => {
+            closeModal(systemActivityModal);
+        });
+
+        // 删除确认弹框 - 关闭按钮
+        document.getElementById('cancelDelete').addEventListener('click', () => {
+            closeModal(deleteConfirmModal);
+        });
+
+        // 创建群组弹框 - 关闭按钮
+        document.getElementById('closeCreateGroupModal').addEventListener('click', () => {
+            closeModal(createGroupModal);
+        });
+        document.getElementById('cancelCreateGroup').addEventListener('click', () => {
+            closeModal(createGroupModal);
+        });
+
+        // 关联群组弹框 - 关闭按钮
+        document.getElementById('closeLinkGroupModal').addEventListener('click', () => {
+            closeModal(linkGroupModal);
+        });
+        document.getElementById('cancelLinkGroup').addEventListener('click', () => {
+            closeModal(linkGroupModal);
+        });
+
+        // 保存活动
+        document.getElementById('saveActivity').addEventListener('click', function() {
+            const activityName = document.getElementById('activityName').value;
+            const activityDate = document.getElementById('activityDate').value;
+            const activityTarget = document.getElementById('activityTarget').value;
+            const activityDescription = document.getElementById('activityDescription').value;
+            
+            if (!activityName.trim()) {
+                alert('请填写活动名称！');
+                        return;
+                    }
+                    
+            if (!activityDate) {
+                alert('请选择活动日期！');
+                        return;
+                    }
+                    
+            const newActivity = {
+                id: Date.now(),
+                name: activityName,
+                date: activityDate,
+                target: activityTarget,
+                description: activityDescription,
+                status: '未开始',
+                docGroup: window.tempDocGroup || null // 关联临时创建的群组
+            };
+            
+            myActivities.push(newActivity);
+            updateActivityDisplay();
+            closeModal(addActivityModal);
+            
+            // 清除临时群组数据
+            if (window.tempDocGroup) {
+                delete window.tempDocGroup;
+                alert('活动添加成功！云文档群组已自动关联。');
+            } else {
+                alert('活动添加成功！');
+            }
+        });
+
+        // 更新活动
+        document.getElementById('updateActivity').addEventListener('click', function() {
+            if (currentEditingActivity) {
+                const activityName = document.getElementById('editActivityName').value;
+                const activityDate = document.getElementById('editActivityDate').value;
+                
+                if (!activityName.trim()) {
+                    alert('请填写活动名称！');
+                        return;
+                    }
+                    
+                if (!activityDate) {
+                    alert('请选择活动日期！');
+                        return;
+                    }
+                    
+                currentEditingActivity.name = activityName;
+                currentEditingActivity.date = activityDate;
+                currentEditingActivity.target = document.getElementById('editActivityTarget').value;
+                currentEditingActivity.description = document.getElementById('editActivityDescription').value;
+                
+                updateActivityDisplay();
+                closeModal(editActivityModal);
+                alert('活动更新成功！');
+            }
+        });
+
+        // 删除活动
+        document.getElementById('deleteEditActivity').addEventListener('click', function() {
+            openDeleteConfirmModal();
+        });
+
+        // 确认删除
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            if (currentEditingActivity) {
+                const index = myActivities.findIndex(a => a.id === currentEditingActivity.id);
+                if (index > -1) {
+                    myActivities.splice(index, 1);
+                    updateActivityDisplay();
+                    closeModal(deleteConfirmModal);
+                    closeModal(editActivityModal);
+                    alert('活动删除成功！');
+                }
+            }
+        });
+
+        // ==================== 活动显示更新功能 ====================
+
+        function updateActivityDisplay() {
+            // 更新活动列表显示
+            // 这里可以添加实际的DOM更新逻辑
+            console.log('Activities updated:', myActivities);
+        }
+
+        // ==================== 活动列表点击事件 ====================
+
+        // 为我的活动列表项添加点击事件
+        document.querySelectorAll('.calendar-event-list').forEach(item => {
+            item.addEventListener('click', function() {
+                const eventId = this.dataset.eventId;
+                const eventType = this.dataset.eventType;
+                
+                if (eventType === 'my') {
+                    openEditActivityModal(eventId);
+                }
+            });
+        });
+
+        // 为日历中的活动添加点击事件
+        document.querySelectorAll('.calendar-event').forEach(event => {
+            event.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const eventId = this.dataset.eventId;
+                const eventType = this.dataset.eventType;
+                
+                if (eventType === 'my') {
+                    openEditActivityModal(eventId);
+                } else if (eventType === 'system') {
+                    // 查看系统活动提示
+                    openViewSystemActivityModal(eventId);
+                }
+            });
+        });
+
+        // 点击弹框外部关闭弹框
+        [addActivityModal, editActivityModal, systemActivityModal, deleteConfirmModal, createGroupModal, linkGroupModal, addSystemActivityModal, viewSystemActivityModal].forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // 编辑和删除活动按钮事件
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-activity-btn')) {
+                e.preventDefault();
+                const activityId = e.target.getAttribute('data-activity-id');
+            if (activityId) {
+                    openEditActivityModal(activityId);
+                }
+            }
+            
+            if (e.target.classList.contains('delete-activity-btn')) {
+                e.preventDefault();
+                const activityId = e.target.getAttribute('data-activity-id');
+                if (activityId) {
+                    const activity = myActivities.find(a => a.id == activityId);
+                    if (activity) {
+                        currentEditingActivity = activity;
+                        openDeleteConfirmModal();
+                    }
+                }
+            }
+        });
+
+        // 确定创建群组
+        document.getElementById('confirmCreateGroup').addEventListener('click', function() {
+            const groupName = document.getElementById('groupName').value;
+            const permission = document.querySelector('input[name="permission"]:checked').value;
+            const remark = document.getElementById('groupRemark').value;
+            
+            if (!groupName.trim()) {
+                alert('请输入群组名称！');
+                return;
+            }
+            
+            // 模拟创建群组并关联到当前活动
+            const newDocGroup = {
+                id: 'group_' + Date.now(),
+                name: groupName,
+                permission: permission,
+                remark: remark,
+                linked: true,
+                fileCount: 0,
+                isNewCreated: true
+            };
+            
+            // 如果是在添加活动的流程中，暂存群组信息
+            window.tempDocGroup = newDocGroup;
+            
+            // 显示成功提示并关闭创建群组弹框
+            alert('群组创建成功！群组将在保存活动时自动关联。');
+            closeModal(createGroupModal);
+            
+            // 更新云文档群组区域的显示
+            updateDocGroupCreateDisplay(newDocGroup);
+        });
+
+        // 确定关联群组
+        document.getElementById('confirmLinkGroup').addEventListener('click', function() {
+            const selectedGroup = document.querySelector('input[name="selectGroup"]:checked');
+            
+            if (!selectedGroup) {
+                alert('请选择要关联的群组！');
+                return;
+            }
+            
+            // 获取选中的群组信息
+            const groupId = selectedGroup.value;
+            const groupInfo = availableGroups[groupId];
+            
+            if (groupInfo) {
+                // 如果是在添加活动的流程中，暂存群组信息
+                window.tempDocGroup = {
+                    id: groupInfo.id,
+                    name: groupInfo.name,
+                    fileCount: groupInfo.fileCount,
+                    linked: true,
+                    isNewCreated: false
+                };
+                
+                // 显示成功提示并关闭关联群组弹框
+                alert(`群组"${groupInfo.name}"关联成功！群组将在保存活动时自动关联。`);
+                closeModal(linkGroupModal);
+                
+                // 更新云文档群组区域的显示
+                updateDocGroupCreateDisplay(window.tempDocGroup);
+            }
+        });
+
+        // 添加活动提示弹框 - 关闭按钮
+        document.getElementById('closeAddSystemActivityModal').addEventListener('click', () => {
+            closeModal(addSystemActivityModal);
+        });
+        document.getElementById('cancelAddSystemActivity').addEventListener('click', () => {
+            closeModal(addSystemActivityModal);
+        });
+
+        // 保存活动提示
+        document.getElementById('saveSystemActivity').addEventListener('click', function() {
+            const activityName = document.getElementById('systemActivityName').value;
+            const activityDate = document.getElementById('systemActivityDate').value;
+            const activityTarget = document.getElementById('systemActivityTarget').value;
+            const activityDescription = document.getElementById('systemActivityDescription').value;
+            
+            if (!activityName.trim()) {
+                alert('请填写活动名称！');
+                    return;
+                }
+                
+            if (!activityDate) {
+                alert('请选择活动日期！');
+                    return;
+                }
+                
+            // 模拟保存活动提示
+            alert('活动提示添加成功！');
+            closeModal(addSystemActivityModal);
+        });
+
+        // 添加活动提示按钮事件
+        document.getElementById('addSystemActivity').addEventListener('click', function() {
+            openAddSystemActivityModal();
+        });
+
+        // 编辑和删除活动提示按钮事件
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-system-activity')) {
+                    e.preventDefault();
+                const activityId = e.target.getAttribute('data-id');
+                alert('编辑活动提示功能（原型展示）- ID: ' + activityId);
+            }
+            
+            if (e.target.classList.contains('delete-system-activity')) {
+                e.preventDefault();
+                const activityId = e.target.getAttribute('data-id');
+                if (confirm('确定要删除这个活动提示吗？')) {
+                    alert('活动提示删除成功！（原型展示）- ID: ' + activityId);
+                        }
+                    }
+                });
+
+        // 模拟系统活动提示数据
+        const systemActivities = {
+            1: {
+                id: 1,
+                name: '社区文艺排练',
+                date: '2025-05-04',
+                target: '社区文艺爱好者',
+                description: '每周定期举行的社区文艺团队排练活动，提升居民文化生活品质。'
+            },
+            2: {
+                id: 2,
+                name: '居民议事会',
+                date: '2025-05-09',
+                target: '社区居民代表',
+                description: '月度居民议事会，讨论社区重要事务，听取居民意见建议。'
+            },
+            3: {
+                id: 3,
+                name: '垃圾分类宣讲',
+                date: '2025-05-15',
+                target: '全体社区居民',
+                description: '普及垃圾分类知识，提高居民环保意识，共建绿色社区。'
+            },
+            5: {
+                id: 5,
+                name: '劳动节活动',
+                date: '2025-05-01',
+                target: '全体社区居民',
+                description: '庆祝劳动节，组织社区居民参与各类文体活动。'
+            },
+            7: {
+                id: 7,
+                name: '邻里节筹备会',
+                date: '2025-05-25',
+                target: '志愿者和居民代表',
+                description: '筹备年度邻里节活动，协调各项准备工作。'
+            },
+            8: {
+                id: 8,
+                name: '社区文艺汇演',
+                date: '2025-05-30',
+                target: '全体社区居民',
+                description: '月末文艺汇演，展示社区文化成果，丰富居民精神生活。'
+            }
+        };
+
+        // 打开添加活动提示弹框
+        function openAddSystemActivityModal() {
+            // 重置表单
+            resetAddSystemActivityForm();
+            addSystemActivityModal.classList.remove('modal-hidden');
+        }
+
+        // 打开查看活动提示弹框
+        function openViewSystemActivityModal(activityId) {
+            const activity = systemActivities[activityId];
+            if (activity) {
+                populateViewSystemActivityForm(activity);
+                viewSystemActivityModal.classList.remove('modal-hidden');
+            }
+        }
+
+        // 填充查看活动提示表单
+        function populateViewSystemActivityForm(activity) {
+            document.getElementById('viewSystemActivityName').textContent = activity.name || '-';
+            document.getElementById('viewSystemActivityDate').textContent = activity.date || '-';
+            document.getElementById('viewSystemActivityTarget').textContent = activity.target || '-';
+            document.getElementById('viewSystemActivityDescription').textContent = activity.description || '-';
+        }
+
+        // 查看活动提示弹框 - 关闭按钮
+        document.getElementById('closeViewSystemActivityModal').addEventListener('click', () => {
+            closeModal(viewSystemActivityModal);
+        });
+        document.getElementById('closeViewSystemActivity').addEventListener('click', () => {
+            closeModal(viewSystemActivityModal);
+        });
+    </script>
+</body>
+</html> 

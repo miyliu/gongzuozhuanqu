@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作总结样式 - 社小智</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 图片裁剪组件 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            /* 确保父页面有滚动条 */
+            overflow-y: auto;
+        }
+        
+        /* 文档选择弹窗样式 */
+        .docs-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        /* 弹框显示状态样式 - 最高优先级 */
+        .docs-modal-visible {
+            display: flex !important;
+        }
+        
+        .docs-modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .docs-modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .docs-modal-body {
+            display: flex;
+            height: 500px;
+            overflow: hidden;
+        }
+        
+        .docs-sidebar {
+            width: 220px;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+        }
+        
+        .docs-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .doc-sidebar-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .doc-sidebar-item:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .doc-sidebar-item.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+        
+        .docs-modal-footer {
+            padding: 12px 24px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        
+        .doc-item {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        
+        .doc-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .doc-item-icon {
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .doc-item-info {
+            flex: 1;
+        }
+        
+        .doc-item-title {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .doc-item-meta {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .search-docs {
+            padding: 12px;
+            background: #f9f9f9;
+        }
+        
+        .search-docs input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        :root {
+            --primary-color: #2479CC;
+            --primary-light: #e6f2ff;
+            --primary-dark: #1a5b99;
+            --accent-color: #ff6a00;
+            --text-color: #333;
+            --light-gray: #f6f6f6;
+        }
+
+        .top-nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-nav .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item {
+            padding: 0 20px;
+            color: #333;
+            position: relative;
+            height: 64px;
+            line-height: 64px;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            margin-left: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2479CC;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .user-name {
+            color: #374151;
+            font-size: 14px;
+        }
+
+        /* 确保在移动设备上菜单隐藏 */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+        }
+
+        .topic-tabs {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid white;
+            font-weight: 500;
+        }
+        
+        .filter-bar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 12px 24px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 12px;
+            background-color: white;
+            color: #333;
+            min-width: 120px;
+            font-size: 13px;
+        }
+        
+        .filter-select option {
+            font-size: 13px;
+        }
+        
+        .filter-label {
+            color: #666;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+        
+        .resource-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eaeaea;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .resource-image {
+            height: 160px;
+            width: 100%;
+            object-fit: cover;
+            position: relative;
+        }
+        
+        .resource-image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+            color: white;
+            padding: 8px 12px;
+            font-weight: 500;
+            font-size: 16px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        }
+        
+        .resource-body {
+            padding: 16px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .resource-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        
+        .resource-desc {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+        
+        .resource-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .resource-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .btn-download {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn-download:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-upload {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-upload i {
+            margin-right: 8px;
+        }
+        
+        .btn-upload:hover {
+            background-color: #e05d00;
+        }
+        
+        .btn-manage {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-manage i {
+            margin-right: 8px;
+        }
+        
+        .btn-manage:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-manage.active {
+            background-color: #28a745;
+        }
+        
+        .btn-manage.active:hover {
+            background-color: #218838;
+        }
+        
+        .edit-actions {
+            display: none;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+        }
+        
+        .edit-mode .edit-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-edit, .btn-delete {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-edit:hover {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .edit-mode .resource-card {
+            position: relative;
+        }
+        
+        .sort-select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 12px;
+            background-color: white;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .sort-select option {
+            font-size: 13px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .header-banner {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 24px 0;
+        }
+        
+        .banner-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-box {
+            background-color: white;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            max-width: 360px;
+        }
+        
+        .search-input {
+            border: none;
+            padding: 10px 16px;
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .search-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 16px;
+            cursor: pointer;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb span {
+            margin: 0 8px;
+        }
+        
+        .ai-helper-button {
+            background-color: #ffaa00;
+            color: white;
+            border-radius: 4px;
+            padding: 8px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .ai-helper-button:hover {
+            background-color: #ee9900;
+        }
+        
+        .ai-helper-button i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        .empty-resource {
+            text-align: center;
+            padding: 80px 0;
+            background-color: white;
+            border-radius: 8px;
+            color: #666;
+        }
+        
+        .empty-resource i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 16px;
+        }
+        
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .format-tag {
+            background-color: #f0f7ff;
+            color: #0066cc;
+            border: 1px solid #cce0ff;
+        }
+        
+
+        
+        /* 开关按钮样式 */
+        .toggle-switch input:checked + div {
+            background-color: #2479CC;
+        }
+        
+        .toggle-switch input:checked + div .toggle-dot {
+            transform: translateX(100%);
+        }
+        
+        .toggle-switch input:focus + div {
+            box-shadow: 0 0 0 2px rgba(36, 121, 204, 0.3);
+        }
+        
+        .toggle-switch div {
+            transition: all 0.3s ease;
+        }
+
+        /* 内容区域iframe统一样式，允许内容撑开父容器 */
+        iframe.content-iframe {
+            border: none;
+            width: 100%;
+            min-height: 600px; /* 提供一个最小高度 */
+            height: auto; /* 允许高度根据内容自动扩展 */
+            overflow: hidden; /* 防止iframe自身产生滚动条 */
+        }
+        
+        /* 内容区域容器样式 */
+        .content-section {
+            width: 100%;
+            height: auto; /* 允许高度自动扩展 */
+            overflow: visible; /* 允许内容撑开容器 */
+        }
+
+        /* 主内容区样式 */
+        #mainContentArea {
+            min-height: 500px; /* 确保有足够的内容高度 */
+            overflow: visible; /* 允许内容超出时显示 */
+        }
+
+        /* 模态框样式 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-hidden {
+            display: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        /* 打字机效果样式 */
+        .typewriter {
+            overflow: hidden;
+            white-space: pre-wrap;
+            animation: typing 0.5s steps(20, end);
+        }
+
+        @keyframes typing {
+            from { 
+                width: 0;
+                opacity: 0;
+            }
+            to { 
+                width: 100%;
+                opacity: 1;
+            }
+        }
+
+        /* 滚动动画样式 */
+        .scroll-animation {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 加载动画样式 */
+        .loading-dots {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% {
+                content: '.';
+            }
+            40% {
+                content: '..';
+            }
+            60%, 100% {
+                content: '...';
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="content-wrapper">
+            <!-- 左侧Logo -->
+            <div class="logo-section">
+                <a href="#" class="logo-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#2479CC">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                    <div class="logo-text">社小智</div>
+                </a>
+            </div>
+            
+            <!-- 中间导航菜单 -->
+            <nav class="nav-menu">
+                <a href="#" class="nav-item">首页</a>
+                <a href="#" class="nav-item">工单办理助手</a>
+                <a href="#" class="nav-item">公文模板</a>
+                <a href="#" class="nav-item">找找云文档</a>
+                <a href="#" class="nav-item">工单分析办理PRO</a>
+                <a href="#" class="nav-item">社情民意助手</a>
+                <a href="work_area.html" class="nav-item active">工作专区</a>
+            </nav>
+            
+            <!-- 右侧用户信息 -->
+            <div class="user-section">
+                <div class="user-avatar">
+                    <img src="https://via.placeholder.com/32" alt="用户头像">
+                </div>
+                <span class="user-name">用户名</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 专题名称显示区域 -->
+    <div class="bg-blue-600 text-white py-4" style="background-color: var(--primary-color) !important;">
+        <div class="content-wrapper px-4">
+            <div class="flex items-center justify-center">
+                <span class="text-xl font-semibold" id="topicName">工作总结样式的专题名称</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 专题选项卡 -->
+    <div class="topic-tabs">
+        <div class="content-wrapper px-4">
+            <div class="flex overflow-x-auto">
+                <a href="#" class="tab-item flex items-center active" data-content="publicity">
+                    <i class="fas fa-home mr-2"></i>
+                    主页
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <main class="content-wrapper px-4 py-6" id="mainContentArea">
+        <!-- 宣传教育内容区域 - 默认显示 -->
+        <div class="content-section" id="content-publicity">
+            <!-- 工作总结专题指引 -->
+            <div class="bg-blue-50 rounded-lg shadow-sm p-4 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-semibold text-blue-800">专题指引</h2>
+                        <p class="text-sm text-gray-600 mt-1"></p>
+                    </div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center" id="btnWorkflowGuide">
+                        <i class="fas fa-tasks mr-2"></i>
+                        查看工作流程引导
+                    </button>
+                </div>
+                
+                <!-- 专题说明文字 -->
+                <div class="mt-4 p-4 bg-white rounded-lg border border-blue-100">
+                    <div class="text-gray-700 leading-relaxed">
+                        <p class="mb-3">社区治安工作总结是系统评估安全防范成效、梳理问题短板、提炼经验做法的重要工具。本专题围绕社区治安巡逻、矛盾纠纷调解、安全隐患排查、特殊人群管理等核心工作，提供全面系统的总结撰写方法与模板，助力提升社区安全治理水平。</p>
+                        <p class="mb-3">高质量的治安工作总结应突出数据支撑、案例说明和实效评估，客观反映社区安全态势变化、群众安全感满意度提升、突出问题整改情况等关键指标。通过科学的总结分析，可有效识别治安管理薄弱环节，为下阶段精准施策提供有力依据。</p>
+                        <p>本专题提供社区治安工作总结全流程指引，包括数据收集、成效分析、经验总结、问题梳理及改进建议等环节，同时配套提供各类专业模板，帮助基层工作者高效完成治安任务总结，构建共建共治共享的社区安全环境。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 智能工作总结生成器 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">工作总结生成器</h2>
+                </div>
+                
+                <!-- 时间范围选择 -->
+                <div class="border border-gray-200 rounded-lg p-4 mb-6">
+                    <h3 class="text-base font-medium text-gray-700 mb-3">选择时间范围</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">开始时间</label>
+                            <input type="date" id="startDate" class="w-full border border-gray-300 rounded-md px-3 py-2" value="2025-01-01">
+                    </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">结束时间</label>
+                            <input type="date" id="endDate" class="w-full border border-gray-300 rounded-md px-3 py-2" value="2025-12-31">
+                                    </div>
+                                            </div>
+                    
+                    <!-- 全社区工作勾选 -->
+                    <div class="mt-4 pt-3 border-t border-gray-200">
+                        <label class="flex items-center cursor-pointer" id="fullCommunityLabel">
+                            <input type="checkbox" id="fullCommunityWork" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <span class="ml-2 text-sm font-medium text-gray-700" id="fullCommunityText">全社区工作</span>
+                            <span class="ml-2 text-xs text-gray-500" id="fullCommunityDesc">(包含所有包楼社工和部门的工作数据，仅领导可勾选，其他角色置灰)</span>
+                        </label>
+                                        </div>
+                                            </div>
+                
+                <!-- 工作总结素材卡片 -->
+                <div class="mb-6">
+                    <h3 class="text-base font-medium text-gray-700 mb-4">工作总结素材</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- 活动记录卡片 -->
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-blue-50 to-blue-100">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-calendar-alt text-white"></i>
+                                        </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">活动记录</h4>
+                                    <p class="text-sm text-gray-600">社区组织的各类活动</p>
+                                            </div>
+                                        </div>
+                            <div class="text-sm text-gray-600">包含安全宣传、文化娱乐、便民服务等活动数据</div>
+                            </div>
+                            
+                        <!-- 巡查走访记录卡片 -->
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-green-50 to-green-100">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-walking text-white"></i>
+                                    </div>
+                                        <div>
+                                    <h4 class="font-medium text-gray-800">巡查走访</h4>
+                                    <p class="text-sm text-gray-600">各种巡查包括地址点位和居民的记录情况</p>
+                                        </div>
+                                        </div>
+                            <div class="text-sm text-gray-600">包含重点区域巡查、入户走访、安全隐患排查、居民需求收集等记录</div>
+                            </div>
+                            
+                        <!-- 居民台账卡片 -->
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-purple-50 to-purple-100">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-users text-white"></i>
+                                        </div>
+                                        <div>
+                                    <h4 class="font-medium text-gray-800">居民台账</h4>
+                                    <p class="text-sm text-gray-600">居民档案管理记录</p>
+                                        </div>
+                                    </div>
+                            <div class="text-sm text-gray-600">包含新增档案、信息更新、动态管理等数据</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                <!-- 工作总结要求输入区域 -->
+                <div class="border border-gray-200 rounded-lg p-4 mb-6">
+                    <h3 class="text-base font-medium text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-edit mr-2 text-blue-500"></i>
+                        工作总结要求
+                    </h3>
+                    <div class="mb-3">
+                        <textarea 
+                            id="userRequirements" 
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm leading-relaxed resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            rows="4" 
+                            placeholder="请输入您对工作总结的具体要求..."
+                        >请重点突出社区治安工作的创新举措和实际成效，包括但不限于：巡逻防控体系建设、矛盾纠纷调解、安全隐患排查、群众安全感满意度提升等方面的具体数据和典型案例。</textarea>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            您可以根据需要修改总结要求，系统将根据您的要求生成个性化的工作总结
+                        </p>
+                        <button 
+                            id="resetRequirements" 
+                            class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                        >
+                            <i class="fas fa-undo mr-1"></i>
+                            恢复默认
+                        </button>
+                    </div>
+                </div>
+                            
+                <!-- 一键生成总结按钮 -->
+                <div class="text-center mb-6">
+                    <button id="btnGenerateSummary" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-lg text-lg shadow-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-magic mr-3"></i>一键生成总结
+                                        </button>
+                                    </div>
+                                    
+                <!-- 生成过程显示区域 -->
+                <div id="generationProcess" class="border border-blue-200 rounded-lg p-6 mb-6 hidden">
+                    <h3 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-cog fa-spin mr-2 text-blue-500"></i>
+                        正在生成工作总结
+                    </h3>
+                    <div id="processSteps" class="space-y-3">
+                        <!-- 动态生成的步骤将在这里显示 -->
+                                            </div>
+                                        </div>
+                
+                <!-- 总结结果显示区域 -->
+                <div id="summaryResult" class="border border-green-200 rounded-lg p-6 hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium text-gray-800 flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            工作总结生成完成
+                        </h3>
+                        <div class="space-x-2">
+                            <button id="copySummary" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                                <i class="fas fa-copy mr-1"></i>复制内容
+                                            </button>
+                            <button id="exportSummary" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm">
+                                <i class="fas fa-download mr-1"></i>导出云文档
+                                            </button>
+                                        </div>
+                                    </div>
+                    <div id="summaryContent" class="bg-gray-50 p-4 rounded border max-h-96 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed">
+                        <!-- 生成的总结内容将在这里显示 -->
+                            </div>
+                        </div>
+        </div>
+        </div>
+        
+        <!-- 公文模版内容区域 - 默认隐藏 -->
+        <div class="content-section hidden" id="content-document">
+            <!-- 筛选栏 -->
+            <div class="filter-bar flex flex-wrap items-center justify-between">
+                <div class="flex flex-wrap items-center gap-4 mb-2 md:mb-0">
+                    <div class="flex items-center">
+                        <span class="filter-label">文档格式：</span>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>DOC</option>
+                            <option>PPT</option>
+                            <option>PDF</option>
+                            <option>XLS</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="flex items-center">
+                    <button id="btnManageDoc" class="btn-manage mr-4">
+                        <i class="fas fa-cog"></i>
+                        管理模式
+                    </button>
+                    <button class="btn-upload mr-4" id="btnUploadDoc">
+                        <i class="fas fa-upload"></i>
+                        上传文档
+                    </button>
+                    <div class="flex items-center">
+                        <span class="filter-label">排序方式：</span>
+                        <select class="sort-select">
+                            <option>最新上传</option>
+                            <option>最多浏览</option>
+                            <option>最多收藏</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 公文模版列表 -->
+            <div class="bg-gray-100 pb-8">
+                <!-- 第一行公文模版 - 大尺寸预览 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-4 px-2 pt-4">
+                    <!-- 公文模版1 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <a href="https://www.shexiaozhi.com/template/1809539569811136576" target="_blank">
+                                <img src="images/doc_templates/wechat_2025-05-18_121127_135.png" alt="组织生活会记录格式" class="w-full h-44 object-contain p-2">
+                            </a>
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">组织生活会记录格式</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数99</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版2 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <a href="https://www.shexiaozhi.com/template/1809539569811136576" target="_blank">
+                                <img src="images/doc_templates/wechat_2025-05-18_121144_131.png" alt="社区工作者考勤汇总表" class="w-full h-44 object-contain p-2">
+                            </a>
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作者考勤汇总表</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数39</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版3 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <a href="https://www.shexiaozhi.com/template/1809539569811136576" target="_blank">
+                                <img src="images/doc_templates/wechat_2025-05-18_121111_143.png" alt="社区工作总结模板" class="w-full h-44 object-contain p-2">
+                            </a>
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作总结模板</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数31</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版4 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <a href="https://www.shexiaozhi.com/template/1809539569811136576" target="_blank">
+                                <img src="images/doc_templates/wechat_2025-05-18_121202_226.png" alt="领导席卡" class="w-full h-44 object-contain p-2">
+                            </a>
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">领导席卡</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数24</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版5 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <a href="https://www.shexiaozhi.com/template/1809539569811136576" target="_blank">
+                                <img src="images/doc_templates/wechat_2025-05-18_121047_295.png" alt="社区工作者年度考核登记表" class="w-full h-44 object-contain p-2">
+                            </a>
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作者年度考核登记表</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数18</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第二行公文模版 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-4 px-2">
+                    <!-- 公文模版6 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <a href="https://www.shexiaozhi.com/template/1809539569811136576" target="_blank">
+                                <img src="images/doc_templates/certificate_template.png" alt="荣誉证书模板" class="w-full h-44 object-contain p-2">
+                            </a>
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">荣誉证书模板</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数13</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版7 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <a href="https://www.shexiaozhi.com/template/1809539569811136576" target="_blank">
+                                <img src="images/doc_templates/staff_form.png" alt="社区工作者档案表" class="w-full h-44 object-contain p-2">
+                            </a>
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作者档案表</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数12</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版8 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <img src="images/doc_templates/seat_card.png" alt="座位牌" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">座位牌</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数12</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版9 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <img src="images/doc_templates/work_manual.png" alt="汇编资料工作手册" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">汇编资料工作手册</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数9</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版10 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col">
+                        <div class="relative">
+                            <div class="absolute top-0 left-0 z-10 bg-yellow-500 text-white px-2 py-1 text-sm font-bold">VIP</div>
+                            <img src="images/doc_templates/certificate_template2.png" alt="证书打印模板" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">证书打印模板</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数9</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm">
+                                <i class="fas fa-download mr-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部分页 -->
+            <div class="flex justify-center mb-8">
+                <nav class="inline-flex rounded-md shadow">
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        上一页
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-blue-600 font-medium">
+                        1
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500 hover:bg-gray-50">
+                        2
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500 hover:bg-gray-50">
+                        3
+                    </a>
+                    <span class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500">
+                        ...
+                    </span>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500 hover:bg-gray-50">
+                        5
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        下一页
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- 资料库内容区域 - 默认隐藏 -->
+        <div class="content-section hidden" id="content-library">
+            <!-- 筛选栏 -->
+            <div class="filter-bar flex flex-wrap items-center justify-between">
+                <div class="flex flex-wrap items-center gap-4 mb-2 md:mb-0">
+                    <div class="flex items-center">
+                        <span class="filter-label">文件格式：</span>
+                        <select class="filter-select" id="formatFilter">
+                            <option>全部</option>
+                            <option>PDF</option>
+                            <option>DOCX</option>
+                            <option>PPTX</option>
+                            <option>XLSX</option>
+                            <option>JPG/PNG</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center ml-2">
+                        <label class="toggle-switch flex items-center cursor-pointer">
+                            <input type="checkbox" id="favoriteToggle" class="sr-only">
+                            <div class="relative w-10 h-5 bg-gray-300 rounded-full transition">
+                                <div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition"></div>
+                            </div>
+                            <span class="ml-2 text-sm text-gray-700">只看收藏</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button id="btnManage" class="btn-manage mr-4">
+                        <i class="fas fa-cog"></i>
+                        管理模式
+                    </button>
+                    <button class="btn-upload mr-4" id="btnUploadCase">
+                        <i class="fas fa-upload"></i>
+                        上传素材
+                    </button>
+                    <div class="flex items-center">
+                        <span class="filter-label">排序方式：</span>
+                        <select class="sort-select">
+                            <option>最新上传</option>
+                            <option>最多浏览</option>
+                            <option>最多收藏</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 资源列表 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8" id="resourceContainer">
+                <!-- 资源卡片1 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/community_meeting.png" alt="社区活动" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类知识普及宣传活动</h3>
+                        <p class="resource-desc">通过趣味游戏、知识问答等互动形式，向社区居民普及垃圾分类知识，提高环保意识。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 1.2k</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片2 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/presentation_education.png" alt="宣传展板" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类宣传教育PPT</h3>
+                        <p class="resource-desc">包含垃圾分类的基础知识、分类标准、常见误区和有效实践案例的PPT课件。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 956</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片3 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/community_cleaning.png" alt="社区活动" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类宣传短视频</h3>
+                        <p class="resource-desc">生动形象的短视频演示如何正确进行垃圾分类，适合在社区宣传栏、电子屏等场所播放。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 1.5k</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片4 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/poster_recycle.png" alt="宣传海报" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类知识宣传海报套装</h3>
+                        <p class="resource-desc">一套10张高清垃圾分类宣传海报，包含分类指南、环保理念、实践技巧等内容。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 876</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片5 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/youth_education.png" alt="环保讲座" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">青少年环保知识讲座</h3>
+                        <p class="resource-desc">针对青少年群体的环保知识讲座方案，包含互动环节、知识竞赛和实践活动。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 732</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片6 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/children_games.png" alt="互动游戏" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类趣味互动游戏</h3>
+                        <p class="resource-desc">面向儿童的垃圾分类互动游戏方案，通过游戏化的方式激发孩子们对垃圾分类的兴趣。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 645</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片7 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/community_volunteer.png" alt="宣传活动" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类进社区宣传活动</h3>
+                        <p class="resource-desc">针对社区居民开展垃圾分类宣传活动方案，包含入户宣传、现场演示和有奖答题环节。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 580</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片8 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/brochure_design.png" alt="宣传手册" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类宣传手册模板</h3>
+                        <p class="resource-desc">可编辑的垃圾分类宣传手册模板，包括图文排版、图标素材和分类指引内容。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 522</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部分页 -->
+            <div class="flex justify-center mb-8">
+                <nav class="inline-flex rounded-md shadow">
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        上一页
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-blue-600 font-medium">
+                        1
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500 hover:bg-gray-50">
+                        2
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500 hover:bg-gray-50">
+                        3
+                    </a>
+                    <span class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500">
+                        ...
+                    </span>
+                    <a href="#" class="py-2 px-4 bg-white border-t border-b border-gray-300 text-gray-500 hover:bg-gray-50">
+                        8
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        下一页
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </main>
+
+    <!-- 工作流程引导抽屉 -->
+    <div id="workflowGuideDrawer" class="fixed inset-0 z-[9999] modal-hidden">
+        <!-- 遮罩层 -->
+        <div id="workflowGuideOverlay" class="absolute inset-0 bg-black bg-opacity-30"></div>
+        
+        <!-- 右侧抽屉 -->
+        <div class="absolute right-0 top-0 bottom-0 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 bg-white shadow-xl transform transition-transform duration-300 translate-x-full" id="workflowGuideContent">
+            <!-- 抽屉头部 -->
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <h2 class="text-xl font-bold">工作总结样式 · 治安任务总结指南</h2>
+                </div>
+                <button id="closeWorkflowGuide" class="text-white p-2 rounded-full hover:bg-blue-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 抽屉内容区 - 工作流程 -->
+            <div class="p-6 overflow-y-auto" style="max-height: calc(100vh - 70px);">
+                <!-- 返回首页按钮 -->
+                <div class="mb-8">
+                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span>返回首页</span>
+                    </a>
+                </div>
+                
+                <!-- 工作流程时间线 -->
+                <div class="relative">
+                    <!-- 垂直时间线 -->
+                    <div class="absolute left-8 top-0 bottom-0 w-1 bg-blue-200"></div>
+                    
+                    <!-- 步骤1：任务执行数据收集 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-blue-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-folder-open text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-blue-600 font-semibold">1. 任务执行数据收集</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>社区治安队员、社区民警、信息统计员</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3">
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>巡逻记录表 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>治安事件统计表 (Excel)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：收集完整的巡逻轨迹数据、处理事件记录、协助公安机关工作记录等，确保数据真实准确。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤2：数据分析与整理 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-green-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-chart-bar text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-green-600 font-semibold">2. 数据分析与整理</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>社区综治办工作人员、数据分析员、治安队长</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3">
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>治安数据分析表 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center hover:bg-purple-100">
+                                                <i class="far fa-file-powerpoint text-purple-500 mr-2"></i>
+                                                <span>治安态势图表 (PPT)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：分析社区安全事件的类型分布、时间规律、高发区域，对数据进行比对分析，揭示问题和趋势。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤3：成效评估与问题梳理 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-yellow-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-tasks text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-yellow-600 font-semibold">3. 成效评估与问题梳理</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>社区治安负责人、综治办主任、网格员代表</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3">
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>治安工作成效表 (Excel)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>问题与难点清单 (Excel)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：量化评估治安工作成效，包括案件破获率、社区矛盾调解率、群众安全感满意度等指标，客观分析工作中的成功经验和存在问题。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤4：经验总结与改进方向 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-pink-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-lightbulb text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-pink-600 font-semibold">4. 经验总结与改进方向</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>综治办负责人、社区治安队长、街道治安科负责人</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <a href="#" class="px-3 py-2 bg-red-50 text-red-600 rounded flex items-center hover:bg-red-100">
+                                                <i class="far fa-file-pdf text-red-500 mr-2"></i>
+                                                <span>工作经验总结 (PDF)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>典型案例分析 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="fas fa-clipboard-check text-blue-500 mr-2"></i>
+                                                <span>工作方法改进清单</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：提炼治安工作的成功经验和创新做法，分析存在的不足，并提出有针对性的改进措施，确保总结具有可借鉴性和指导性。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤5：编写总结报告 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-blue-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-file-alt text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-blue-600 font-semibold">5. 编写总结报告</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>治安工作负责人、报告撰写人、数据审核人员</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3">
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>治安任务总结报告 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>工作数据汇总表 (Excel)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：总结报告应包括工作背景、主要成效、存在问题、经验启示和下一步工作计划等要素，注重用数据说话，突出重点亮点。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤6：汇报与成果推广 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-gray-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-bullhorn text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-gray-600 font-semibold">6. 汇报与成果推广</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>社区综治办领导、治安工作负责人、相关部门代表</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">产出资料：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <a href="#" class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center hover:bg-blue-100">
+                                                <i class="far fa-file-word text-blue-500 mr-2"></i>
+                                                <span>治安工作简报 (Word)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center hover:bg-green-100">
+                                                <i class="far fa-file-excel text-green-500 mr-2"></i>
+                                                <span>成果展示资料包 (Excel)</span>
+                                            </a>
+                                            <a href="#" class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center hover:bg-purple-100">
+                                                <i class="far fa-file-powerpoint text-purple-500 mr-2"></i>
+                                                <span>治安工作汇报演示文稿 (PPT)</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：通过社区工作简报、工作汇报会、经验交流会等形式，将治安工作的成功经验和创新做法进行推广，争取相关部门的支持与指导。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-100 border-t border-gray-200 py-8" id="pageFooter" style="display: none;">
+        <div class="container mx-auto px-4">
+            <div class="text-center text-gray-500 text-sm">
+                © 2025 社小智平台 版权所有
+            </div>
+                </div>
+    </footer>
+
+    <script>
+        // 设置URL参数中的专题名称
+            const urlParams = new URLSearchParams(window.location.search);
+        const topicName = urlParams.get('topicName') || urlParams.get('name');
+        
+        if (topicName) {
+            document.getElementById('topicName').textContent = decodeURIComponent(topicName);
+            document.title = decodeURIComponent(topicName) + ' - 社小智';
+        }
+
+        // 工作流程引导弹框功能
+        const btnWorkflowGuide = document.getElementById('btnWorkflowGuide');
+        const workflowGuideDrawer = document.getElementById('workflowGuideDrawer');
+        const workflowGuideOverlay = document.getElementById('workflowGuideOverlay');
+        const closeWorkflowGuide = document.getElementById('closeWorkflowGuide');
+        const workflowGuideContent = document.getElementById('workflowGuideContent');
+
+        // 打开工作流程引导弹框
+        if (btnWorkflowGuide) {
+            btnWorkflowGuide.addEventListener('click', function() {
+                workflowGuideDrawer.classList.remove('modal-hidden');
+                setTimeout(() => {
+                    workflowGuideContent.classList.remove('translate-x-full');
+                }, 10);
+            });
+        }
+
+        // 关闭工作流程引导弹框
+        if (closeWorkflowGuide) {
+            closeWorkflowGuide.addEventListener('click', closeWorkflowDrawer);
+        }
+
+        if (workflowGuideOverlay) {
+            workflowGuideOverlay.addEventListener('click', closeWorkflowDrawer);
+        }
+
+        function closeWorkflowDrawer() {
+            workflowGuideContent.classList.add('translate-x-full');
+            setTimeout(() => {
+                workflowGuideDrawer.classList.add('modal-hidden');
+            }, 300);
+        }
+
+        // 工作总结生成器功能
+        
+        // 模拟数据
+        const mockData = {
+            activities: [
+                { name: '社区安全巡逻培训活动', date: '2025-01-15' },
+                { name: '防盗防骗安全讲座', date: '2025-02-05' },
+                { name: '社区安全隐患排查行动', date: '2025-03-10' },
+                { name: '青少年安全教育主题活动', date: '2025-04-20' },
+                { name: '居民安全知识竞赛', date: '2025-05-15' },
+                { name: '应急演练活动', date: '2025-06-10' },
+                { name: '社区治安志愿者培训', date: '2025-07-08' },
+                { name: '邻里互助安全行动', date: '2025-08-12' },
+                { name: '老年人防诈骗宣传', date: '2025-09-18' },
+                { name: '消防安全检查活动', date: '2025-10-22' },
+                { name: '年度安全工作总结会', date: '2025-11-25' },
+                { name: '平安社区创建活动', date: '2025-12-15' }
+            ],
+            visits: 156,
+            residentNew: 78,
+            residentUpdate: 134
+        };
+
+        // 更新数据统计（仅在生成总结时使用）
+        function updateDataCounts() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const isFullCommunity = document.getElementById('fullCommunityWork').checked;
+            
+            // 过滤时间范围内的活动
+            const filteredActivities = mockData.activities.filter(activity => {
+                return activity.date >= startDate && activity.date <= endDate;
+            });
+            
+            // 根据"全社区工作"状态调整数据
+            let dataMultiplier = 1;
+            if (isFullCommunity && userRole === 'leader') {
+                dataMultiplier = 3.2; // 全社区数据约为个人数据的3.2倍
+            }
+            
+            return {
+                activityCount: filteredActivities.length,
+                visitCount: Math.round(mockData.visits * dataMultiplier),
+                residentNewCount: Math.round(mockData.residentNew * dataMultiplier),
+                residentUpdateCount: Math.round(mockData.residentUpdate * dataMultiplier),
+                isFullCommunity: isFullCommunity
+            };
+        }
+
+        // 一键生成总结功能
+        const btnGenerateSummary = document.getElementById('btnGenerateSummary');
+        const generationProcess = document.getElementById('generationProcess');
+        const summaryResult = document.getElementById('summaryResult');
+        const processSteps = document.getElementById('processSteps');
+        const summaryContent = document.getElementById('summaryContent');
+
+        btnGenerateSummary.addEventListener('click', function() {
+            // 禁用按钮
+            btnGenerateSummary.disabled = true;
+            btnGenerateSummary.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在生成...';
+            
+            // 隐藏结果，显示生成过程
+            summaryResult.classList.add('hidden');
+            generationProcess.classList.remove('hidden');
+            
+            // 清空步骤容器
+            processSteps.innerHTML = '';
+            
+            // 开始生成过程
+            startGenerationProcess();
+        });
+
+        // 生成过程步骤
+        function startGenerationProcess() {
+            // 获取当前时间范围的数据统计
+            const currentData = updateDataCounts();
+            
+            const steps = [
+                { text: '正在统计活动记录...', data: currentData.activityCount + '项活动' },
+                { text: '正在分析巡查走访记录...', data: currentData.visitCount + '次巡查走访' },
+                { text: '正在整理居民台账...', data: `新增${currentData.residentNewCount}个，更新${currentData.residentUpdateCount}个` },
+                { text: '正在生成工作总结...', data: '基于数据分析生成' }
+            ];
+            
+            let currentStep = 0;
+            
+            function showNextStep() {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    const stepElement = document.createElement('div');
+                    stepElement.className = 'flex items-center justify-between p-3 bg-white rounded border scroll-animation';
+                    stepElement.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">${step.text}</span>
+                        </div>
+                        <span class="text-blue-600 font-medium">${step.data}</span>
+                    `;
+                    
+                    processSteps.appendChild(stepElement);
+                    currentStep++;
+                    
+                    // 继续下一步
+                    setTimeout(showNextStep, 1200);
+                } else {
+                    // 所有步骤完成，开始生成总结
+                    setTimeout(generateSummary, 1000);
+                }
+            }
+            
+            showNextStep();
+        }
+
+        // 生成总结内容
+        function generateSummary() {
+            // 获取当前时间范围的数据统计
+            const currentData = updateDataCounts();
+            
+            // 获取用户输入的需求
+            const userRequirements = getUserRequirements();
+            
+            // 根据是否是全社区工作调整报告标题和描述
+            const reportTitle = currentData.isFullCommunity ? '全社区工作总结报告' : '社区工作总结报告';
+            const workScope = currentData.isFullCommunity ? '全社区范围内' : '本报告期内';
+            const workLevel = currentData.isFullCommunity ? '，统筹协调各包楼社工和相关部门' : '';
+            
+            // 根据用户需求调整内容重点
+            let focusAreas = '';
+            let additionalContent = '';
+            
+            // 分析用户需求中的关键词，调整内容重点
+            if (userRequirements.includes('创新') || userRequirements.includes('举措')) {
+                focusAreas += '创新工作方法、';
+                additionalContent += `
+    
+    【创新举措亮点】
+    本期工作中，我们积极探索创新工作方法，建立了"网格化+智能化"的治安防控新模式，通过技防与人防相结合，实现了社区安全管理的全覆盖。创新开展"邻里守望"互助活动，发动居民参与社区治安，形成了群防群治的良好局面。`;
+            }
+            
+            if (userRequirements.includes('满意度') || userRequirements.includes('群众')) {
+                focusAreas += '群众满意度提升、';
+                additionalContent += `
+    
+    【群众满意度成效】
+    通过第三方调查机构统计，社区居民安全感满意度达到96.8%，较上期提升8.2个百分点。居民对社区治安工作的认可度显著提升，收到表扬信件15封，锦旗3面。`;
+            }
+            
+            if (userRequirements.includes('效率') || userRequirements.includes('效果')) {
+                focusAreas += '工作效率优化、';
+                additionalContent += `
+    
+    【工作效率提升】
+    通过优化工作流程和引入信息化管理系统，各项工作效率显著提升。矛盾纠纷调解成功率达到98%，平均处理时间缩短30%。安全隐患排查整改及时率达到100%。`;
+            }
+            
+            // 移除最后的逗号
+            focusAreas = focusAreas.replace(/、$/, '');
+            
+            const summaryText = `${reportTitle}
+
+【生成依据】根据您的要求：${userRequirements}
+
+一、工作概述
+
+    ${workScope}，我社区围绕"平安社区"建设目标，扎实开展各项社区工作${workLevel}。共组织开展各类活动${currentData.activityCount}项，深入开展巡查走访${currentData.visitCount}次，新建立居民档案${currentData.residentNewCount}份，更新居民信息${currentData.residentUpdateCount}次。通过系统化的工作部署和精细化管理，社区建设取得了显著成效。
+
+二、主要工作成果
+
+    1. 活动组织成效显著
+    报告期内共组织开展社区活动${currentData.activityCount}项，涵盖安全宣传、文化娱乐、便民服务等多个方面。特别是安全教育类活动，有效提升了居民的安全防范意识，社区安全满意度较上期提升15%。
+
+    2. 巡查走访深入细致
+    累计开展巡查走访${currentData.visitCount}次，覆盖重点区域和居民户数达95%以上。通过定期巡查和入户走访及时了解居民需求，收集意见建议186条，解决实际问题142个，排查安全隐患68处，居民满意度持续提升。
+
+    3. 居民服务管理规范
+    新建立居民档案${currentData.residentNewCount}份，及时更新居民信息${currentData.residentUpdateCount}次，实现了居民信息的动态管理。建立了完善的服务台账，为精准服务提供了有力支撑。${additionalContent}
+
+三、经验总结
+
+    1. 坚持以人为本的工作理念，将居民需求作为工作的出发点和落脚点。
+    2. 注重工作的系统性和连续性，通过定期活动和持续巡查走访，建立了良好的服务机制。
+    3. 强化数据管理，通过建立完善的档案制度，提升了工作的精准性和有效性。${focusAreas ? `
+    4. 重点加强${focusAreas}等方面工作，取得了明显成效。` : ''}
+
+四、存在问题和改进方向
+
+    1. 部分活动参与度有待提高，需要进一步创新活动形式和内容。
+    2. 巡查走访工作还需更加精准，重点关注特殊群体和困难家庭，加强重点区域的巡查频次。
+    3. 信息化水平需要进一步提升，建立更加完善的数字化管理体系。
+
+五、下一步工作计划
+
+    1. 继续优化活动内容，提高居民参与积极性。
+    2. 深化巡查走访工作，建立常态化服务机制，完善重点区域巡查制度。
+    3. 完善信息管理系统，提升工作效率和服务质量。
+
+    通过持续努力，我们将继续为居民提供更加优质的服务，建设更加和谐美好的社区环境。`;
+
+            // 隐藏生成过程，显示结果
+            generationProcess.classList.add('hidden');
+            summaryResult.classList.remove('hidden');
+            
+            // 打字机效果显示总结
+            typewriterEffect(summaryContent, summaryText);
+            
+            // 恢复按钮状态
+            btnGenerateSummary.disabled = false;
+            btnGenerateSummary.innerHTML = '<i class="fas fa-magic mr-3"></i>一键生成总结';
+        }
+
+        // 打字机效果函数
+        function typewriterEffect(element, text) {
+            element.innerHTML = '';
+            let index = 0;
+            const speed = 20; // 打字速度（毫秒）
+            
+            function type() {
+                if (index < text.length) {
+                    element.innerHTML += text.charAt(index);
+                    index++;
+                    
+                    // 自动滚动到底部
+                    element.scrollTop = element.scrollHeight;
+                    
+                    setTimeout(type, speed);
+                }
+            }
+            
+            type();
+        }
+
+        // 复制功能
+        document.getElementById('copySummary').addEventListener('click', function() {
+            const content = summaryContent.textContent;
+            navigator.clipboard.writeText(content).then(function() {
+                this.textContent = '已复制';
+                setTimeout(() => {
+                    this.textContent = '复制内容';
+                }, 2000);
+            }.bind(this));
+        });
+
+        // 导出功能
+        document.getElementById('exportSummary').addEventListener('click', function() {
+            alert('导出功能开发中...');
+        });
+
+        // 工作总结生成器功能
+        
+        // 模拟用户角色检测（实际项目中应从后端获取）
+        const userRole = getUserRole(); // 'leader' 或 'social_worker'
+        
+        function getUserRole() {
+            // 模拟从URL参数或localStorage获取用户角色
+            const urlParams = new URLSearchParams(window.location.search);
+            const role = urlParams.get('userRole') || localStorage.getItem('userRole') || 'social_worker';
+            return role;
+        }
+        
+        // 根据用户角色设置"全社区工作"选项的状态
+        function setupFullCommunityWorkPermission() {
+            const fullCommunityWork = document.getElementById('fullCommunityWork');
+            const fullCommunityLabel = document.getElementById('fullCommunityLabel');
+            const fullCommunityText = document.getElementById('fullCommunityText');
+            const fullCommunityDesc = document.getElementById('fullCommunityDesc');
+            
+            if (userRole === 'social_worker') {
+                // 包楼社工：置灰状态
+                fullCommunityWork.disabled = true;
+                fullCommunityWork.checked = false;
+                fullCommunityLabel.classList.add('cursor-not-allowed');
+                fullCommunityLabel.classList.remove('cursor-pointer');
+                fullCommunityText.classList.add('text-gray-400');
+                fullCommunityText.classList.remove('text-gray-700');
+                fullCommunityDesc.textContent = '(仅限领导查看全社区数据)';
+                fullCommunityDesc.classList.add('text-gray-400');
+            } else if (userRole === 'leader') {
+                // 领导角色：可勾选
+                fullCommunityWork.disabled = false;
+                fullCommunityWork.checked = false;
+                fullCommunityLabel.classList.add('cursor-pointer');
+                fullCommunityLabel.classList.remove('cursor-not-allowed');
+                fullCommunityText.classList.add('text-gray-700');
+                fullCommunityText.classList.remove('text-gray-400');
+                fullCommunityDesc.textContent = '(包含所有包楼社工和部门的工作数据，仅领导可勾选，对其他角色置灰)';
+                fullCommunityDesc.classList.remove('text-gray-400');
+                
+                // 添加勾选状态变化监听
+                fullCommunityWork.addEventListener('change', function() {
+                    if (this.checked) {
+                        console.log('已启用全社区工作模式');
+                        // 这里可以添加切换到全社区数据的逻辑
+                    } else {
+                        console.log('已切换到个人工作模式');
+                        // 这里可以添加切换到个人数据的逻辑
+                    }
+                });
+            }
+        }
+        
+        // 页面加载时设置权限
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFullCommunityWorkPermission();
+            initializePresetPrompt();
+        });
+
+        // 工作总结生成器功能
+        
+        // 预置提示词（模拟从后台配置获取）
+        const defaultPrompt = "请重点突出社区治安工作的创新举措和实际成效，包括但不限于：巡逻防控体系建设、矛盾纠纷调解、安全隐患排查、群众安全感满意度提升等方面的具体数据和典型案例。";
+        
+        // 初始化预置提示词
+        function initializePresetPrompt() {
+            // 模拟从后台API获取预置提示词
+            fetchPresetPromptFromBackend().then(prompt => {
+                const userRequirements = document.getElementById('userRequirements');
+                if (userRequirements && prompt) {
+                    userRequirements.value = prompt;
+                }
+            });
+        }
+        
+        // 模拟从后台获取预置提示词的API调用
+        async function fetchPresetPromptFromBackend() {
+            // 实际项目中这里应该是真实的API调用
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(defaultPrompt);
+                }, 100);
+            });
+        }
+        
+        // 获取用户当前输入的需求
+        function getUserRequirements() {
+            const userRequirements = document.getElementById('userRequirements');
+            return userRequirements ? userRequirements.value.trim() : defaultPrompt;
+        }
+        
+        // 恢复默认提示词功能
+        document.getElementById('resetRequirements').addEventListener('click', function() {
+            const userRequirements = document.getElementById('userRequirements');
+            if (userRequirements) {
+                userRequirements.value = defaultPrompt;
+                // 添加视觉反馈
+                this.innerHTML = '<i class="fas fa-check mr-1"></i>已恢复';
+                this.classList.add('text-green-600');
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-undo mr-1"></i>恢复默认';
+                    this.classList.remove('text-green-600');
+                }, 1500);
+            }
+        });
+        
+        // 模拟用户角色检测（实际项目中应从后端获取）
+    </script>
+</body>
+</html> 

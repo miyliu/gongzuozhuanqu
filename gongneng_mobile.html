@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能区 - 移动端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 移动端全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            width: 375px;
+            overflow-x: hidden;
+        }
+        
+        /* 移动端导航栏 */
+        .mobile-navbar {
+            height: 44px;
+            background-color: #2479CC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-navbar-back {
+            position: absolute;
+            left: 16px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .mobile-navbar-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+        
+        /* 专题功能菜单样式 */
+        .topic-menu {
+            background-color: white;
+            display: flex;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 44px;
+            z-index: 99;
+            overflow-x: auto;
+            padding: 0 4px;
+        }
+        
+        .topic-menu-item {
+            flex: 0 0 auto;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 14px;
+            color: #666666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .topic-menu-item.active {
+            color: #2479CC;
+            border-bottom-color: #2479CC;
+            font-weight: 600;
+        }
+        
+        .topic-menu-item:active {
+            background-color: #f5f5f5;
+        }
+        
+        /* 内容区域 */
+        .content-area {
+            padding: 16px 12px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 卡片样式 */
+        .mobile-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mobile-card-title i {
+            margin-right: 8px;
+            color: #2479CC;
+        }
+        
+        /* AI助手样式 */
+        .chat-container {
+            height: 400px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+        
+        .chat-message {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+        
+        .chat-message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message-bubble.user {
+            background-color: #2479CC;
+            color: white;
+        }
+        
+        .message-bubble.assistant {
+            background-color: white;
+            color: #333333;
+            border: 1px solid #e5e5e5;
+        }
+        
+        /* 模版显示样式 */
+        .template-tag {
+            display: inline-block;
+            background-color: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+        
+        .template-tag i {
+            margin-right: 4px;
+        }
+        
+        /* 模版选择区域 */
+        .template-selection {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e5e5;
+            background-color: white;
+        }
+        
+        .template-select-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #d9d9d9;
+            color: #666666;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .template-select-btn i {
+            margin-right: 4px;
+        }
+        
+        .selected-template {
+            background-color: #e6f7ff;
+            border: 1px solid #91d5ff;
+            color: #1890ff;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 8px;
+        }
+        
+        .selected-template i {
+            margin-right: 4px;
+        }
+        
+        .remove-template {
+            margin-left: 4px;
+            cursor: pointer;
+            color: #1890ff;
+        }
+        
+        .chat-input-area {
+            padding: 12px;
+            border-top: 1px solid #e5e5e5;
+            background-color: white;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .chat-send-btn {
+            width: 36px;
+            height: 36px;
+            background-color: #2479CC;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        /* 预设问题样式 */
+        .preset-questions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .preset-question {
+            background-color: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-question:active {
+            background-color: #bae7ff;
+        }
+        
+        /* 模版选择弹框样式 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-backdrop.hidden {
+            display: none;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 320px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+        }
+        
+        .modal-close {
+            color: #666666;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .template-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .template-item {
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .template-item:active {
+            background-color: #f5f5f5;
+        }
+        
+        .template-item.selected {
+            border-color: #2479CC;
+            background-color: #e6f7ff;
+        }
+        
+        .template-item input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .template-info {
+            flex: 1;
+        }
+        
+        .template-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .template-name i {
+            margin-right: 6px;
+            color: #2479CC;
+        }
+        
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid #e5e5e5;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .modal-btn-cancel {
+            background-color: #f5f5f5;
+            color: #666666;
+        }
+        
+        .modal-btn-confirm {
+            background-color: #2479CC;
+            color: white;
+        }
+        
+        .modal-btn-confirm:disabled {
+            background-color: #d9d9d9;
+            color: #999999;
+            cursor: not-allowed;
+        }
+        
+        /* 案例库样式 */
+        .filter-section {
+            background-color: white;
+            padding: 12px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .filter-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .filter-label {
+            font-size: 12px;
+            color: #666666;
+            margin-right: 8px;
+            min-width: 60px;
+        }
+        
+        .filter-select {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 12px;
+            background-color: white;
+        }
+        
+        .case-item {
+            background-color: white;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+        
+        .case-item:active {
+            background-color: #f5f5f5;
+            transform: scale(0.98);
+        }
+        
+        .case-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background-color: #f5f5f5;
+        }
+        
+        .case-content {
+            padding: 12px;
+        }
+        
+        .case-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 6px;
+        }
+        
+        .case-desc {
+            font-size: 12px;
+            color: #666666;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .case-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #999999;
+        }
+        
+        .case-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* 素材库样式 */
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .material-item {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .material-item:active {
+            transform: scale(0.98);
+        }
+        
+        .material-image {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            background-color: #f5f5f5;
+            padding: 8px;
+        }
+        
+        .material-info {
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .material-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        
+        .material-downloads {
+            font-size: 10px;
+            color: #999999;
+            margin-bottom: 8px;
+        }
+        
+        .download-btn {
+            background-color: #2479CC;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        
+        .download-btn i {
+            margin-right: 2px;
+        }
+        
+        /* 使用记录样式 */
+        .record-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .record-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+        }
+        
+        .record-time {
+            font-size: 11px;
+            color: #999999;
+        }
+        
+        .record-content {
+            font-size: 12px;
+            color: #666666;
+            line-height: 1.4;
+        }
+        
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 详情页面样式 */
+        .detail-page {
+            display: none;
+            background-color: #f7f7f7;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            z-index: 200;
+        }
+        
+        .detail-page.active {
+            display: block;
+        }
+        
+        .detail-navbar {
+            height: 44px;
+            background-color: #2479CC;
+            display: flex;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .detail-navbar-back {
+            padding: 0 16px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-navbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            margin-right: 48px; /* 平衡左侧返回按钮 */
+        }
+        
+        .detail-content {
+            padding: 16px 12px;
+        }
+        
+        .detail-header {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .detail-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .detail-meta {
+            font-size: 12px;
+            color: #999999;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .detail-body {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .detail-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-section-title i {
+            margin-right: 8px;
+            color: #2479CC;
+        }
+        
+        .detail-text {
+            font-size: 14px;
+            color: #666666;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .detail-list {
+            font-size: 14px;
+            color: #666666;
+            line-height: 1.6;
+        }
+        
+        .detail-list ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .detail-list li {
+            margin-bottom: 4px;
+        }
+        
+        .detail-image {
+            width: 100%;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        
+        .detail-video {
+            width: 100%;
+            height: 200px;
+            background-color: #000000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 12px 0;
+            position: relative;
+        }
+        
+        .video-placeholder {
+            color: white;
+            text-align: center;
+        }
+        
+        .video-placeholder i {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .detail-download {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .download-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .download-info i {
+            font-size: 20px;
+            margin-right: 12px;
+            color: #dc3545;
+        }
+        
+        .download-details {
+            flex: 1;
+        }
+        
+        .download-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333333;
+            margin-bottom: 2px;
+        }
+        
+        .download-size {
+            font-size: 12px;
+            color: #999999;
+        }
+        
+        .download-btn {
+            background-color: #2479CC;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .download-btn:active {
+            background-color: #1a5a99;
+        }
+        
+        /* 素材详情特有样式 */
+        .material-preview {
+            text-align: center;
+            margin: 16px 0;
+        }
+        
+        .material-preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+        
+        .material-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 16px;
+        }
+        
+        .material-stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .material-stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 4px;
+        }
+        
+        .material-stat-label {
+            font-size: 12px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body>
+    <!-- 移动端导航栏 -->
+    <div class="mobile-navbar">
+        <div class="mobile-navbar-back">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="mobile-navbar-title" id="navbarTitle">功能区</div>
+    </div>
+    
+    <!-- 专题功能菜单 -->
+    <div class="topic-menu">
+        <div class="topic-menu-item" data-page="ai">AI助手</div>
+        <div class="topic-menu-item active" data-page="cases">案例库</div>
+        <div class="topic-menu-item" data-page="materials">素材库</div>
+        <div class="topic-menu-item" data-page="records">使用记录</div>
+    </div>
+    
+    <!-- 内容区域 -->
+    <div class="content-area">
+        <!-- AI助手内容 -->
+        <div class="tab-content" id="ai-content">
+            <div class="mobile-card">
+                <div class="mobile-card-title">
+                    <i class="fas fa-robot"></i>
+                    AI助手
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-message assistant">
+                            <div class="message-bubble assistant">
+                                您好！我是您的AI助手，专门为社区工作者提供宣传活动策划和执行方面的专业指导。
+                                <br><br>
+                                我可以为您提供以下宣传活动辅导：
+                                <br>• 活动策划：从主题确定到执行方案的全流程指导
+                                <br>• 宣传推广：多渠道宣传策略和素材制作建议
+                                <br>• 参与度提升：居民动员和互动环节设计技巧
+                                <br>• 效果评估：活动成效评估和经验总结方法
+                                <br>• 文案撰写：活动方案、总结报告、宣传文案等
+                                
+                                <!-- 预设问题 -->
+                                <div class="preset-questions">
+                                    <button class="preset-question" data-question="我想组织一场面向青少年的爱国主义教育活动，有什么建议？">
+                                        我想组织一场面向青少年的爱国主义教育活动，有什么建议？
+                                    </button>
+                                    <button class="preset-question" data-question="如何提高社区居民参与度？">
+                                        如何提高社区居民参与度？
+                                    </button>
+                                    <button class="preset-question" data-question="社区活动策划有哪些注意事项？">
+                                        社区活动策划有哪些注意事项？
+                                    </button>
+                                    <button class="preset-question" data-question="儿童活动如何选择活动场所？">
+                                        儿童活动如何选择活动场所？
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 模版选择区域 -->
+                    <div class="template-selection">
+                        <button class="template-select-btn" id="selectTemplateBtn">
+                            <i class="fas fa-file-alt"></i>
+                            选择模版
+                        </button>
+                        <div id="selectedTemplateDisplay" class="hidden" style="margin-top: 8px;">
+                            <div class="selected-template">
+                                <i class="fas fa-file-alt"></i>
+                                <span id="selectedTemplateName"></span>
+                                <i class="fas fa-times remove-template" id="removeTemplate"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="请输入您的问题...">
+                        <button class="chat-send-btn" id="chatSendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 案例库内容 -->
+        <div class="tab-content active" id="cases-content">
+            <!-- 筛选器 -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <span class="filter-label">排序方式</span>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="latest">最近更新</option>
+                        <option value="popular">最多浏览</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 案例列表 -->
+            <div id="casesList">
+                <div class="case-item">
+                    <img src="images/community_meeting.png" alt="垃圾分类知识普及宣传活动" class="case-image">
+                    <div class="case-content">
+                        <div class="case-title">垃圾分类知识普及宣传活动</div>
+                        <div class="case-desc">通过趣味游戏、知识问答等互动形式，向社区居民普及垃圾分类知识，提高环保意识。</div>
+                        <div class="case-meta">
+                            <div class="case-stats">
+                                <span><i class="far fa-eye"></i> 1.2k</span>
+                            </div>
+                            <span>2025-01-15</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="case-item">
+                    <img src="images/presentation_education.png" alt="垃圾分类宣传教育PPT" class="case-image">
+                    <div class="case-content">
+                        <div class="case-title">垃圾分类宣传教育PPT</div>
+                        <div class="case-desc">包含垃圾分类的基础知识、分类标准、常见误区和有效实践案例的PPT课件。</div>
+                        <div class="case-meta">
+                            <div class="case-stats">
+                                <span><i class="far fa-eye"></i> 956</span>
+                            </div>
+                            <span>2025-01-12</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="case-item">
+                    <img src="images/community_cleaning.png" alt="垃圾分类宣传短视频" class="case-image">
+                    <div class="case-content">
+                        <div class="case-title">垃圾分类宣传短视频</div>
+                        <div class="case-desc">生动形象的短视频演示如何正确进行垃圾分类，适合在社区宣传栏、电子屏等场所播放。</div>
+                        <div class="case-meta">
+                            <div class="case-stats">
+                                <span><i class="far fa-eye"></i> 1.5k</span>
+                            </div>
+                            <span>2025-01-10</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="case-item">
+                    <img src="images/poster_recycle.png" alt="垃圾分类知识宣传海报套装" class="case-image">
+                    <div class="case-content">
+                        <div class="case-title">垃圾分类知识宣传海报套装</div>
+                        <div class="case-desc">一套10张高清垃圾分类宣传海报，包含分类指南、环保理念、实践技巧等内容。</div>
+                        <div class="case-meta">
+                            <div class="case-stats">
+                                <span><i class="far fa-eye"></i> 876</span>
+                            </div>
+                            <span>2025-01-08</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="case-item">
+                    <img src="images/youth_education.png" alt="青少年环保知识讲座" class="case-image">
+                    <div class="case-content">
+                        <div class="case-title">青少年环保知识讲座</div>
+                        <div class="case-desc">针对青少年群体的环保知识讲座方案，包含互动环节、知识竞赛和实践活动。</div>
+                        <div class="case-meta">
+                            <div class="case-stats">
+                                <span><i class="far fa-eye"></i> 732</span>
+                            </div>
+                            <span>2025-01-05</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="case-item">
+                    <img src="images/children_games.png" alt="垃圾分类趣味互动游戏" class="case-image">
+                    <div class="case-content">
+                        <div class="case-title">垃圾分类趣味互动游戏</div>
+                        <div class="case-desc">面向儿童的垃圾分类互动游戏方案，通过游戏化的方式激发孩子们对垃圾分类的兴趣。</div>
+                        <div class="case-meta">
+                            <div class="case-stats">
+                                <span><i class="far fa-eye"></i> 645</span>
+                            </div>
+                            <span>2025-01-03</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 素材库内容 -->
+        <div class="tab-content" id="materials-content">
+            <!-- 筛选器 -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <span class="filter-label">文档格式</span>
+                    <select class="filter-select" id="docFormatFilter">
+                        <option value="">全部</option>
+                        <option value="DOC">DOC</option>
+                        <option value="PPT">PPT</option>
+                        <option value="PDF">PDF</option>
+                        <option value="XLS">XLS</option>
+                    </select>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-label">排序方式</span>
+                    <select class="filter-select" id="docSortFilter">
+                        <option value="latest">最近更新</option>
+                        <option value="downloads">最多下载</option>
+                        <option value="references">最多引用</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 素材网格 -->
+            <div class="material-grid" id="materialGrid">
+                <div class="material-item">
+                    <img src="images/doc_templates/wechat_2025-05-18_121127_135.png" alt="组织生活会记录格式" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">组织生活会记录格式</div>
+                        <div class="material-downloads">下载次数99</div>
+                    </div>
+                </div>
+                
+                <div class="material-item">
+                    <img src="images/doc_templates/wechat_2025-05-18_121144_131.png" alt="社区工作者考勤汇总表" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">社区工作者考勤汇总表</div>
+                        <div class="material-downloads">下载次数39</div>
+                    </div>
+                </div>
+                
+                <div class="material-item">
+                    <img src="images/doc_templates/wechat_2025-05-18_121111_143.png" alt="社区工作总结模板" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">社区工作总结模板</div>
+                        <div class="material-downloads">下载次数31</div>
+                    </div>
+                </div>
+                
+                <div class="material-item">
+                    <img src="images/doc_templates/wechat_2025-05-18_121202_226.png" alt="领导席卡" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">领导席卡</div>
+                        <div class="material-downloads">下载次数24</div>
+                    </div>
+                </div>
+                
+                <div class="material-item">
+                    <img src="images/doc_templates/wechat_2025-05-18_121047_295.png" alt="社区工作者年度考核登记表" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">社区工作者年度考核登记表</div>
+                        <div class="material-downloads">下载次数18</div>
+                    </div>
+                </div>
+                
+                <div class="material-item">
+                    <img src="images/doc_templates/certificate_template.png" alt="荣誉证书模板" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">荣誉证书模板</div>
+                        <div class="material-downloads">下载次数13</div>
+                    </div>
+                </div>
+                
+                <div class="material-item">
+                    <img src="images/doc_templates/staff_form.png" alt="社区工作者档案表" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">社区工作者档案表</div>
+                        <div class="material-downloads">下载次数12</div>
+                    </div>
+                </div>
+                
+                <div class="material-item">
+                    <img src="images/doc_templates/seat_card.png" alt="座位牌" class="material-image">
+                    <div class="material-info">
+                        <div class="material-title">座位牌</div>
+                        <div class="material-downloads">下载次数12</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 使用记录内容 -->
+        <div class="tab-content" id="records-content">
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">查看案例：垃圾分类知识普及宣传活动</div>
+                    <div class="record-time">2小时前</div>
+                </div>
+                <div class="record-content">
+                    浏览了垃圾分类知识普及宣传活动的详细案例，学习了活动组织流程和互动环节设计。
+                </div>
+            </div>
+            
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">下载素材：组织生活会记录格式</div>
+                    <div class="record-time">1天前</div>
+                </div>
+                <div class="record-content">
+                    下载了组织生活会记录格式模板，用于规范社区党组织生活会的记录工作。
+                </div>
+            </div>
+            
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">AI助手咨询：青少年爱国主义教育活动策划</div>
+                    <div class="record-time">2天前</div>
+                </div>
+                <div class="record-content">
+                    咨询了AI助手关于组织青少年爱国主义教育活动的策划建议，获得了详细的活动方案指导。
+                </div>
+            </div>
+            
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">查看案例：垃圾分类宣传教育PPT</div>
+                    <div class="record-time">3天前</div>
+                </div>
+                <div class="record-content">
+                    学习了垃圾分类宣传教育PPT的制作方法和内容结构，参考了知识点的组织方式。
+                </div>
+            </div>
+            
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">下载素材：社区工作总结模板</div>
+                    <div class="record-time">1周前</div>
+                </div>
+                <div class="record-content">
+                    下载了社区工作总结模板，用于撰写月度和季度工作总结报告。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 案例详情页面 -->
+    <div id="caseDetailPage" class="detail-page">
+        <div class="detail-navbar">
+            <div class="detail-navbar-back" onclick="closeCaseDetail()">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="detail-navbar-title">案例详情</div>
+        </div>
+        
+        <div class="detail-content">
+            <!-- 案例标题和基本信息 -->
+            <div class="detail-header">
+                <div class="detail-title" id="caseDetailTitle">垃圾分类知识普及宣传活动</div>
+                <div class="detail-meta">
+                    <span>发布时间：<span id="caseDetailDate">2025-01-15</span></span>
+                    <span>浏览量：<span id="caseDetailViews">1.2k</span></span>
+                </div>
+            </div>
+            
+            <!-- 案例视频 -->
+            <div class="detail-body" id="caseVideoSection">
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-play-circle"></i>
+                        案例视频
+                    </div>
+                    <div class="detail-video">
+                        <div class="video-placeholder">
+                            <i class="fas fa-play"></i>
+                            <div>点击播放视频</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 案例描述 -->
+            <div class="detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-file-text"></i>
+                        案例描述
+                    </div>
+                    <div class="detail-text">
+                        通过趣味游戏、知识问答等互动形式，向社区居民普及垃圾分类知识，提高环保意识。本活动采用了多种创新方式提高居民参与度：
+                    </div>
+                    <div class="detail-list">
+                        <ul>
+                            <li>设置垃圾分类投放体验区，让居民实际操作</li>
+                            <li>举办垃圾分类知识竞赛，设置奖品激励参与</li>
+                            <li>通过图文并茂的展板展示垃圾分类知识</li>
+                            <li>邀请环保专家进行现场答疑解惑</li>
+                        </ul>
+                    </div>
+                    <img src="images/community_meeting.png" alt="活动现场" class="detail-image">
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-info-circle"></i>
+                        活动背景
+                    </div>
+                    <div class="detail-text">
+                        随着城市生活垃圾的日益增多，垃圾分类已成为提高资源利用率、改善环境质量的重要措施。为响应国家垃圾分类政策，提高社区居民的环保意识和垃圾分类能力，我们组织了这次知识普及宣传活动。
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-tasks"></i>
+                        活动内容
+                    </div>
+                    <div class="detail-text">
+                        活动采用"理论+实践"的方式，首先由环保专家进行垃圾分类知识讲解，详细介绍了四类垃圾的分类标准和投放方法。随后设置了趣味问答环节，居民通过答题赢取小礼品。最后进行实际操作练习，让居民亲手体验正确的垃圾分类流程。
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-chart-line"></i>
+                        活动效果
+                    </div>
+                    <div class="detail-text">
+                        本次活动共有120余名居民参与，发放宣传资料200份，现场答疑50余人次。通过活动，居民对垃圾分类的知晓率从65%提升到95%，实际分类准确率提高了30%。活动得到了居民的一致好评，纷纷表示要在日常生活中认真实践垃圾分类。
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-star"></i>
+                        活动亮点
+                    </div>
+                    <div class="detail-text">
+                        结合了知识宣讲和互动体验，寓教于乐，使枯燥的垃圾分类知识变得生动有趣。设置了针对不同年龄段的参与环节，全家可一起参与，增强了社区的凝聚力。
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 相关资料 -->
+            <div class="detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-download"></i>
+                        相关资料
+                    </div>
+                    <div class="detail-download">
+                        <div class="download-info">
+                            <i class="far fa-file-pdf"></i>
+                            <div class="download-details">
+                                <div class="download-name">垃圾分类知识普及宣传活动方案.pdf</div>
+                                <div class="download-size">2.5MB - PDF文档</div>
+                            </div>
+                        </div>
+        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 素材详情页面 -->
+    <div id="materialDetailPage" class="detail-page">
+        <div class="detail-navbar">
+            <div class="detail-navbar-back" onclick="closeMaterialDetail()">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="detail-navbar-title">素材详情</div>
+        </div>
+        
+        <div class="detail-content">
+            <!-- 素材标题和基本信息 -->
+            <div class="detail-header">
+                <div class="detail-title" id="materialDetailTitle">组织生活会记录格式</div>
+                <div class="detail-meta">
+                    <span>下载次数：<span id="materialDetailDownloads">99</span></span>
+                    <span>上传时间：<span id="materialDetailDate">2025-01-15</span></span>
+                    <span>文件格式：<span id="materialDetailFormat">DOCX</span></span>
+                </div>
+            </div>
+            
+            <!-- 素材预览 -->
+            <div class="detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-eye"></i>
+                        素材预览
+                    </div>
+                    <div class="material-preview">
+                        <img id="materialPreviewImage" src="images/doc_templates/wechat_2025-05-18_121127_135.png" alt="素材预览" class="material-preview-image">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 素材说明 -->
+            <div class="detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-info-circle"></i>
+                        素材说明
+                    </div>
+                    <div class="detail-text" id="materialDescription">
+                        本素材为标准的组织生活会记录格式模板，包含会议基本信息、参会人员、会议议程、讨论内容、决议事项等完整要素。适用于党支部、团支部等各类组织生活会的记录整理工作。
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 文件信息 -->
+            <div class="detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-file"></i>
+                        素材信息
+                    </div>
+                    <div class="detail-download">
+                        <div class="download-info">
+                            <i class="far fa-file-word"></i>
+                            <div class="download-details">
+                                <div class="download-name" id="materialFileName">组织生活会记录格式.docx</div>
+                                <div class="download-size">文件大小：<span id="materialFileSize">156KB</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 统计信息 -->
+                <div class="material-stats">
+                    <div class="material-stat-item">
+                        <div class="material-stat-value" id="materialStatDownloads">99</div>
+                        <div class="material-stat-label">下载次数</div>
+                    </div>
+                    <div class="material-stat-item">
+                        <div class="material-stat-value" id="materialStatSize">156KB</div>
+                        <div class="material-stat-label">文件大小</div>
+                    </div>
+                    <div class="material-stat-item">
+                        <div class="material-stat-value" id="materialStatFormat">DOCX</div>
+                        <div class="material-stat-label">文件格式</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模版选择弹框 -->
+    <div id="templateSelectModal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">选择素材模版</div>
+                <div class="modal-close" id="closeTemplateModal">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="template-list" id="templateList">
+                    <div class="template-item" data-template-id="template1">
+                        <input type="radio" name="templateSelect" value="template1">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                组织生活会记录格式
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-item" data-template-id="template2">
+                        <input type="radio" name="templateSelect" value="template2">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                社区工作总结模板
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-item" data-template-id="template3">
+                        <input type="radio" name="templateSelect" value="template3">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                社区工作者考勤汇总表
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-item" data-template-id="template4">
+                        <input type="radio" name="templateSelect" value="template4">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                领导席卡
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-item" data-template-id="template5">
+                        <input type="radio" name="templateSelect" value="template5">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                社区工作者年度考核登记表
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-item" data-template-id="template6">
+                        <input type="radio" name="templateSelect" value="template6">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                荣誉证书模板
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-item" data-template-id="template7">
+                        <input type="radio" name="templateSelect" value="template7">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                社区工作者档案表
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-item" data-template-id="template8">
+                        <input type="radio" name="templateSelect" value="template8">
+                        <div class="template-info">
+                            <div class="template-name">
+                                <i class="fas fa-file-alt"></i>
+                                座位牌
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" id="cancelTemplateSelect">取消</button>
+                <button class="modal-btn modal-btn-confirm" id="confirmTemplateSelect" disabled>确认选择</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数中的专题名称和tab
+        const urlParams = new URLSearchParams(window.location.search);
+        const topicName = urlParams.get('topicName') || urlParams.get('name');
+        const activeTab = urlParams.get('tab') || 'cases'; // 默认显示案例库
+        
+        if (topicName) {
+            const decodedTopicName = decodeURIComponent(topicName);
+            document.getElementById('navbarTitle').textContent = decodedTopicName;
+            document.title = decodedTopicName + ' - 功能区';
+        }
+
+        // Tab切换功能
+        const topicMenuItems = document.querySelectorAll('.topic-menu-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        function activateTab(tabName) {
+            // 移除所有active类
+            topicMenuItems.forEach(item => item.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // 添加active类到指定tab
+            const targetMenuItem = document.querySelector(`[data-page="${tabName}"]`);
+            const targetContent = document.getElementById(tabName + '-content');
+            
+            if (targetMenuItem && targetContent) {
+                targetMenuItem.classList.add('active');
+                targetContent.classList.add('active');
+            }
+        }
+
+        topicMenuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-page');
+                activateTab(tabName);
+            });
+        });
+
+        // 初始化激活指定的tab
+        activateTab(activeTab);
+
+        // AI助手聊天功能
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+        
+        // 调试信息
+        console.log('AI助手元素检查:', {
+            chatMessages: !!chatMessages,
+            chatInput: !!chatInput,
+            chatSendBtn: !!chatSendBtn
+        });
+        
+        // 模版选择相关元素
+        const selectTemplateBtn = document.getElementById('selectTemplateBtn');
+        const templateSelectModal = document.getElementById('templateSelectModal');
+        const closeTemplateModal = document.getElementById('closeTemplateModal');
+        const cancelTemplateSelect = document.getElementById('cancelTemplateSelect');
+        const confirmTemplateSelect = document.getElementById('confirmTemplateSelect');
+        const selectedTemplateDisplay = document.getElementById('selectedTemplateDisplay');
+        const selectedTemplateName = document.getElementById('selectedTemplateName');
+        const removeTemplate = document.getElementById('removeTemplate');
+        
+        let currentSelectedTemplate = null; // 当前选中的模版
+
+        function addMessage(content, isUser = false, templateInfo = null) {
+            if (!chatMessages) {
+                console.error('chatMessages元素未找到');
+                return;
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${isUser ? 'user' : 'assistant'}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = `message-bubble ${isUser ? 'user' : 'assistant'}`;
+            
+            // 如果有模版信息，先显示模版标签
+            let messageContent = '';
+            if (templateInfo) {
+                messageContent += `<div class="template-tag"><i class="fas fa-file-alt"></i>${templateInfo.name}</div>`;
+            }
+            messageContent += content.replace(/\n/g, '<br>');
+            
+            bubbleDiv.innerHTML = messageContent;
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage(messageText = null) {
+            console.log('sendMessage被调用', { messageText, chatInput: !!chatInput });
+            
+            if (!chatInput) {
+                console.error('chatInput元素未找到');
+                return;
+            }
+            
+            const message = messageText || chatInput.value.trim();
+            if (!message) {
+                console.log('消息为空，不发送');
+                return;
+            }
+            
+            console.log('发送消息:', message);
+            
+            // 添加用户消息，包含模版信息
+            addMessage(message, true, currentSelectedTemplate);
+            if (!messageText) {
+                chatInput.value = '';
+            }
+            
+            // 模拟AI回复
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(message, currentSelectedTemplate);
+                addMessage(aiResponse);
+            }, 1000);
+        }
+
+        function generateAIResponse(userMessage, template) {
+            // 如果有选中的模版，优先给出基于模版的回复
+            if (template) {
+                switch (template.id) {
+                    case 'template1': // 组织生活会记录格式
+                        return `基于"${template.name}"模版，我为您提供以下建议：
+
+• **会议基本信息**：准确记录会议时间、地点、主持人、记录人等基础信息
+• **参会人员**：详细记录出席、请假、缺席人员名单，确保信息完整
+• **会议议程**：按照议程逐项记录，包含学习内容、讨论议题、决议事项
+• **发言记录**：如实记录主要发言人的观点和建议
+• **会议总结**：总结会议成果和后续工作安排
+
+需要我为您提供具体的记录格式示例吗？`;
+                        
+                    case 'template2': // 社区工作总结模板
+                        return `参考"${template.name}"，我建议您的工作总结应包含以下结构：
+
+• **工作概述**：简要介绍本期工作的整体情况和主要任务
+• **主要成果**：用数据和事例详细说明取得的工作成效
+• **创新举措**：突出工作中的亮点和创新做法
+• **存在问题**：客观分析工作中遇到的困难和不足
+• **经验总结**：提炼可复制推广的工作经验
+• **下步计划**：制定针对性的改进措施和工作安排
+
+您希望我针对哪个具体部分提供更详细的撰写指导？`;
+                        
+                    case 'template3': // 社区工作者考勤汇总表
+                        return `基于"${template.name}"，我为您整理了考勤管理的要点：
+
+• **出勤统计**：准确记录每日出勤情况，包含正常出勤、迟到、早退
+• **请假管理**：分类记录事假、病假、公假等不同假期类型
+• **加班记录**：统计加班时间和加班事由，便于工作量评估
+• **异常情况**：记录特殊情况说明，确保数据真实可靠
+• **月度汇总**：生成月度考勤报表，为绩效考核提供依据
+
+需要我为您说明具体的操作流程或表格设计要点吗？`;
+                        
+                    default:
+                        return `基于您选择的"${template.name}"模版，我已经为您准备了针对性的建议。请告诉我您具体需要什么帮助，我会结合该模版为您提供更精准的指导。`;
+                }
+            }
+            
+            // 原有的预设回复逻辑
+            const responses = {
+                '我想组织一场面向青少年的爱国主义教育活动，有什么建议？': `针对青少年群体的爱国主义教育活动，我建议您可以从以下几个方面来考虑：
+
+• 结合当下热点，设计活动性强的活动形式
+• 运用多媒体技术，增强活动趣味性  
+• 设置小组竞赛环节，提高参与积极性
+• 邀请相关领域专家进行分享
+
+需要我为您生成一个具体的活动方案吗？`,
+                
+                '如何提高社区居民参与度？': `提高社区居民参与度是一个系统性工程，建议从以下几个维度入手：
+
+• 了解居民真实需求，开展针对性活动
+• 建立多元化沟通渠道，及时收集反馈
+• 设计激励机制，如积分兑换、荣誉表彰等
+• 培养社区意见领袖，发挥示范带动作用
+• 选择合适的时间和地点，降低参与门槛
+
+您希望我针对哪个具体方面提供更详细的建议？`,
+                
+                '社区活动策划有哪些注意事项？': `社区活动策划需要注意以下关键要素：
+
+• 前期调研：了解居民需求和兴趣点
+• 目标明确：设定清晰的活动目标和预期效果
+• 资源配置：合理安排人力、物力、财力
+• 风险评估：制定应急预案，确保活动安全
+• 宣传推广：多渠道宣传，提高知晓率
+• 效果评估：建立反馈机制，总结经验教训
+
+您想了解哪个环节的具体操作方法？`,
+                
+                '儿童活动如何选择活动场所？': `儿童活动场所选择需要重点考虑以下因素：
+
+• 安全性：场地无安全隐患，有完善的安全设施
+• 空间大小：根据活动人数和形式选择合适的空间
+• 交通便利：方便家长接送，有充足的停车位
+• 设施配套：有必要的音响、投影等设备
+• 环境舒适：通风良好，光线充足，温度适宜
+• 应急保障：就近有医疗机构，便于应急处理
+
+您需要我为特定类型的儿童活动推荐场所吗？`
+            };
+
+            // 检查是否有预设回复
+            if (responses[userMessage]) {
+                return responses[userMessage];
+            }
+
+            // 根据关键词生成回复
+            if (userMessage.includes('活动') || userMessage.includes('策划')) {
+                return '关于活动策划，我建议您首先明确活动目标，然后制定详细的执行方案。您可以告诉我具体的活动类型，我来为您提供更有针对性的建议。';
+            } else if (userMessage.includes('工作') || userMessage.includes('总结')) {
+                return '工作总结是很重要的反思和提升过程。建议您从工作完成情况、取得成效、存在问题、改进措施等几个方面来组织内容。需要我为您提供具体的写作框架吗？';
+            } else if (userMessage.includes('社区') || userMessage.includes('居民')) {
+                return '社区工作需要以居民需求为导向，建立良好的沟通机制。您遇到了什么具体问题？我可以为您提供更有针对性的解决方案。';
+            } else {
+                return '感谢您的提问！我会尽力为您提供帮助。您能详细描述一下您遇到的具体情况吗？这样我可以给出更准确的建议。';
+            }
+        }
+
+        // 模版选择功能
+        if (selectTemplateBtn) {
+            selectTemplateBtn.addEventListener('click', function() {
+                templateSelectModal.classList.remove('hidden');
+            });
+        }
+
+        if (closeTemplateModal) {
+            closeTemplateModal.addEventListener('click', function() {
+                templateSelectModal.classList.add('hidden');
+                resetTemplateSelection();
+            });
+        }
+
+        if (cancelTemplateSelect) {
+            cancelTemplateSelect.addEventListener('click', function() {
+                templateSelectModal.classList.add('hidden');
+                resetTemplateSelection();
+            });
+        }
+
+        if (confirmTemplateSelect) {
+            confirmTemplateSelect.addEventListener('click', function() {
+                const selectedRadio = document.querySelector('input[name="templateSelect"]:checked');
+                if (selectedRadio) {
+                    const templateItem = selectedRadio.closest('.template-item');
+                    const templateName = templateItem.querySelector('.template-name').textContent.trim();
+                    const templateId = templateItem.dataset.templateId;
+                    
+                    // 设置当前选中的模版
+                    currentSelectedTemplate = {
+                        id: templateId,
+                        name: templateName
+                    };
+                    
+                    // 显示选中的模版
+                    selectedTemplateName.textContent = templateName;
+                    selectedTemplateDisplay.classList.remove('hidden');
+                    
+                    // 关闭弹框
+                    templateSelectModal.classList.add('hidden');
+                    resetTemplateSelection();
+                }
+            });
+        }
+
+        if (removeTemplate) {
+            removeTemplate.addEventListener('click', function() {
+                currentSelectedTemplate = null;
+                selectedTemplateDisplay.classList.add('hidden');
+            });
+        }
+
+        // 模版选择交互
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'templateSelect') {
+                confirmTemplateSelect.disabled = false;
+                // 更新选中状态
+                document.querySelectorAll('.template-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                e.target.closest('.template-item').classList.add('selected');
+            }
+        });
+
+        // 模版项点击选择
+        document.addEventListener('click', function(e) {
+            const templateItem = e.target.closest('.template-item');
+            if (templateItem && !e.target.matches('input[type="radio"]')) {
+                const radio = templateItem.querySelector('input[type="radio"]');
+                radio.checked = true;
+                confirmTemplateSelect.disabled = false;
+                // 更新选中状态
+                document.querySelectorAll('.template-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                templateItem.classList.add('selected');
+            }
+        });
+
+        function resetTemplateSelection() {
+            document.querySelectorAll('input[name="templateSelect"]').forEach(radio => {
+                radio.checked = false;
+            });
+            document.querySelectorAll('.template-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            confirmTemplateSelect.disabled = true;
+        }
+
+        if (chatSendBtn) {
+            chatSendBtn.addEventListener('click', sendMessage);
+        }
+        
+        if (chatInput) {
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // 案例点击事件
+        document.querySelectorAll('.case-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const title = this.querySelector('.case-title').textContent;
+                showCaseDetail(title, this);
+            });
+        });
+
+        // 素材下载事件
+        document.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const materialItem = this.closest('.material-item');
+                if (materialItem) {
+                    const title = materialItem.querySelector('.material-title').textContent;
+                    showMaterialDetail(title, materialItem);
+                } else {
+                    // 如果是详情页面的下载按钮
+                    const title = document.getElementById('materialDetailTitle').textContent;
+                    downloadMaterialFile(title);
+                }
+            });
+        });
+
+        // 素材项点击事件
+        document.querySelectorAll('.material-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // 如果点击的是下载按钮，不触发详情显示
+                if (e.target.closest('.download-btn')) {
+                    return;
+                }
+                const title = this.querySelector('.material-title').textContent;
+                showMaterialDetail(title, this);
+            });
+        });
+
+        // 显示案例详情页面
+        function showCaseDetail(title, caseElement) {
+            // 从PC端数据获取案例详情信息
+            const caseData = getCaseDetailData(title);
+            
+            // 更新详情页面内容
+            document.getElementById('caseDetailTitle').textContent = caseData.title;
+            document.getElementById('caseDetailDate').textContent = caseData.date;
+            document.getElementById('caseDetailViews').textContent = caseData.views;
+            
+            // 显示详情页面
+            document.getElementById('caseDetailPage').classList.add('active');
+            
+            // 隐藏主页面滚动
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 显示素材详情页面
+        function showMaterialDetail(title, materialElement) {
+            // 从PC端数据获取素材详情信息
+            const materialData = getMaterialDetailData(title);
+            
+            // 更新详情页面内容
+            document.getElementById('materialDetailTitle').textContent = materialData.title;
+            document.getElementById('materialDetailDownloads').textContent = materialData.downloads;
+            document.getElementById('materialDetailDate').textContent = materialData.uploadTime;
+            document.getElementById('materialDetailFormat').textContent = materialData.format;
+            document.getElementById('materialPreviewImage').src = materialData.image;
+            document.getElementById('materialDescription').textContent = materialData.description;
+            document.getElementById('materialFileName').textContent = materialData.fileName;
+            document.getElementById('materialFileSize').textContent = materialData.fileSize;
+            
+            // 更新统计信息
+            document.getElementById('materialStatDownloads').textContent = materialData.downloads;
+            document.getElementById('materialStatSize').textContent = materialData.fileSize;
+            document.getElementById('materialStatFormat').textContent = materialData.format;
+            
+            // 显示详情页面
+            document.getElementById('materialDetailPage').classList.add('active');
+            
+            // 隐藏主页面滚动
+            document.body.style.overflow = 'hidden';
+        }
+
+        function downloadMaterialFile() {
+            const title = document.getElementById('materialDetailTitle').textContent;
+            alert(`开始下载素材：${title}`);
+        }
+
+        // 获取案例详情数据（模拟从PC端获取）
+        function getCaseDetailData(title) {
+            // 模拟案例数据，实际应该从PC端gongneng.html对应的数据获取
+            const caseDataMap = {
+                '垃圾分类知识普及宣传活动': {
+                    title: '垃圾分类知识普及宣传活动',
+                    date: '2025-01-15',
+                    views: '1.2k',
+                    description: '通过趣味游戏、知识问答等互动形式，向社区居民普及垃圾分类知识，提高环保意识。',
+                    background: '随着城市生活垃圾的日益增多，垃圾分类已成为提高资源利用率、改善环境质量的重要措施。',
+                    content: '活动采用"理论+实践"的方式，首先由环保专家进行垃圾分类知识讲解...',
+                    effect: '本次活动共有120余名居民参与，发放宣传资料200份，现场答疑50余人次。',
+                    highlight: '结合了知识宣讲和互动体验，寓教于乐，使枯燥的垃圾分类知识变得生动有趣。'
+                },
+                '垃圾分类宣传教育PPT': {
+                    title: '垃圾分类宣传教育PPT',
+                    date: '2025-01-12',
+                    views: '956',
+                    description: '包含垃圾分类的基础知识、分类标准、常见误区和有效实践案例的PPT课件。',
+                    background: 'PPT课件是社区宣传教育的重要工具，通过图文并茂的方式传达垃圾分类知识。',
+                    content: 'PPT内容涵盖垃圾分类的基本概念、四分类法详解、常见分类错误纠正等。',
+                    effect: 'PPT已在多个社区使用，获得良好反馈，有效提升了居民的分类意识。',
+                    highlight: '内容丰富、图文并茂，适合各年龄段居民学习使用。'
+                },
+                '垃圾分类宣传短视频': {
+                    title: '垃圾分类宣传短视频',
+                    date: '2025-01-10',
+                    views: '1.5k',
+                    description: '生动形象的短视频演示如何正确进行垃圾分类，适合在社区宣传栏、电子屏等场所播放。',
+                    background: '短视频是现代宣传的有效方式，能够快速传达信息，吸引居民注意。',
+                    content: '视频通过动画演示、实景拍摄等方式，生动展示垃圾分类的正确方法。',
+                    effect: '视频播放量超过1.5k次，有效提升了社区垃圾分类的参与度。',
+                    highlight: '形式新颖、内容生动，适合在各种电子媒体平台播放。'
+                },
+                '垃圾分类趣味互动游戏': {
+                    title: '垃圾分类趣味互动游戏',
+                    date: '2025-01-03',
+                    views: '645',
+                    description: '面向儿童的垃圾分类互动游戏方案，通过游戏化的方式激发孩子们对垃圾分类的兴趣。',
+                    background: '儿童是垃圾分类教育的重要群体，通过游戏化学习能够取得更好的教育效果。',
+                    content: '游戏包含分类挑战、知识问答、角色扮演等多种互动环节。',
+                    effect: '游戏受到儿童和家长的欢迎，有效提升了家庭垃圾分类的实施率。',
+                    highlight: '寓教于乐、互动性强，特别适合儿童群体的学习特点。'
+                }
+            };
+            
+            return caseDataMap[title] || caseDataMap['垃圾分类知识普及宣传活动'];
+        }
+
+        // 获取素材详情数据（模拟从PC端获取）
+        function getMaterialDetailData(title) {
+            // 模拟素材数据，实际应该从PC端gongneng.html对应的数据获取
+            const materialDataMap = {
+                '组织生活会记录格式': {
+                    title: '组织生活会记录格式',
+                    downloads: '99',
+                    uploadTime: '2025-01-15',
+                    format: 'DOCX',
+                    image: 'images/doc_templates/wechat_2025-05-18_121127_135.png',
+                    description: '本素材为标准的组织生活会记录格式模板，包含会议基本信息、参会人员、会议议程、讨论内容、决议事项等完整要素。适用于党支部、团支部等各类组织生活会的记录整理工作。',
+                    fileName: '组织生活会记录格式.docx',
+                    fileSize: '156KB'
+                },
+                '社区工作总结模板': {
+                    title: '社区工作总结模板',
+                    downloads: '156',
+                    uploadTime: '2025-01-12',
+                    format: 'DOCX',
+                    image: 'images/doc_templates/wechat_2025-05-18_121127_135.png',
+                    description: '标准的社区工作总结模板，包含工作概述、主要成绩、存在问题、改进措施等完整框架。适用于各类社区工作的总结汇报。',
+                    fileName: '社区工作总结模板.docx',
+                    fileSize: '128KB'
+                },
+                '社区工作者考勤汇总表': {
+                    title: '社区工作者考勤汇总表',
+                    downloads: '89',
+                    uploadTime: '2025-01-10',
+                    format: 'XLSX',
+                    image: 'images/doc_templates/wechat_2025-05-18_121127_135.png',
+                    description: '社区工作者考勤汇总表模板，包含出勤统计、请假记录、加班统计等功能模块。方便社区管理人员进行考勤数据的整理和分析。',
+                    fileName: '社区工作者考勤汇总表.xlsx',
+                    fileSize: '89KB'
+                },
+                '社区活动策划方案模板': {
+                    title: '社区活动策划方案模板',
+                    downloads: '203',
+                    uploadTime: '2025-01-08',
+                    format: 'DOCX',
+                    image: 'images/doc_templates/wechat_2025-05-18_121127_135.png',
+                    description: '通用的社区活动策划方案模板，包含活动背景、目标、内容、流程、预算、风险评估等完整要素。适用于各类社区文体活动的策划工作。',
+                    fileName: '社区活动策划方案模板.docx',
+                    fileSize: '245KB'
+                },
+                '居民意见收集表': {
+                    title: '居民意见收集表',
+                    downloads: '134',
+                    uploadTime: '2025-01-05',
+                    format: 'DOCX',
+                    image: 'images/doc_templates/wechat_2025-05-18_121127_135.png',
+                    description: '标准的居民意见收集表格，包含意见分类、问题描述、处理建议等字段。便于社区工作者收集和整理居民反馈的各类意见建议。',
+                    fileName: '居民意见收集表.docx',
+                    fileSize: '67KB'
+                },
+                '社区安全检查记录表': {
+                    title: '社区安全检查记录表',
+                    downloads: '178',
+                    uploadTime: '2025-01-03',
+                    format: 'XLSX',
+                    image: 'images/doc_templates/wechat_2025-05-18_121127_135.png',
+                    description: '社区安全检查记录表模板，包含检查项目、检查结果、问题记录、整改措施等内容。适用于社区日常安全巡查工作的记录和管理。',
+                    fileName: '社区安全检查记录表.xlsx',
+                    fileSize: '112KB'
+                }
+            };
+            
+            return materialDataMap[title] || materialDataMap['组织生活会记录格式'];
+        }
+
+        // 筛选功能
+        const formatFilter = document.getElementById('formatFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const docFormatFilter = document.getElementById('docFormatFilter');
+        const docSortFilter = document.getElementById('docSortFilter');
+
+        if (formatFilter) {
+            formatFilter.addEventListener('change', function() {
+                console.log('案例库格式筛选:', this.value);
+            });
+        }
+
+        if (sortFilter) {
+            sortFilter.addEventListener('change', function() {
+                console.log('案例库排序:', this.value);
+            });
+        }
+
+        if (docFormatFilter) {
+            docFormatFilter.addEventListener('change', function() {
+                console.log('素材库格式筛选:', this.value);
+            });
+        }
+
+        if (docSortFilter) {
+            docSortFilter.addEventListener('change', function() {
+                console.log('素材库排序:', this.value);
+            });
+        }
+
+        // 发送按钮和输入框事件绑定
+        function bindChatEvents() {
+            console.log('绑定聊天事件');
+            
+            if (chatSendBtn) {
+                console.log('绑定发送按钮点击事件');
+                chatSendBtn.addEventListener('click', function(e) {
+                    console.log('发送按钮被点击');
+                    e.preventDefault();
+                    sendMessage();
+                });
+            } else {
+                console.error('发送按钮未找到');
+            }
+            
+            if (chatInput) {
+                console.log('绑定输入框回车事件');
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        console.log('回车键被按下');
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            } else {
+                console.error('输入框未找到');
+            }
+        }
+
+        // 预设问题功能
+        function bindPresetQuestions() {
+            document.querySelectorAll('.preset-question').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const question = this.getAttribute('data-question');
+                    console.log('预设问题被点击:', question);
+                    if (chatInput) {
+                        chatInput.value = question;
+                        sendMessage();
+                    }
+                });
+            });
+        }
+
+        // 确保在DOM加载完成后绑定事件
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                bindChatEvents();
+                bindPresetQuestions();
+            });
+        } else {
+            bindChatEvents();
+            bindPresetQuestions();
+        }
+
+        console.log('功能区移动端页面初始化完成');
+    </script>
+
+    <script>
+        // 全局函数声明，供HTML onclick事件调用
+        
+        // 关闭案例详情页面
+        function closeCaseDetail() {
+            document.getElementById('caseDetailPage').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 关闭素材详情页面
+        function closeMaterialDetail() {
+            document.getElementById('materialDetailPage').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 下载案例文件
+        function downloadCaseFile() {
+            const title = document.getElementById('caseDetailTitle').textContent;
+            alert(`开始下载案例文件：${title}方案.pdf`);
+        }
+
+        // 下载素材文件
+        function downloadMaterialFile() {
+            const title = document.getElementById('materialDetailTitle').textContent;
+            alert(`开始下载素材：${title}`);
+        }
+        
+        // AI助手功能修复脚本
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AI助手功能修复脚本启动');
+            
+            // 重新获取元素
+            const chatInput = document.getElementById('chatInput');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            
+            if (chatInput && chatSendBtn) {
+                console.log('AI助手元素找到，重新绑定事件');
+                
+                // 移除可能存在的旧事件监听器
+                const newSendBtn = chatSendBtn.cloneNode(true);
+                chatSendBtn.parentNode.replaceChild(newSendBtn, chatSendBtn);
+                
+                const newInput = chatInput.cloneNode(true);
+                chatInput.parentNode.replaceChild(newInput, chatInput);
+                
+                // 重新绑定事件
+                newSendBtn.addEventListener('click', function(e) {
+                    console.log('修复后的发送按钮被点击');
+                    e.preventDefault();
+                    const message = newInput.value.trim();
+                    if (message) {
+                        console.log('发送消息:', message);
+                        // 调用发送消息函数
+                        if (typeof sendMessage === 'function') {
+                            sendMessage(message);
+                        } else {
+                            console.error('sendMessage函数未找到');
+                        }
+                    }
+                });
+                
+                newInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        console.log('修复后的回车键被按下');
+                        e.preventDefault();
+                        newSendBtn.click();
+                    }
+                });
+                
+                console.log('AI助手事件重新绑定完成');
+            } else {
+                console.error('AI助手元素未找到');
+            }
+        });
+    </script>
+</body>
+</html> 

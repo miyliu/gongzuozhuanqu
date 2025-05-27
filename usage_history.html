@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用记录 - 社小智</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            height: auto;
+            overflow: visible;
+        }
+        
+        :root {
+            --primary-color: #2479CC;
+            --primary-light: #e6f2ff;
+            --primary-dark: #1a5b99;
+            --accent-color: #ff6a00;
+            --danger-color: #e53e3e;
+            --success-color: #38a169;
+            --text-color: #333;
+            --light-gray: #f6f6f6;
+        }
+        
+        .history-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            height: auto;
+            overflow: visible;
+        }
+        
+        #recordsContainer {
+            height: auto;
+            overflow: visible;
+            max-height: none;
+        }
+        
+        .record-item {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 1rem 0;
+        }
+        
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        
+        .record-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 0;
+            color: #888;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-6">
+        <div class="history-container">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">使用记录</h2>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <select id="typeFilter" class="bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">全部记录</option>
+                            <option value="ai_query">AI助手</option>
+                            <option value="function_use">功能使用</option>
+                        </select>
+                    </div>
+                    <button id="manageBtn" class="flex items-center text-blue-500 hover:text-blue-700">
+                        <i class="fas fa-cog mr-1"></i>
+                        <span>管理记录</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="manageToolbar" class="flex justify-between items-center mb-4 border-b pb-3" style="display: none;">
+                <div class="flex items-center">
+                    <label class="inline-flex items-center mr-4">
+                        <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-blue-600">
+                        <span class="ml-2 text-sm text-gray-700">全选</span>
+                    </label>
+                    <span id="selectedCount" class="text-sm text-gray-500">已选择 0 条记录</span>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="deleteAllBtn" class="flex items-center text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash mr-1"></i>
+                        <span>删除全部</span>
+                    </button>
+                    <button id="deleteSelectedBtn" class="flex items-center text-red-500 hover:text-red-700" disabled>
+                        <i class="fas fa-trash-alt mr-1"></i>
+                        <span>删除选中</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flow-root">
+                <div id="recordsContainer" class="divide-y divide-gray-200">
+                    <!-- 记录将动态加载到这里 -->
+                </div>
+                
+                <div id="emptyState" class="empty-state hidden" style="display: none;">
+                    <i class="fas fa-history"></i>
+                    <p>当前没有可显示的使用记录</p>
+                    <button id="emptyStateBtn" class="mt-4 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                        加载示例数据
+                    </button>
+                </div>
+                
+                <div id="paginationControls" class="mt-6 flex justify-between items-center">
+                    <div class="text-sm text-gray-500">
+                        显示 <span id="currentPageInfo">1-10</span> 条记录
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="prevPageBtn" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-chevron-left mr-1"></i>上一页
+                        </button>
+                        <button id="nextPageBtn" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                            下一页<i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'request_height') {
+                    const height = document.body.scrollHeight;
+                    window.parent.postMessage({
+                        type: 'iframe_content_height',
+                        height: height
+                    }, '*');
+                }
+            });
+
+            const recordsContainer = document.getElementById('recordsContainer');
+            const emptyState = document.getElementById('emptyState');
+            const typeFilter = document.getElementById('typeFilter');
+            const manageBtn = document.getElementById('manageBtn');
+            const manageToolbar = document.getElementById('manageToolbar');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            const selectedCountSpan = document.getElementById('selectedCount');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const currentPageInfo = document.getElementById('currentPageInfo');
+            const paginationControls = document.getElementById('paginationControls');
+            
+            const storageKey = 'userActivityRecords';
+            let currentTopicId = null;
+            let currentPage = 1;
+            const recordsPerPage = 10;
+            let isManageMode = false;
+            
+            function loadRecords(page = 1) {
+                currentPage = page;
+                const typeValue = typeFilter.value;
+                
+                let allRecords = JSON.parse(localStorage.getItem(storageKey)) || [];
+                if (allRecords.length === 0) {
+                    generateSampleData(true);
+                    allRecords = JSON.parse(localStorage.getItem(storageKey)) || [];
+                }
+                
+                if (currentTopicId && currentTopicId !== 'unknown') {
+                    const currentTopicRecords = allRecords.filter(record => record.topicId === currentTopicId);
+                    if (currentTopicRecords.length < 10) {
+                        addSampleDataForCurrentTopic();
+                        allRecords = JSON.parse(localStorage.getItem(storageKey)) || [];
+                    }
+                }
+                
+                const filteredRecords = getFilteredRecords(typeValue);
+                const totalRecords = filteredRecords.length;
+                
+                const totalPages = Math.max(1, Math.ceil(totalRecords / recordsPerPage));
+                const startIndex = (page - 1) * recordsPerPage;
+                const endIndex = Math.min(startIndex + recordsPerPage, totalRecords);
+                
+                currentPageInfo.textContent = totalRecords > 0 ? `${startIndex + 1}-${endIndex} (共${totalRecords}条)` : '1-10 (共10条)';
+                prevPageBtn.disabled = page <= 1;
+                nextPageBtn.disabled = page >= totalPages;
+                
+                paginationControls.style.display = 'flex';
+                
+                recordsContainer.innerHTML = '';
+                
+                emptyState.classList.add('hidden');
+                emptyState.style.display = 'none';
+                recordsContainer.classList.remove('hidden');
+                
+                let currentPageRecords = [];
+                
+                if (filteredRecords.length > 0) {
+                    currentPageRecords = filteredRecords.slice(startIndex, endIndex);
+                } 
+                
+                if (currentPageRecords.length === 0) {
+                    generateSampleData(true);
+                    const newFilteredRecords = getFilteredRecords(typeFilter.value);
+                    currentPageRecords = newFilteredRecords.slice(startIndex, Math.min(startIndex + recordsPerPage, newFilteredRecords.length));
+                }
+                
+                currentPageRecords.forEach(record => {
+                    const recordItem = createRecordItem(record);
+                    recordsContainer.appendChild(recordItem);
+                });
+                
+                if (currentPageRecords.length === 0 && page > 1) {
+                    loadRecords(1);
+                }
+            }
+            
+            function getFilteredRecords(typeFilter) {
+                const allRecords = JSON.parse(localStorage.getItem(storageKey)) || [];
+                
+                return allRecords.filter(record => {
+                    if (currentTopicId && record.topicId !== currentTopicId) {
+                        return false;
+                    }
+                    
+                    if (record.objectName === '活动管理' && record.topicType === 'activity') {
+                        let currentTopicType = 'common';
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const topicTypeParam = urlParams.get('topicType');
+                        
+                        if (topicTypeParam) {
+                            currentTopicType = topicTypeParam;
+                        } else if (window.parent && window.parent.currentTopicType) {
+                            currentTopicType = window.parent.currentTopicType;
+                        }
+                        
+                        if (currentTopicType !== 'activity') {
+                            return false;
+                        }
+                    }
+                    
+                    if (typeFilter && record.type !== typeFilter) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            function createRecordItem(record) {
+                const div = document.createElement('div');
+                div.className = 'record-item flex py-4';
+                div.dataset.id = record.timestamp;
+                
+                let iconClass = 'fa-history';
+                let bgColorClass = 'bg-gray-100';
+                let textColorClass = 'text-gray-600';
+                let actionText = '未知操作';
+                
+                switch(record.type) {
+                    case 'ai_query':
+                        iconClass = 'fa-robot';
+                        bgColorClass = 'bg-purple-100';
+                        textColorClass = 'text-purple-600';
+                        
+                        if (record.objectName === '智能问答') {
+                            actionText = '使用了智能体';
+                        } else if (record.objectName === '公众号文章生成' || 
+                                  record.objectName === '海报设计' || 
+                                  record.objectName === '方案生成') {
+                            actionText = '使用了智能体';
+                        } else {
+                            actionText = '使用了AI助手';
+                        }
+                        break;
+                    case 'function_use':
+                        iconClass = 'fa-lightbulb';
+                        bgColorClass = 'bg-yellow-100';
+                        textColorClass = 'text-yellow-600';
+                        
+                        if (record.objectName === '活动管理') {
+                            actionText = '';
+                        } else {
+                            actionText = '使用了功能';
+                        }
+                        break;
+                }
+                
+                let activityTypeText = '未知操作';
+                switch(record.type) {
+                    case 'ai_query':
+                        activityTypeText = 'AI助手';
+                        break;
+                    case 'function_use':
+                        activityTypeText = '功能使用';
+                        break;
+                }
+                
+                const checkboxHtml = `
+                    <div class="checkbox-container mr-3" style="display: none;">
+                        <input type="checkbox" class="record-checkbox form-checkbox h-5 w-5 text-blue-600" data-id="${record.timestamp}">
+                    </div>
+                `;
+                
+                div.innerHTML = checkboxHtml + `
+                    <div class="mr-4">
+                        <div class="record-icon ${bgColorClass} ring-8 ring-white">
+                            <i class="fas ${iconClass} ${textColorClass}"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-medium">${activityTypeText}</h3>
+                            <time class="text-xs text-gray-500">${record.timestamp}</time>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-700">
+                            ${record.objectName === '活动管理' ? record.additionalInfo : 
+                              `${actionText} <span class="font-medium text-blue-600">《${record.objectName}》</span>
+                              ${record.type === 'function_use' && actionText !== '' ? '功能' : ''}`}
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500">${record.objectName === '活动管理' ? '' : record.additionalInfo}</p>
+                    </div>
+                `;
+                
+                return div;
+            }
+            
+            typeFilter.addEventListener('change', function() {
+                loadRecords(1);
+            });
+            
+            prevPageBtn.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    loadRecords(currentPage - 1);
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', function() {
+                const filteredRecords = getFilteredRecords(typeFilter.value);
+                const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+                if (currentPage < totalPages) {
+                    loadRecords(currentPage + 1);
+                }
+            });
+            
+            manageBtn.addEventListener('click', function() {
+                isManageMode = !isManageMode;
+                
+                if (isManageMode) {
+                    manageBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>完成</span>';
+                    manageToolbar.style.display = 'flex';
+                    
+                    document.querySelectorAll('.checkbox-container').forEach(checkbox => {
+                        checkbox.style.display = 'block';
+                    });
+                } else {
+                    manageBtn.innerHTML = '<i class="fas fa-cog mr-1"></i><span>管理记录</span>';
+                    manageToolbar.style.display = 'none';
+                    
+                    document.querySelectorAll('.checkbox-container').forEach(checkbox => {
+                        checkbox.style.display = 'none';
+                    });
+                    
+                    document.querySelectorAll('.record-checkbox').forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    
+                    selectAllCheckbox.checked = false;
+                    updateSelectedCount();
+                }
+            });
+            
+            selectAllCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                
+                document.querySelectorAll('.record-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+                
+                updateSelectedCount();
+            });
+            
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('record-checkbox')) {
+                    updateSelectedCount();
+                }
+            });
+            
+            function updateSelectedCount() {
+                const checkedCount = document.querySelectorAll('.record-checkbox:checked').length;
+                selectedCountSpan.textContent = `已选择 ${checkedCount} 条记录`;
+                
+                deleteSelectedBtn.disabled = checkedCount === 0;
+                
+                const totalCheckboxes = document.querySelectorAll('.record-checkbox').length;
+                selectAllCheckbox.checked = checkedCount > 0 && checkedCount === totalCheckboxes;
+            }
+            
+            deleteSelectedBtn.addEventListener('click', function() {
+                const checkedCount = document.querySelectorAll('.record-checkbox:checked').length;
+                
+                if (checkedCount === 0) return;
+                
+                const selectedIds = Array.from(document.querySelectorAll('.record-checkbox:checked')).map(
+                    checkbox => checkbox.dataset.id
+                );
+                
+                const confirmMessage = selectedIds.length === document.querySelectorAll('.record-checkbox').length
+                    ? '确定要删除全部使用记录吗？'
+                    : `确定要删除已选择的 ${selectedIds.length} 条记录吗？`;
+                
+                if (confirm(confirmMessage)) {
+                    let records = JSON.parse(localStorage.getItem(storageKey)) || [];
+                    records = records.filter(record => !selectedIds.includes(record.timestamp));
+                    localStorage.setItem(storageKey, JSON.stringify(records));
+                    
+                    loadRecords(1);
+                    
+                    if (records.length === 0) {
+                        generateSampleData(true);
+                        loadRecords(1);
+                    }
+                }
+            });
+            
+            const deleteAllBtn = document.getElementById('deleteAllBtn');
+            deleteAllBtn.addEventListener('click', function() {
+                const confirmMessage = '确定要删除所有使用记录吗？此操作无法撤销。';
+                
+                if (confirm(confirmMessage)) {
+                    localStorage.removeItem(storageKey);
+                    generateSampleData(true);
+                    loadRecords(1);
+                    alert('所有记录已删除，已重新生成示例数据');
+                }
+            });
+            
+            document.getElementById('emptyStateBtn').addEventListener('click', function() {
+                sessionStorage.removeItem('sampleDataLoaded');
+                generateSampleData(true);
+                if (currentTopicId) {
+                    addSampleDataForCurrentTopic();
+                }
+                loadRecords(1);
+            });
+            
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'record_activity') {
+                    recordActivity(
+                        event.data.activityType,
+                        event.data.objectName,
+                        event.data.additionalInfo,
+                        event.data.topicId,
+                        event.data.topicName
+                    );
+                    loadRecords(1);
+                }
+                
+                if (event.data && event.data.type === 'init_topic_info') {
+                    currentTopicId = event.data.topicId;
+                    
+                    const records = JSON.parse(localStorage.getItem(storageKey)) || [];
+                    const hasCurrentTopicRecords = records.some(record => record.topicId === currentTopicId);
+                    
+                    if (!hasCurrentTopicRecords) {
+                        addSampleDataForCurrentTopic();
+                    }
+                    
+                    loadRecords(1);
+                }
+            });
+            
+            function recordActivity(type, objectName, additionalInfo, topicId, topicName) {
+                let records = JSON.parse(localStorage.getItem(storageKey)) || [];
+                
+                let topicType = 'common';
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const topicTypeParam = urlParams.get('topicType');
+                
+                if (topicTypeParam) {
+                    topicType = topicTypeParam;
+                } else if (window.parent && window.parent.currentTopicType) {
+                    topicType = window.parent.currentTopicType;
+                }
+                
+                if (objectName === '活动管理' && 
+                    (additionalInfo.includes('创建了活动') || additionalInfo.includes('修改了活动'))) {
+                    topicType = 'activity';
+                }
+                
+                const newRecord = {
+                    topicId: topicId || 'unknown',
+                    topicName: topicName || '当前主题',
+                    type: type,
+                    objectName: objectName,
+                    additionalInfo: additionalInfo,
+                    timestamp: new Date().toLocaleString('zh-CN'),
+                    topicType: topicType
+                };
+                
+                records.unshift(newRecord);
+                
+                if (records.length > 100) {
+                    records = records.slice(0, 100);
+                }
+                
+                localStorage.setItem(storageKey, JSON.stringify(records));
+            }
+            
+            function addSampleDataForCurrentTopic() {
+                if (currentTopicId && currentTopicId !== 'unknown') {
+                    const today = new Date();
+                    
+                    function getRecentMinutesAgo(minutesAgo) {
+                        const date = new Date(today);
+                        date.setMinutes(date.getMinutes() - minutesAgo);
+                        return date.toLocaleString('zh-CN');
+                    }
+                    
+                    function getRecentHoursAgo(hoursAgo) {
+                        const date = new Date(today);
+                        date.setHours(date.getHours() - hoursAgo);
+                        return date.toLocaleString('zh-CN');
+                    }
+                    
+                    let topicType = 'common';
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const topicTypeParam = urlParams.get('topicType');
+                    
+                    if (topicTypeParam) {
+                        topicType = topicTypeParam;
+                    } else if (window.parent && window.parent.currentTopicType) {
+                        topicType = window.parent.currentTopicType;
+                    }
+                    
+                    const currentTopicRecords = [
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'function_use',
+                            objectName: '活动管理',
+                            additionalInfo: '创建了活动: 3月邻里节读书会活动',
+                            timestamp: getRecentMinutesAgo(5),
+                            topicType: 'activity'
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'function_use',
+                            objectName: '活动管理',
+                            additionalInfo: '修改了活动: 4月邻里节筹备会',
+                            timestamp: getRecentMinutesAgo(10),
+                            topicType: 'activity'
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 如何提高工作效率？',
+                            timestamp: getRecentMinutesAgo(60),
+                            topicType: topicType
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'ai_query',
+                            objectName: '海报设计',
+                            additionalInfo: '咨询问题: 请为社区活动设计一张宣传海报',
+                            timestamp: getRecentMinutesAgo(15),
+                            topicType: topicType
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'ai_query',
+                            objectName: '公众号文章生成',
+                            additionalInfo: '咨询问题: 帮我写一篇关于社区邻里活动的推广文章',
+                            timestamp: getRecentMinutesAgo(20),
+                            topicType: topicType
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'ai_query',
+                            objectName: '方案生成',
+                            additionalInfo: '咨询问题: 帮我制定一份社区活动工作计划书',
+                            timestamp: getRecentHoursAgo(3),
+                            topicType: topicType
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 如何提升团队协作效率？',
+                            timestamp: getRecentHoursAgo(24),
+                            topicType: topicType
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'function_use',
+                            objectName: '内容审核',
+                            additionalInfo: '审核内容: 会议记录',
+                            timestamp: getRecentHoursAgo(28),
+                            topicType: topicType
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 如何优化工作流程？',
+                            timestamp: getRecentHoursAgo(48),
+                            topicType: topicType
+                        },
+                        {
+                            topicId: currentTopicId,
+                            topicName: '当前主题',
+                            type: 'ai_query',
+                            objectName: '方案生成',
+                            additionalInfo: '咨询问题: 帮我制定工作方案',
+                            timestamp: getRecentHoursAgo(52),
+                            topicType: topicType
+                        }
+                    ];
+                    
+                    let records = JSON.parse(localStorage.getItem(storageKey)) || [];
+                    records = [...currentTopicRecords, ...records];
+                    localStorage.setItem(storageKey, JSON.stringify(records));
+                }
+            }
+            
+            function generateSampleData(forceRegenerate = false) {
+                if (forceRegenerate || sessionStorage.getItem('sampleDataLoaded') !== 'true') {
+                    localStorage.removeItem(storageKey);
+                    sessionStorage.setItem('sampleDataLoaded', 'true');
+                
+                    const today = new Date();
+                    
+                    function getRecentDateString(daysAgo) {
+                        const date = new Date(today);
+                        date.setDate(date.getDate() - daysAgo);
+                        return date.toLocaleString('zh-CN');
+                    }
+                    
+                    if (currentTopicId && currentTopicId !== 'unknown') {
+                        addSampleDataForCurrentTopic();
+                        return;
+                    }
+                    
+                    const sampleRecords = [
+                        {
+                            topicId: 'topic1',
+                            topicName: '主题一',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 如何提高工作效率？',
+                            timestamp: getRecentDateString(0.1),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic1',
+                            topicName: '主题一',
+                            type: 'ai_query',
+                            objectName: '海报设计',
+                            additionalInfo: '咨询问题: 设计一张关于垃圾分类活动的宣传海报',
+                            timestamp: getRecentDateString(0.05),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic2',
+                            topicName: '主题二',
+                            type: 'ai_query',
+                            objectName: '公众号文章生成',
+                            additionalInfo: '咨询问题: 生成一篇社区环保倡议的公众号文章',
+                            timestamp: getRecentDateString(0.08),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic1',
+                            topicName: '主题一',
+                            type: 'function_use',
+                            objectName: '活动管理',
+                            additionalInfo: '创建了活动: 5月邻里节招募活动',
+                            timestamp: getRecentDateString(0.03),
+                            topicType: 'activity'
+                        },
+                        {
+                            topicId: 'topic1',
+                            topicName: '主题一',
+                            type: 'ai_query',
+                            objectName: '方案生成',
+                            additionalInfo: '咨询问题: 请帮我制定一份完整的工作规划方案',
+                            timestamp: getRecentDateString(0.2),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic3',
+                            topicName: '主题三',
+                            type: 'function_use',
+                            objectName: '内容审核',
+                            additionalInfo: '审核内容: 发布文案',
+                            timestamp: getRecentDateString(3.2),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic1',
+                            topicName: '主题一',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 如何组织一次成功的会议？',
+                            timestamp: getRecentDateString(5.4),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic4',
+                            topicName: '主题四',
+                            type: 'ai_query',
+                            objectName: '方案生成',
+                            additionalInfo: '咨询问题: 请为我们团队制定一份行动计划',
+                            timestamp: getRecentDateString(8.5),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic3',
+                            topicName: '主题三',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 如何提高团队协作能力？',
+                            timestamp: getRecentDateString(10.7),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic5',
+                            topicName: '主题五',
+                            type: 'function_use',
+                            objectName: '内容审核',
+                            additionalInfo: '审核内容: 工作总结报告',
+                            timestamp: getRecentDateString(16.4),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic4',
+                            topicName: '主题四',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 工作中如何提高沟通效率？',
+                            timestamp: getRecentDateString(22.5),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic6',
+                            topicName: '主题六',
+                            type: 'ai_query',
+                            objectName: '方案生成',
+                            additionalInfo: '咨询问题: 帮我制定一份详细的工作规划',
+                            timestamp: getRecentDateString(35.3),
+                            topicType: 'common'
+                        },
+                        {
+                            topicId: 'topic6',
+                            topicName: '主题六',
+                            type: 'ai_query',
+                            objectName: '智能问答',
+                            additionalInfo: '咨询问题: 如何进行有效的时间管理？',
+                            timestamp: getRecentDateString(45.2),
+                            topicType: 'common'
+                        }
+                    ];
+                    
+                    localStorage.setItem(storageKey, JSON.stringify(sampleRecords));
+                }
+            }
+            
+            function initializeHistoryPage() {
+                emptyState.classList.add('hidden');
+                emptyState.style.display = 'none';
+                
+                if (currentTopicId && currentTopicId !== 'unknown') {
+                    const records = JSON.parse(localStorage.getItem(storageKey)) || [];
+                    const hasCurrentTopicRecords = records.some(record => record.topicId === currentTopicId);
+                    
+                    if (!hasCurrentTopicRecords) {
+                        addSampleDataForCurrentTopic();
+                    }
+                } else {
+                    generateSampleData();
+                }
+                
+                loadRecords(1);
+            }
+            
+            initializeHistoryPage();
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巡查走访记录 - 社小智</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2479CC;
+            --primary-light: #e6f2ff;
+            --primary-dark: #1a5b99;
+            --accent-color: #ff6a00;
+            --text-color: #333;
+            --light-gray: #f6f6f6;
+            --border-color: #e5e7eb;
+        }
+
+        .top-nav {
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            padding: 0 16px;
+            color: #333;
+            position: relative;
+            height: 64px;
+            line-height: 64px;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 16px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: #fff;
+            border-right: 1px solid var(--border-color);
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .sidebar-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .sidebar-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+            height: calc(100vh - 64px);
+        }
+
+        .search-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-form {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(36, 121, 204, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(36, 121, 204, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .results-section {
+            background: white;
+            margin: 0 20px 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th {
+            background-color: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 500;
+            color: #374151;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .results-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .results-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .action-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-right: 12px;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .tag-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .tag-item {
+            background: #e0f2fe;
+            color: #0277bd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tag-add {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px dashed #d1d5db;
+        }
+
+        .tag-add:hover {
+            background: #e5e7eb;
+        }
+
+        .visitor-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .visitor-item {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .visitor-add {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px dashed #d1d5db;
+        }
+
+        .visitor-add:hover {
+            background: #e5e7eb;
+        }
+
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .filter-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: white;
+        }
+
+        /* 弹框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+            flex: 1;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .modal-close:hover {
+            color: #374151;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-textarea {
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(36, 121, 204, 0.1);
+        }
+
+        .attachment-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f9fafb;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .attachment-area:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f9ff;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        .topic-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #e6f7ff;
+            color: #2479CC;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="container mx-auto px-4 flex items-center justify-between h-full">
+            <div class="flex items-center">
+                <a href="#" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#2479CC">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                    <div class="ml-2">
+                        <div class="text-xl font-bold text-blue-600">社小智</div>
+                        <div class="text-xs text-gray-500">AI</div>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="hidden md:flex">
+                <a href="#" class="nav-item">首页</a>
+                <a href="#" class="nav-item">工单办理助手</a>
+                <a href="#" class="nav-item">公文模板</a>
+                <a href="#" class="nav-item">找找云文档</a>
+                <a href="#" class="nav-item">工单分析办理PRO</a>
+                <a href="#" class="nav-item active">社情民意助手</a>
+            </nav>
+            
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                    <span class="text-blue-600 font-medium">高</span>
+                </div>
+                <span class="text-gray-700">高明</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- 左侧菜单 -->
+        <aside class="sidebar">
+            <div class="p-4">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <span class="text-blue-600 font-medium">高</span>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-800">高明</div>
+                        <div class="text-sm text-gray-500">惠新南里</div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-search"></i>
+                    首页
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-list"></i>
+                    社区列表
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-building"></i>
+                    小区列表
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-home"></i>
+                    楼宇列表
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-door-open"></i>
+                    房间信息
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    居民信息
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    走访记录
+                </a>
+                <a href="#" class="sidebar-item active">
+                    <i class="fas fa-walking"></i>
+                    巡查走访
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主要内容区 -->
+        <main class="main-content">
+            <!-- 搜索面板 -->
+            <div class="search-panel">
+                <div class="search-title">
+                    <div class="flex items-center">
+                        <i class="fas fa-search mr-2"></i>
+                        巡查走访记录查询
+                        <span class="ml-2 text-sm opacity-80">在 惠新南里社区 中检索：</span>
+                    </div>
+                    <div class="filter-toggle">
+                        <input type="checkbox" id="myRecordsOnly">
+                        <label for="myRecordsOnly">只看我创建的</label>
+                    </div>
+                </div>
+                
+                <div class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">走访时间</label>
+                            <input type="date" class="form-input" placeholder="开始日期">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="visibility: hidden;">到</label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-500">到</span>
+                                <input type="date" class="form-input flex-1" placeholder="结束时间">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">巡查地点</label>
+                            <input type="text" class="form-input" placeholder="请输入地点">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">相关居民</label>
+                            <input type="text" class="form-input" placeholder="请输入相关居民姓名">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">工作专题</label>
+                            <select class="form-input" id="topicFilter">
+                                <option value="">全部</option>
+                                <option value="巡查走访专题">巡查走访专题</option>
+                                <option value="环境卫生整治">环境卫生整治</option>
+                                <option value="安全隐患排查">安全隐患排查</option>
+                                <option value="便民服务专项">便民服务专项</option>
+                                <option value="物业管理专题">物业管理专题</option>
+                                <option value="社区文化建设">社区文化建设</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">需要处置</label>
+                            <select class="form-input" id="needDisposalFilter" onchange="toggleDisposalCompletedFilter()">
+                                <option value="">全部</option>
+                                <option value="yes">是</option>
+                                <option value="no">否</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">完成处置</label>
+                            <select class="form-input" id="disposalCompletedFilter">
+                                <option value="">全部</option>
+                                <option value="yes">是</option>
+                                <option value="no">否</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">是否关联到居民</label>
+                            <select class="form-input">
+                                <option value="">全部</option>
+                                <option value="yes">是</option>
+                                <option value="no">否</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">创建人</label>
+                            <select class="form-input" id="creatorName">
+                                <option value="">全部</option>
+                                <option value="高明">高明</option>
+                                <option value="李明">李明</option>
+                                <option value="王芳">王芳</option>
+                                <option value="张伟">张伟</option>
+                                <option value="刘青朱">刘青朱</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <!-- 空位，保持布局平衡 -->
+                        </div>
+                        <div class="form-group">
+                            <!-- 空位，保持布局平衡 -->
+                        </div>
+                        <div class="form-group">
+                            <!-- 空位，保持布局平衡 -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">居民标签</label>
+                            <div class="tag-selector">
+                                <div class="tag-item">
+                                    高龄老人
+                                    <i class="fas fa-times cursor-pointer"></i>
+                                </div>
+                                <div class="tag-item">
+                                    电动车主
+                                    <i class="fas fa-times cursor-pointer"></i>
+                                </div>
+                                <div class="tag-add">
+                                    <i class="fas fa-plus mr-1"></i>选择标签
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button class="btn-secondary" id="resetBtn">
+                            重置内容
+                        </button>
+                        <button class="btn-primary" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                            立即查询
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 查询结果 -->
+            <div class="results-section">
+                <div class="results-header">
+                    <span>根据已有条件查询到25条信息</span>
+                    <a href="topic_detail_template_wentishangbao_houxu.html" class="btn-success">
+                        <i class="fas fa-plus"></i>
+                        新建巡查走访记录
+                    </a>
+                </div>
+                
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>工作专题</th>
+                            <th>巡查地点</th>
+                            <th>相关居民</th>
+                            <th>走访描述</th>
+                            <th>需要处置</th>
+                            <th>完成处置</th>
+                            <th>创建人</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="topic-badge">巡查走访专题</span></td>
+                            <td>惠新南里5号院3号楼1单元101</td>
+                            <td>张燕</td>
+                            <td>居民反映楼道灯不亮，影响夜间出行安全</td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td>高明</td>
+                            <td>2025-05-20 18:14:30</td>
+                            <td>
+                                <a href="#" class="action-link" onclick="viewRecord(1)">查看</a>
+                                <a href="topic_detail_template_wentishangbao_houxu.html?edit=1" class="action-link">编辑</a>
+                                <a href="#" class="action-link text-red-500" onclick="deleteRecord(1, this)">删除</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="topic-badge">安全隐患排查</span></td>
+                            <td>惠新南里5号院3号楼电梯</td>
+                            <td>唐继存</td>
+                            <td>电梯运行异常，有异响，需要维修</td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td><span class="status-badge status-pending">否</span></td>
+                            <td>李明</td>
+                            <td>2025-05-14 15:14:34</td>
+                            <td>
+                                <a href="#" class="action-link" onclick="viewRecord(2)">查看</a>
+                                <a href="topic_detail_template_wentishangbao_houxu.html?edit=2" class="action-link">编辑</a>
+                                <a href="#" class="action-link text-red-500" onclick="deleteRecord(2, this)">删除</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="topic-badge">环境卫生整治</span></td>
+                            <td>惠新南里5号院垃圾收集点</td>
+                            <td>-</td>
+                            <td>垃圾桶满溢，周围环境卫生较差</td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td><span class="status-badge status-pending">否</span></td>
+                            <td>王芳</td>
+                            <td>2025-05-14 15:14:20</td>
+                            <td>
+                                <a href="#" class="action-link" onclick="viewRecord(3)">查看</a>
+                                <a href="topic_detail_template_wentishangbao_houxu.html?edit=3" class="action-link">编辑</a>
+                                <a href="#" class="action-link text-red-500" onclick="deleteRecord(3, this)">删除</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="topic-badge">便民服务专项</span></td>
+                            <td>惠新南里5号院大门口</td>
+                            <td>刘大爷</td>
+                            <td>门禁系统故障，居民进出不便</td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td>高明</td>
+                            <td>2025-05-14 15:12:30</td>
+                            <td>
+                                <a href="#" class="action-link" onclick="viewRecord(4)">查看</a>
+                                <a href="topic_detail_template_wentishangbao_houxu.html?edit=4" class="action-link">编辑</a>
+                                <a href="#" class="action-link text-red-500" onclick="deleteRecord(4, this)">删除</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="topic-badge">安全隐患排查</span></td>
+                            <td>惠新南里5号院健身区</td>
+                            <td>-</td>
+                            <td>健身器材损坏，存在安全隐患</td>
+                            <td><span class="status-badge status-pending">否</span></td>
+                            <td><span class="status-badge status-disabled">-</span></td>
+                            <td>张伟</td>
+                            <td>2025-05-14 15:11:46</td>
+                            <td>
+                                <a href="#" class="action-link" onclick="viewRecord(5)">查看</a>
+                                <a href="topic_detail_template_wentishangbao_houxu.html?edit=5" class="action-link">编辑</a>
+                                <a href="#" class="action-link text-red-500" onclick="deleteRecord(5, this)">删除</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="topic-badge">物业管理专题</span></td>
+                            <td>惠新南里二层238号楼4单元202号</td>
+                            <td>刘青朱</td>
+                            <td>居民家中水管漏水，影响楼下邻居</td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td><span class="status-badge status-completed">是</span></td>
+                            <td>李明</td>
+                            <td>2025-03-04 14:06:56</td>
+                            <td>
+                                <a href="#" class="action-link" onclick="viewRecord(6)">查看</a>
+                                <a href="topic_detail_template_wentishangbao_houxu.html?edit=6" class="action-link">编辑</a>
+                                <a href="#" class="action-link text-red-500" onclick="deleteRecord(6, this)">删除</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- 巡查走访记录查看弹框 -->
+    <div id="recordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">查看巡查走访记录</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 基本信息 -->
+                <div class="form-section">
+                    <h4 class="form-section-title">
+                        <i class="fas fa-info-circle text-blue-600"></i>
+                        基本信息
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">工作专题</label>
+                            <div class="form-input bg-gray-50" id="viewTopic">巡查走访专题</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">巡查地点</label>
+                            <div class="form-input bg-gray-50" id="viewLocation">惠新南里5号院3号楼1单元101</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">走访时间</label>
+                            <div class="form-input bg-gray-50" id="viewTime">2025-05-20 18:14:30</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">创建人</label>
+                            <div class="form-input bg-gray-50" id="viewCreator">高明</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 走访描述 -->
+                <div class="form-section">
+                    <h4 class="form-section-title">
+                        <i class="fas fa-edit text-green-600"></i>
+                        走访描述
+                    </h4>
+                    <div class="form-group">
+                        <label class="form-label">走访情况</label>
+                        <div class="form-textarea bg-gray-50 w-full" id="viewDescription">
+                            居民反映楼道灯不亮，影响夜间出行安全。经现场查看，确实存在照明问题，需要及时维修。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 相关居民信息 -->
+                <div class="form-section">
+                    <h4 class="form-section-title">
+                        <i class="fas fa-users text-purple-600"></i>
+                        相关居民信息
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">相关居民</label>
+                            <div class="form-input bg-gray-50" id="viewResident">张燕 (1号楼101)</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">居民标签</label>
+                            <div class="bg-gray-50 p-2 rounded border" id="viewResidentTags">
+                                <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs mr-1">高龄老人</span>
+                                <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">电动车主</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">居民备注</label>
+                        <div class="form-textarea bg-gray-50 w-full" id="viewResidentRemarks">
+                            热心邻里，经常反映小区问题。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 附件信息 -->
+                <div class="form-section">
+                    <h4 class="form-section-title">
+                        <i class="fas fa-paperclip text-purple-600"></i>
+                        附件信息
+                    </h4>
+                    <div id="viewAttachmentList" class="space-y-2">
+                        <div class="flex items-center p-2 bg-gray-50 rounded">
+                            <i class="fas fa-image text-blue-600 mr-2"></i>
+                            <span class="text-sm">楼道照明问题.jpg</span>
+                            <span class="text-xs text-gray-500 ml-2">(245KB)</span>
+                        </div>
+                        <div class="flex items-center p-2 bg-gray-50 rounded">
+                            <i class="fas fa-file-audio text-blue-600 mr-2"></i>
+                            <span class="text-sm">现场录音.mp3</span>
+                            <span class="text-xs text-gray-500 ml-2">(1.2MB)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 后续处置信息 -->
+                <div class="form-section">
+                    <h4 class="form-section-title">
+                        <i class="fas fa-tasks text-orange-600"></i>
+                        后续处置信息
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">是否需要后续处置</label>
+                            <div class="form-input bg-gray-50" id="viewNeedFollowUp">是</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">是否完成处置</label>
+                            <div class="form-input bg-gray-50" id="viewDisposalCompleted">是</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">处置情况</label>
+                        <div class="form-textarea bg-gray-50 w-full" id="viewDisposalSituation">
+                            已联系物业维修人员，预计明天上午进行维修。
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">完成情况</label>
+                        <div class="form-textarea bg-gray-50 w-full" id="viewCompletionStatus">
+                            维修已完成，楼道照明恢复正常，居民表示满意。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 处置状态字段联动逻辑
+        function toggleDisposalCompletedFilter() {
+            const needDisposalFilter = document.getElementById('needDisposalFilter');
+            const disposalCompletedFilter = document.getElementById('disposalCompletedFilter');
+            
+            if (needDisposalFilter.value === 'no') {
+                // 当"需要处置"选择"否"时，锁定"完成处置"为不可选择
+                disposalCompletedFilter.disabled = true;
+                disposalCompletedFilter.value = ''; // 重置为"全部"
+                disposalCompletedFilter.style.backgroundColor = '#f3f4f6';
+                disposalCompletedFilter.style.color = '#9ca3af';
+            } else {
+                // 当"需要处置"选择"全部"或"是"时，启用"完成处置"
+                disposalCompletedFilter.disabled = false;
+                disposalCompletedFilter.style.backgroundColor = '';
+                disposalCompletedFilter.style.color = '';
+            }
+        }
+
+        // 获取URL参数中的专题名称
+        const urlParams = new URLSearchParams(window.location.search);
+        const topicName = urlParams.get('topicName') || urlParams.get('name');
+
+        // 页面交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 如果是从特定专题进入，设置专题筛选的默认值
+            if (topicName) {
+                const decodedTopicName = decodeURIComponent(topicName);
+                const topicFilter = document.getElementById('topicFilter');
+                if (topicFilter) {
+                    topicFilter.value = decodedTopicName;
+                }
+                
+                // 更新页面标题
+                const searchTitle = document.querySelector('.search-title .opacity-80');
+                if (searchTitle) {
+                    searchTitle.textContent = `在 惠新南里社区 的 ${decodedTopicName} 中检索：`;
+                }
+                
+                // 延迟执行筛选，确保页面加载完成
+                setTimeout(() => {
+                    performSearch();
+                }, 100);
+            }
+            // 标签删除功能
+            document.querySelectorAll('.tag-item .fa-times').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+
+            // 添加标签功能
+            document.querySelector('.tag-add').addEventListener('click', function() {
+                console.log('添加标签');
+                // 这里可以添加标签选择弹框逻辑
+            });
+
+            // 重置按钮
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                document.querySelectorAll('.form-input').forEach(input => {
+                    input.value = '';
+                });
+                document.querySelectorAll('.tag-item').forEach(item => {
+                    item.remove();
+                });
+                document.getElementById('myRecordsOnly').checked = false;
+                
+                // 重置处置状态字段的联动状态
+                const disposalCompletedFilter = document.getElementById('disposalCompletedFilter');
+                disposalCompletedFilter.disabled = false;
+                disposalCompletedFilter.style.backgroundColor = '';
+                disposalCompletedFilter.style.color = '';
+                
+                // 重置后显示所有表格行
+                const tableRows = document.querySelectorAll('.results-table tbody tr');
+                tableRows.forEach(row => {
+                    row.style.display = '';
+                });
+                
+                // 更新记录数量显示
+                updateRecordCount();
+            });
+
+            // 查询按钮
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                console.log('执行查询');
+                performSearch();
+            });
+
+            // 只看我创建的切换
+            document.getElementById('myRecordsOnly').addEventListener('change', function() {
+                console.log('切换筛选条件:', this.checked ? '只看我创建的' : '查看全部');
+                // 这里可以添加筛选逻辑
+            });
+        });
+
+        // 查看记录
+        function viewRecord(id) {
+            console.log('查看记录:', id);
+            // 根据ID加载不同的记录数据
+            loadViewData(id);
+            document.getElementById('recordModal').classList.add('show');
+        }
+
+        // 关闭弹框
+        function closeModal() {
+            document.getElementById('recordModal').classList.remove('show');
+        }
+
+        // 加载查看数据（模拟）
+        function loadViewData(id) {
+            // 模拟不同记录的数据
+            const mockData = {
+                1: {
+                    topic: '巡查走访专题',
+                    location: '惠新南里5号院3号楼1单元101',
+                    target: '张燕',
+                    time: '2025-05-20 18:14:30',
+                    creator: '高明',
+                    description: '居民反映楼道灯不亮，影响夜间出行安全。经现场查看，确实存在照明问题，需要及时维修。',
+                    resident: '张燕 (1号楼101)',
+                    residentTags: ['高龄老人', '电动车主'],
+                    residentRemarks: '热心邻里，经常反映小区问题。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系物业维修人员，预计明天上午进行维修。',
+                    completionStatus: '维修已完成，楼道照明恢复正常，居民表示满意。',
+                    attachments: [
+                        { name: '楼道照明问题.jpg', type: 'image', size: '245KB' },
+                        { name: '现场录音.mp3', type: 'audio', size: '1.2MB' }
+                    ]
+                },
+                2: {
+                    topic: '安全隐患排查',
+                    location: '惠新南里5号院3号楼电梯',
+                    target: '唐继存',
+                    time: '2025-05-14 15:14:34',
+                    creator: '李明',
+                    description: '电梯运行异常，有异响，需要维修。',
+                    resident: '唐继存 (3号楼201)',
+                    residentTags: ['高龄老人'],
+                    residentRemarks: '经常使用电梯，对电梯状况比较关注。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已联系电梯维保公司，等待技术人员上门检查。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '电梯异响录音.mp3', type: 'audio', size: '800KB' }
+                    ]
+                },
+                3: {
+                    topic: '环境卫生整治',
+                    location: '惠新南里5号院垃圾收集点',
+                    target: '-',
+                    time: '2025-05-14 15:14:20',
+                    creator: '王芳',
+                    description: '垃圾桶满溢，周围环境卫生较差。',
+                    resident: '-',
+                    residentTags: [],
+                    residentRemarks: '无相关居民。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已通知保洁公司加强清理频次。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '垃圾收集点现状.jpg', type: 'image', size: '1.5MB' }
+                    ]
+                },
+                4: {
+                    topic: '便民服务专项',
+                    location: '惠新南里5号院大门口',
+                    target: '刘大爷',
+                    time: '2025-05-14 15:12:30',
+                    creator: '高明',
+                    description: '门禁系统故障，居民进出不便。',
+                    resident: '刘大爷 (门卫)',
+                    residentTags: ['门卫'],
+                    residentRemarks: '负责小区门禁管理，反映及时。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系门禁系统维修公司。',
+                    completionStatus: '门禁系统已修复，运行正常。',
+                    attachments: [
+                        { name: '门禁故障照片.jpg', type: 'image', size: '890KB' }
+                    ]
+                },
+                5: {
+                    topic: '安全隐患排查',
+                    location: '惠新南里5号院健身区',
+                    target: '-',
+                    time: '2025-05-14 15:11:46',
+                    creator: '张伟',
+                    description: '健身器材损坏，存在安全隐患。',
+                    resident: '-',
+                    residentTags: [],
+                    residentRemarks: '无相关居民。',
+                    needFollowUp: '否',
+                    disposalCompleted: '-',
+                    disposalSituation: '已设置警示标识，暂时封闭该区域。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '健身器材损坏.jpg', type: 'image', size: '1.1MB' }
+                    ]
+                },
+                6: {
+                    topic: '物业管理专题',
+                    location: '惠新南里二层238号楼4单元202号',
+                    target: '刘青朱',
+                    time: '2025-03-04 14:06:56',
+                    creator: '李明',
+                    description: '居民家中水管漏水，影响楼下邻居。',
+                    resident: '刘青朱 (4单元202)',
+                    residentTags: ['中年居民'],
+                    residentRemarks: '配合度较高，积极解决问题。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系专业维修人员上门维修。',
+                    completionStatus: '水管漏水问题已解决，楼下邻居满意。',
+                    attachments: [
+                        { name: '水管漏水现场.jpg', type: 'image', size: '1.3MB' },
+                        { name: '维修完成照片.jpg', type: 'image', size: '980KB' }
+                    ]
+                }
+            };
+
+            const data = mockData[id] || mockData[1]; // 默认使用第一条数据
+
+            // 填充数据到查看弹框
+            document.getElementById('viewTopic').textContent = data.topic;
+            document.getElementById('viewLocation').textContent = data.location;
+            document.getElementById('viewTime').textContent = data.time;
+            document.getElementById('viewCreator').textContent = data.creator;
+            document.getElementById('viewDescription').textContent = data.description;
+            document.getElementById('viewResident').textContent = data.resident;
+            document.getElementById('viewResidentRemarks').textContent = data.residentRemarks;
+            document.getElementById('viewNeedFollowUp').textContent = data.needFollowUp;
+            document.getElementById('viewDisposalCompleted').textContent = data.disposalCompleted;
+            document.getElementById('viewDisposalSituation').textContent = data.disposalSituation;
+            document.getElementById('viewCompletionStatus').textContent = data.completionStatus;
+
+            // 填充居民标签
+            const tagsContainer = document.getElementById('viewResidentTags');
+            tagsContainer.innerHTML = '';
+            data.residentTags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs mr-1';
+                tagElement.textContent = tag;
+                tagsContainer.appendChild(tagElement);
+            });
+
+            // 填充附件列表
+            const attachmentContainer = document.getElementById('viewAttachmentList');
+            attachmentContainer.innerHTML = '';
+            data.attachments.forEach(attachment => {
+                const attachmentElement = document.createElement('div');
+                attachmentElement.className = 'flex items-center p-2 bg-gray-50 rounded';
+                attachmentElement.innerHTML = `
+                    <i class="fas fa-${attachment.type === 'image' ? 'image' : 'file-audio'} text-blue-600 mr-2"></i>
+                    <span class="text-sm">${attachment.name}</span>
+                    <span class="text-xs text-gray-500 ml-2">(${attachment.size})</span>
+                `;
+                attachmentContainer.appendChild(attachmentElement);
+            });
+        }
+
+        // 点击弹框外部关闭
+        document.getElementById('recordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // 在<script>标签内添加删除逻辑
+        function deleteRecord(id, el) {
+            if (confirm('确定要删除该巡查走访记录吗？此操作不可恢复。')) {
+                // 二次确认
+                if (confirm('请再次确认，是否真的要删除？')) {
+                    // 删除表格行
+                    const row = el.closest('tr');
+                    if (row) row.remove();
+                    // TODO: 如有后端API，补充接口调用
+                    console.log('已删除记录ID:', id);
+                    
+                    // 更新记录数量
+                    updateRecordCount();
+                }
+            }
+        }
+
+        // 执行搜索筛选功能
+        function performSearch() {
+            const topicFilter = document.getElementById('topicFilter').value;
+            const myRecordsOnly = document.getElementById('myRecordsOnly').checked;
+            const needDisposal = document.getElementById('needDisposalFilter').value;
+            const disposalCompleted = document.getElementById('disposalCompletedFilter').value;
+            const creatorName = document.getElementById('creatorName').value;
+            
+            console.log('筛选条件:', {
+                topicFilter,
+                myRecordsOnly,
+                needDisposal,
+                disposalCompleted,
+                creatorName
+            });
+            
+            // 筛选表格行
+            filterTableRows({
+                topicFilter,
+                myRecordsOnly,
+                needDisposal,
+                disposalCompleted,
+                creatorName
+            });
+        }
+        
+        // 筛选表格行显示
+        function filterTableRows(filters) {
+            const tableRows = document.querySelectorAll('.results-table tbody tr');
+            let visibleCount = 0;
+            
+            tableRows.forEach(row => {
+                let shouldShow = true;
+                
+                // 工作专题筛选
+                if (filters.topicFilter) {
+                    const topicElement = row.querySelector('.topic-badge');
+                    if (!topicElement || topicElement.textContent.trim() !== filters.topicFilter) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // 创建人筛选
+                if (filters.creatorName) {
+                    const cells = row.querySelectorAll('td');
+                    const creatorCell = cells[7]; // 创建人列 (第8列，索引为7)
+                    if (!creatorCell || creatorCell.textContent.trim() !== filters.creatorName) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // 需要处置筛选
+                if (filters.needDisposal) {
+                    const cells = row.querySelectorAll('td');
+                    const needDisposalCell = cells[5]; // 需要处置列 (第6列，索引为5)
+                    const isNeeded = needDisposalCell.textContent.includes('是');
+                    if ((filters.needDisposal === 'yes' && !isNeeded) || 
+                        (filters.needDisposal === 'no' && isNeeded)) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // 完成处置筛选
+                if (filters.disposalCompleted) {
+                    const cells = row.querySelectorAll('td');
+                    const completedCell = cells[6]; // 完成处置列 (第7列，索引为6)
+                    const isCompleted = completedCell.textContent.includes('是');
+                    if ((filters.disposalCompleted === 'yes' && !isCompleted) || 
+                        (filters.disposalCompleted === 'no' && isCompleted)) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // 显示/隐藏表格行
+                if (shouldShow) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // 更新记录数量显示
+            const resultsHeader = document.querySelector('.results-header span');
+            if (resultsHeader) {
+                resultsHeader.textContent = `根据已有条件查询到${visibleCount}条信息`;
+            }
+        }
+        
+        // 更新记录数量
+        function updateRecordCount() {
+            const visibleRows = Array.from(document.querySelectorAll('.results-table tbody tr'))
+                .filter(row => row.style.display !== 'none');
+            const resultsHeader = document.querySelector('.results-header span');
+            if (resultsHeader) {
+                resultsHeader.textContent = `根据已有条件查询到${visibleRows.length}条信息`;
+            }
+        }
+    </script>
+</body>
+</html> 

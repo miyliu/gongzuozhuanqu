@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专题分类管理 - 社小智管理后台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --primary-light: #e0e7ff;
+            --primary-dark: #1e3a8a;
+            --secondary-color: #475569;
+            --text-color: #333;
+            --light-gray: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        
+        .top-header {
+            background-color: var(--primary-color);
+            color: white;
+            height: 56px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar {
+            background-color: #fff;
+            width: 240px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            z-index: 40;
+        }
+        
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+            min-height: calc(100vh - 56px);
+        }
+        
+        .menu-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .menu-item.active {
+            border-left-color: var(--primary-color);
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .menu-item i {
+            margin-right: 12px;
+            width: 18px;
+            text-align: center;
+        }
+        
+        .submenu-item {
+            padding: 10px 16px 10px 46px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .submenu-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .submenu-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .cancel-btn {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            padding: 10px 16px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #d1d5db;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table thead {
+            background-color: #f1f5f9;
+        }
+        
+        .admin-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .admin-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .admin-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-online {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        
+        .status-offline {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .edit-btn {
+            color: var(--primary-color);
+            margin-right: 4px;
+        }
+        
+        .edit-btn:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .delete-btn {
+            color: #ef4444;
+            margin-right: 4px;
+        }
+        
+        .delete-btn:hover {
+            background-color: #fee2e2;
+        }
+        
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 95%;
+            max-width: 500px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        .modal-backdrop.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .page-btn:hover:not(.active) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-jump-container {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 6px;
+            padding: 5px 10px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+        
+        .page-jump-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .page-jump-input {
+            width: 40px;
+            border: none;
+            text-align: center;
+            outline: none;
+            font-size: 14px;
+            color: var(--text-color);
+            padding: 4px;
+        }
+        
+        .page-jump-btn {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: none;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-jump-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        /* 添加右侧抽屉样式 */
+        .drawer-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .drawer-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .drawer-content {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        
+        .drawer-backdrop.active .drawer-content {
+            right: 0;
+        }
+        
+        .drawer-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .drawer-title {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 18px;
+        }
+        
+        .drawer-body {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .upload-container {
+            border: 1px dashed #d1d5db;
+            border-radius: 4px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-container:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .upload-preview {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 8px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .upload-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-preview {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+        }
+        
+        /* 数值输入框样式 */
+        input[type="number"] {
+            -moz-appearance: textfield;
+            text-align: center;
+        }
+        
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="top-header fixed w-full z-50">
+        <div class="container mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+                <div class="ml-3 text-xl font-bold">社小智管理后台</div>
+            </div>
+            <div class="flex items-center">
+                <div class="mr-4 text-sm">管理员</div>
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-500"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <!-- 系统管理菜单组 -->
+        <div class="menu-group">
+            <div class="menu-item active">
+                <i class="fas fa-cog"></i>
+                <span>系统管理</span>
+            </div>
+            <div class="submenu">
+                <div class="submenu-item">
+                    <a href="topic_admin.html" class="block w-full h-full">专题配置</a>
+                </div>
+                <div class="submenu-item active">专题分类管理</div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- 主要内容 -->
+    <main class="main-content pt-16">
+        <!-- 页面标题 -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">专题分类管理</h1>
+            <!-- 已删除说明文字 -->
+        </div>
+        
+        <!-- 列表和搜索 -->
+        <div class="card">
+            <div class="card-header">
+                <div>专题分类管理</div>
+                <div class="flex">
+                    <div>
+                        <button class="submit-btn" id="addCategoryBtn">
+                            <i class="fas fa-plus mr-1"></i> 新增分类
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- 搜索栏和筛选选项放在同一行 -->
+                <div class="flex mb-4 items-center">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" placeholder="搜索分类名称..." class="form-control pl-10">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <button class="submit-btn">搜索</button>
+                    </div>
+                    <div class="ml-2">
+                        <button class="cancel-btn">重置</button>
+                    </div>
+                </div>
+                
+                <!-- 筛选和排序选项 -->
+                <div class="flex mb-6 items-center">
+                    <div class="min-w-[120px]">
+                        <select class="form-control" id="statusFilter">
+                            <option value="">全部状态</option>
+                            <option value="启用">启用</option>
+                            <option value="禁用">禁用</option>
+                        </select>
+                    </div>
+                    <div class="ml-4 min-w-[200px]">
+                        <select class="form-control" id="sortTypeFilter">
+                            <option value="updateTime">更新时间近的在上</option>
+                            <option value="sortValue">排序数字大的在上</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 表格 -->
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th width="5%">序号</th>
+                                <th width="15%">分类名称</th>
+                                <th width="10%">PC图标</th>
+                                <th width="10%">小程序图标</th>
+                                <th width="10%">分类颜色</th>
+                                <th width="8%">排序</th>
+                                <th width="12%">更新时间</th>
+                                <th width="10%">状态</th>
+                                <th width="20%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>巡查走访</td>
+                                <td>
+                                    <img src="https://img.icons8.com/fluency/48/000000/error-cloud.png" alt="PC图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <img src="https://img.icons8.com/ios-filled/50/1e40af/error-cloud.png" alt="小程序图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <div class="w-6 h-6 rounded bg-red-500" title="#EF4444"></div>
+                                </td>
+                                <td>10</td>
+                                <td>2023-06-15 14:30</td>
+                                <td>
+                                    <span class="status-badge status-online">启用</span>
+                                </td>
+                                <td>
+                                    <button class="action-btn edit-btn" onclick="openEditDrawer(1)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="openDeleteConfirm(1)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>工作总结</td>
+                                <td>
+                                    <img src="https://img.icons8.com/color/48/000000/document.png" alt="PC图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <img src="https://img.icons8.com/ios-filled/50/1e40af/document.png" alt="小程序图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <div class="w-6 h-6 rounded bg-blue-500" title="#3B82F6"></div>
+                                </td>
+                                <td>9</td>
+                                <td>2023-06-14 10:15</td>
+                                <td>
+                                    <span class="status-badge status-online">启用</span>
+                                </td>
+                                <td>
+                                    <button class="action-btn edit-btn" onclick="openEditDrawer(2)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="openDeleteConfirm(2)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>活动组织</td>
+                                <td>
+                                    <img src="https://img.icons8.com/color/48/000000/calendar.png" alt="PC图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <img src="https://img.icons8.com/ios-filled/50/1e40af/calendar.png" alt="小程序图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <div class="w-6 h-6 rounded bg-green-500" title="#10B981"></div>
+                                </td>
+                                <td>8</td>
+                                <td>2023-06-13 16:45</td>
+                                <td>
+                                    <span class="status-badge status-online">启用</span>
+                                </td>
+                                <td>
+                                    <button class="action-btn edit-btn" onclick="openEditDrawer(3)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="openDeleteConfirm(3)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>宣传教育</td>
+                                <td>
+                                    <img src="https://img.icons8.com/color/48/000000/megaphone.png" alt="PC图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <img src="https://img.icons8.com/ios-filled/50/1e40af/megaphone.png" alt="小程序图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <div class="w-6 h-6 rounded bg-yellow-500" title="#F59E0B"></div>
+                                </td>
+                                <td>7</td>
+                                <td>2023-06-12 09:20</td>
+                                <td>
+                                    <span class="status-badge status-online">启用</span>
+                                </td>
+                                <td>
+                                    <button class="action-btn edit-btn" onclick="openEditDrawer(4)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="openDeleteConfirm(4)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>巡查走访</td>
+                                <td>
+                                    <img src="https://img.icons8.com/color/48/000000/walking.png" alt="PC图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <img src="https://img.icons8.com/ios-filled/50/1e40af/walking.png" alt="小程序图标" class="w-8 h-8">
+                                </td>
+                                <td>
+                                    <div class="w-6 h-6 rounded bg-purple-500" title="#8B5CF6"></div>
+                                </td>
+                                <td>6</td>
+                                <td>2023-06-11 11:35</td>
+                                <td>
+                                    <span class="status-badge status-online">启用</span>
+                                </td>
+                                <td>
+                                    <button class="action-btn edit-btn" onclick="openEditDrawer(5)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="openDeleteConfirm(5)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <div class="pagination">
+                    <div class="pagination-info">
+                        显示 1 到 5，共 5 条记录
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="page-btn disabled" disabled>
+                            <i class="fas fa-angle-double-left"></i>
+                        </button>
+                        <button class="page-btn disabled" disabled>
+                            <i class="fas fa-angle-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn disabled" disabled>
+                            <i class="fas fa-angle-right"></i>
+                        </button>
+                        <button class="page-btn disabled" disabled>
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                        <div class="page-jump-container ml-2">
+                            <span>前往</span>
+                            <input type="number" min="1" max="1" value="1" class="page-jump-input">
+                            <span>页</span>
+                            <button class="page-jump-btn">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 新增/编辑分类抽屉弹框 -->
+    <div id="categoryDrawer" class="drawer-backdrop">
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title" id="drawerTitle">编辑分类</h3>
+                <button class="modal-close" onclick="closeDrawer()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="drawer-body">
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label class="form-label" for="categoryName">分类名称 <span class="text-red-500">*</span></label>
+                        <input type="text" id="categoryName" class="form-control" placeholder="请输入分类名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PC图标</label>
+                        <div class="upload-container" id="pcIconUpload">
+                            <div class="upload-preview">
+                                <img id="pcIconPreview" src="" alt="PC图标预览">
+                            </div>
+                            <div class="text-sm text-gray-500">点击上传PC端图标<br>(建议尺寸: 48x48px)</div>
+                            <input type="file" id="pcIconInput" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">小程序图标</label>
+                        <div class="upload-container" id="miniIconUpload">
+                            <div class="upload-preview">
+                                <img id="miniIconPreview" src="" alt="小程序图标预览">
+                            </div>
+                            <div class="text-sm text-gray-500">点击上传小程序图标<br>(建议尺寸: 48x48px)</div>
+                            <input type="file" id="miniIconInput" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="categoryColor">分类颜色</label>
+                        <div class="color-input">
+                            <div id="colorPreview" class="color-preview"></div>
+                            <input type="text" id="categoryColor" class="form-control" placeholder="#RRGGBB" value="#EF4444">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sortOrder">排序 <span class="text-red-500">*</span></label>
+                        <input type="number" id="sortOrder" class="form-control" min="5" max="10" value="5" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="categoryStatus">状态</label>
+                        <select id="categoryStatus" class="form-control">
+                            <option value="1">启用</option>
+                            <option value="0">禁用</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="drawer-footer">
+                <button class="cancel-btn" onclick="closeDrawer()">取消</button>
+                <button class="submit-btn" id="saveCategory">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 删除确认模态框 -->
+    <div id="deleteModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">删除确认</h3>
+                <button class="modal-close" onclick="closeDeleteConfirm()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除此分类吗？删除后无法恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeDeleteConfirm()">取消</button>
+                <button class="submit-btn bg-red-600 hover:bg-red-700" id="confirmDelete">删除</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 当前正在编辑的分类ID
+        let currentEditId = null;
+        let currentDeleteId = null;
+        
+        // 模拟分类数据
+        const categories = [
+            {
+                id: 1,
+                name: "巡查走访",
+                pcIcon: "https://img.icons8.com/fluency/48/000000/error-cloud.png",
+                miniIcon: "https://img.icons8.com/ios-filled/50/1e40af/error-cloud.png",
+                color: "#EF4444",
+                sort: 10,
+                status: 1,
+                updateTime: "2023-06-15 14:30"
+            },
+            {
+                id: 2,
+                name: "工作总结",
+                pcIcon: "https://img.icons8.com/color/48/000000/document.png",
+                miniIcon: "https://img.icons8.com/ios-filled/50/1e40af/document.png",
+                color: "#3B82F6",
+                sort: 9,
+                status: 1,
+                updateTime: "2023-06-14 10:15"
+            },
+            {
+                id: 3,
+                name: "活动组织",
+                pcIcon: "https://img.icons8.com/color/48/000000/calendar.png",
+                miniIcon: "https://img.icons8.com/ios-filled/50/1e40af/calendar.png",
+                color: "#10B981",
+                sort: 8,
+                status: 1,
+                updateTime: "2023-06-13 16:45"
+            },
+            {
+                id: 4,
+                name: "宣传教育",
+                pcIcon: "https://img.icons8.com/color/48/000000/megaphone.png",
+                miniIcon: "https://img.icons8.com/ios-filled/50/1e40af/megaphone.png",
+                color: "#F59E0B",
+                sort: 7,
+                status: 1,
+                updateTime: "2023-06-12 09:20"
+            },
+            {
+                id: 5,
+                name: "巡查走访",
+                pcIcon: "https://img.icons8.com/color/48/000000/walking.png",
+                miniIcon: "https://img.icons8.com/ios-filled/50/1e40af/walking.png",
+                color: "#8B5CF6",
+                sort: 6,
+                status: 1,
+                updateTime: "2023-06-11 11:35"
+            }
+        ];
+        
+        // 打开编辑抽屉
+        function openEditDrawer(id) {
+            currentEditId = id;
+            const drawerTitle = document.getElementById('drawerTitle');
+            
+            if (id) {
+                // 编辑现有分类
+                drawerTitle.textContent = '编辑分类';
+                const category = categories.find(c => c.id === id);
+                
+                if (category) {
+                    document.getElementById('categoryName').value = category.name;
+                    document.getElementById('pcIconPreview').src = category.pcIcon;
+                    document.getElementById('miniIconPreview').src = category.miniIcon;
+                    document.getElementById('categoryColor').value = category.color;
+                    document.getElementById('sortOrder').value = category.sort;
+                    document.getElementById('categoryStatus').value = category.status;
+                    
+                    // 更新颜色预览
+                    updateColorPreview();
+                }
+            } else {
+                // 新增分类
+                drawerTitle.textContent = '新增分类';
+                document.getElementById('categoryForm').reset();
+                document.getElementById('pcIconPreview').src = '';
+                document.getElementById('miniIconPreview').src = '';
+                document.getElementById('categoryColor').value = '#EF4444';
+                document.getElementById('sortOrder').value = 5;
+                
+                // 更新颜色预览
+                updateColorPreview();
+            }
+            
+            document.getElementById('categoryDrawer').classList.add('active');
+        }
+        
+        // 关闭编辑抽屉
+        function closeDrawer() {
+            document.getElementById('categoryDrawer').classList.remove('active');
+            currentEditId = null;
+        }
+        
+        // 打开删除确认模态框
+        function openDeleteConfirm(id) {
+            currentDeleteId = id;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+        
+        // 关闭删除确认模态框
+        function closeDeleteConfirm() {
+            document.getElementById('deleteModal').classList.remove('active');
+            currentDeleteId = null;
+        }
+        
+        // 更新颜色预览
+        function updateColorPreview() {
+            const colorInput = document.getElementById('categoryColor');
+            const colorPreview = document.getElementById('colorPreview');
+            
+            // 更新颜色预览
+            colorPreview.style.backgroundColor = colorInput.value;
+        }
+        
+        // 处理图片上传预览
+        function handleImageUpload(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // 保存分类
+        function saveCategory() {
+            const name = document.getElementById('categoryName').value;
+            const color = document.getElementById('categoryColor').value;
+            const sort = document.getElementById('sortOrder').value;
+            const status = document.getElementById('categoryStatus').value;
+            
+            // 验证必填项
+            if (!name) {
+                alert('请输入分类名称');
+                return;
+            }
+            
+            if (!sort) {
+                alert('请输入排序值');
+                return;
+            }
+            
+            if (!document.getElementById('pcIconPreview').src) {
+                alert('请上传PC图标');
+                return;
+            }
+            
+            if (!document.getElementById('miniIconPreview').src) {
+                alert('请上传小程序图标');
+                return;
+            }
+            
+            // 验证颜色格式
+            if (!/^#[0-9A-F]{6}$/i.test(color)) {
+                alert('请输入正确的颜色格式，如 #FF0000');
+                return;
+            }
+            
+            // 在实际项目中，这里应该是AJAX请求保存数据
+            console.log('保存分类', {
+                id: currentEditId,
+                name,
+                pcIcon: document.getElementById('pcIconPreview').src,
+                miniIcon: document.getElementById('miniIconPreview').src,
+                color,
+                sort,
+                status
+            });
+            
+            // 模拟保存成功
+            alert(currentEditId ? '分类更新成功' : '分类添加成功');
+            closeDrawer();
+            
+            // 实际项目中应刷新列表
+        }
+        
+        // 确认删除
+        function confirmDelete() {
+            if (!currentDeleteId) return;
+            
+            // 在实际项目中，这里应该是AJAX请求删除数据
+            console.log('删除分类', currentDeleteId);
+            
+            // 模拟删除成功
+            alert('分类删除成功');
+            closeDeleteConfirm();
+            
+            // 实际项目中应刷新列表
+        }
+        
+        // 处理排序
+        function handleSort() {
+            const sortType = document.getElementById('sortTypeFilter').value;
+            const tableBody = document.querySelector('.admin-table tbody');
+            const rows = Array.from(tableBody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                if (sortType === 'updateTime') {
+                    // 按更新时间排序（降序）
+                    const aTime = new Date(a.cells[6].textContent.trim());
+                    const bTime = new Date(b.cells[6].textContent.trim());
+                    return bTime - aTime; // 更新时间近的在上
+                } else {
+                    // 按排序值排序（降序）
+                    const aSort = parseInt(a.cells[5].textContent.trim());
+                    const bSort = parseInt(b.cells[5].textContent.trim());
+                    return bSort - aSort; // 排序数字大的在上
+                }
+            });
+            
+            // 删除现有行
+            rows.forEach(row => row.remove());
+            
+            // 添加排序后的行
+            rows.forEach((row, index) => {
+                row.cells[0].textContent = index + 1; // 更新序号
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定新增按钮事件
+            document.getElementById('addCategoryBtn').addEventListener('click', function() {
+                openEditDrawer(null);
+            });
+            
+            // 绑定保存按钮事件
+            document.getElementById('saveCategory').addEventListener('click', saveCategory);
+            
+            // 绑定确认删除按钮事件
+            document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
+            
+            // 绑定排序方式变更事件
+            document.getElementById('sortTypeFilter').addEventListener('change', handleSort);
+            
+            // 绑定颜色输入变更事件
+            document.getElementById('categoryColor').addEventListener('input', updateColorPreview);
+            
+            // 绑定PC图标上传事件
+            document.getElementById('pcIconUpload').addEventListener('click', function() {
+                document.getElementById('pcIconInput').click();
+            });
+            
+            document.getElementById('pcIconInput').addEventListener('change', function() {
+                handleImageUpload('pcIconInput', 'pcIconPreview');
+            });
+            
+            // 绑定小程序图标上传事件
+            document.getElementById('miniIconUpload').addEventListener('click', function() {
+                document.getElementById('miniIconInput').click();
+            });
+            
+            document.getElementById('miniIconInput').addEventListener('change', function() {
+                handleImageUpload('miniIconInput', 'miniIconPreview');
+            });
+        });
+    </script>
+</body>
+</html> 

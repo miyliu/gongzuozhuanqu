@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巡查走访记录 - 移动端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 移动端全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            width: 375px;
+            overflow-x: hidden;
+        }
+        
+        /* 移动端导航栏 */
+        .mobile-navbar {
+            height: 44px;
+            background-color: #2479CC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-navbar-back {
+            position: absolute;
+            left: 16px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .mobile-navbar-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+        
+        /* 搜索筛选区域 */
+        .search-section {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+            cursor: pointer;
+            min-height: 20px;
+        }
+        
+        .search-title {
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-toggle {
+            color: #6b7280;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.3s ease;
+        }
+        
+        .search-toggle.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #374151;
+            font-size: 12px;
+            padding: 8px 12px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 12px;
+        }
+        
+        .filter-toggle input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #2479CC;
+        }
+        
+        .filter-toggle label {
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .search-form {
+            background: transparent;
+            border-radius: 8px;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .search-form.expanded {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 16px;
+            padding: 16px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
+            font-size: 12px;
+            color: #374151;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        .form-input, .form-select {
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            background-color: white;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #2479CC;
+            box-shadow: 0 0 0 2px rgba(36, 121, 204, 0.1);
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(135deg, #2479CC 0%, #1a5b99 100%);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        /* 记录列表样式 */
+        .records-container {
+            padding: 0 12px 12px;
+        }
+        
+        .records-header {
+            background: white;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .record-item {
+            background: white;
+            border-bottom: 1px solid #f3f4f6;
+            padding: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .record-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .record-item:active {
+            background-color: #f9fafb;
+        }
+        
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .record-location {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            flex: 1;
+            margin-right: 8px;
+        }
+        
+        .record-time {
+            font-size: 11px;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+        
+        .record-target {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+        
+        .record-description {
+            font-size: 12px;
+            color: #374151;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .record-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .record-status {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+        
+        .record-creator {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        
+        .record-topic {
+            font-size: 10px;
+            color: #2479CC;
+            background-color: #e6f7ff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-bottom: 4px;
+            display: inline-block;
+            font-weight: 500;
+        }
+        
+        /* 详情弹框样式 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .modal-backdrop.hidden {
+            display: none;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .modal-close {
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .detail-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .detail-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 13px;
+            color: #374151;
+            background: #f9fafb;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #f3f4f6;
+        }
+        
+        .detail-textarea {
+            min-height: 60px;
+            line-height: 1.4;
+        }
+        
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .tag-item {
+            background: #e0f2fe;
+            color: #0277bd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .attachment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 4px;
+            border: 1px solid #f3f4f6;
+        }
+        
+        .attachment-icon {
+            color: #2479CC;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        
+        .attachment-info {
+            flex: 1;
+        }
+        
+        .attachment-name {
+            font-size: 12px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .attachment-size {
+            font-size: 10px;
+            color: #9ca3af;
+        }
+        
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+        
+        .btn-close {
+            width: 100%;
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 移动端导航栏 -->
+    <div class="mobile-navbar">
+        <div class="mobile-navbar-back">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="mobile-navbar-title" id="navbarTitle">巡查走访记录</div>
+    </div>
+    
+    <!-- 搜索筛选区域 -->
+    <div class="search-section">
+        <div class="search-header">
+            <div class="search-title">
+                <i class="fas fa-search mr-2"></i>
+                记录查询
+            </div>
+            <div class="search-toggle">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+        
+        <div class="search-form" id="searchForm">
+            <div class="form-row full">
+                <div class="filter-toggle">
+                    <input type="checkbox" id="myRecordsOnly">
+                    <label for="myRecordsOnly">只看我的记录</label>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">开始日期</label>
+                    <input type="date" class="form-input" id="startDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">结束日期</label>
+                    <input type="date" class="form-input" id="endDate">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">相关居民</label>
+                    <input type="text" class="form-input" id="targetName" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">创建人</label>
+                    <select class="form-select" id="creatorName">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">工作专题</label>
+                    <select class="form-select" id="topicFilter">
+                        <option value="">全部</option>
+                        <option value="巡查走访专题">巡查走访专题</option>
+                        <option value="环境卫生整治">环境卫生整治</option>
+                        <option value="安全隐患排查">安全隐患排查</option>
+                        <option value="便民服务专项">便民服务专项</option>
+                        <option value="物业管理专题">物业管理专题</option>
+                        <option value="社区文化建设">社区文化建设</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">需要处置</label>
+                    <select class="form-select" id="needDisposalFilter" onchange="toggleDisposalCompletedFilter()">
+                        <option value="">全部</option>
+                        <option value="yes">是</option>
+                        <option value="no">否</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">完成处置</label>
+                    <select class="form-select" id="disposalCompletedFilter">
+                        <option value="">全部</option>
+                        <option value="yes">是</option>
+                        <option value="no">否</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <!-- 空位保持布局平衡 -->
+                </div>
+            </div>
+            
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">巡查地点</label>
+                    <input type="text" class="form-input" id="locationKeyword" placeholder="请输入地点关键词">
+                </div>
+            </div>
+            
+            <div class="search-buttons">
+                <button class="btn-primary" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                    查询
+                </button>
+                <button class="btn-secondary" id="resetBtn">
+                    重置
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 记录列表 -->
+    <div class="records-container">
+        <div class="records-header">
+            <span>共找到 6 条记录</span>
+            <span>惠新南里社区</span>
+        </div>
+        
+        <div class="record-item" onclick="viewRecord(1)">
+            <div class="record-topic">巡查走访专题</div>
+            <div class="record-header">
+                <div class="record-location">惠新南里5号院3号楼1单元101</div>
+                <div class="record-time">05-20 18:14</div>
+            </div>
+            <div class="record-target">相关居民：张燕</div>
+            <div class="record-description">居民反映楼道灯不亮，影响夜间出行安全</div>
+            <div class="record-footer">
+                <div class="record-status">
+                    <span class="status-badge status-completed">需处置</span>
+                    <span class="status-badge status-completed">已完成</span>
+                </div>
+                <div class="record-creator">高明</div>
+            </div>
+        </div>
+        
+        <div class="record-item" onclick="viewRecord(2)">
+            <div class="record-topic">安全隐患排查</div>
+            <div class="record-header">
+                <div class="record-location">惠新南里5号院3号楼电梯</div>
+                <div class="record-time">05-14 15:14</div>
+            </div>
+            <div class="record-target">相关居民：唐继存</div>
+            <div class="record-description">电梯运行异常，有异响，需要维修</div>
+            <div class="record-footer">
+                <div class="record-status">
+                    <span class="status-badge status-completed">需处置</span>
+                    <span class="status-badge status-pending">未完成</span>
+                </div>
+                <div class="record-creator">李明</div>
+            </div>
+        </div>
+        
+        <div class="record-item" onclick="viewRecord(3)">
+            <div class="record-topic">环境卫生整治</div>
+            <div class="record-header">
+                <div class="record-location">惠新南里5号院垃圾收集点</div>
+                <div class="record-time">05-14 15:14</div>
+            </div>
+            <div class="record-target">相关居民：-</div>
+            <div class="record-description">垃圾桶满溢，周围环境卫生较差</div>
+            <div class="record-footer">
+                <div class="record-status">
+                    <span class="status-badge status-completed">需处置</span>
+                    <span class="status-badge status-pending">未完成</span>
+                </div>
+                <div class="record-creator">王芳</div>
+            </div>
+        </div>
+        
+        <div class="record-item" onclick="viewRecord(4)">
+            <div class="record-topic">便民服务专项</div>
+            <div class="record-header">
+                <div class="record-location">惠新南里5号院大门口</div>
+                <div class="record-time">05-14 15:12</div>
+            </div>
+            <div class="record-target">相关居民：刘大爷</div>
+            <div class="record-description">门禁系统故障，居民进出不便</div>
+            <div class="record-footer">
+                <div class="record-status">
+                    <span class="status-badge status-completed">需处置</span>
+                    <span class="status-badge status-completed">已完成</span>
+                </div>
+                <div class="record-creator">高明</div>
+            </div>
+        </div>
+        
+        <div class="record-item" onclick="viewRecord(5)">
+            <div class="record-topic">安全隐患排查</div>
+            <div class="record-header">
+                <div class="record-location">惠新南里5号院健身区</div>
+                <div class="record-time">05-14 15:11</div>
+            </div>
+            <div class="record-target">相关居民：-</div>
+            <div class="record-description">健身器材损坏，存在安全隐患</div>
+            <div class="record-footer">
+                <div class="record-status">
+                    <span class="status-badge status-pending">无需处置</span>
+                    <span class="status-badge status-disabled">-</span>
+                </div>
+                <div class="record-creator">张伟</div>
+            </div>
+        </div>
+        
+        <div class="record-item" onclick="viewRecord(6)">
+            <div class="record-topic">物业管理专题</div>
+            <div class="record-header">
+                <div class="record-location">惠新南里二层238号楼4单元202号</div>
+                <div class="record-time">03-04 14:06</div>
+            </div>
+            <div class="record-target">相关居民：刘青朱</div>
+            <div class="record-description">居民家中水管漏水，影响楼下邻居</div>
+            <div class="record-footer">
+                <div class="record-status">
+                    <span class="status-badge status-completed">需处置</span>
+                    <span class="status-badge status-completed">已完成</span>
+                </div>
+                <div class="record-creator">李明</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情查看弹框 -->
+    <div id="recordModal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">巡查走访详情</div>
+                <div class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- 基本信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-info-circle" style="color: #2479CC;"></i>
+                        基本信息
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">工作专题</div>
+                            <div class="detail-value" id="viewTopic">巡查走访专题</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">创建人</div>
+                            <div class="detail-value" id="viewCreator">高明</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">巡查地点</div>
+                            <div class="detail-value" id="viewLocation">惠新南里5号院3号楼1单元101</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">走访时间</div>
+                            <div class="detail-value" id="viewTime">2025-05-20 18:14:30</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 走访描述 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-edit" style="color: #10b981;"></i>
+                        走访描述
+                    </div>
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">走访情况</div>
+                            <div class="detail-value detail-textarea" id="viewDescription">
+                                居民反映楼道灯不亮，影响夜间出行安全。经现场查看，确实存在照明问题，需要及时维修。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 相关居民信息 -->
+                <div class="detail-section" id="residentInfoSection">
+                    <div class="detail-section-title">
+                        <i class="fas fa-users" style="color: #8b5cf6;"></i>
+                        相关居民信息
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">相关居民</div>
+                            <div class="detail-value" id="viewResident">张燕 (1号楼101)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">居民标签</div>
+                            <div class="detail-value" id="viewResidentTags">
+                                <div class="tag-list">
+                                    <span class="tag-item">高龄老人</span>
+                                    <span class="tag-item">电动车主</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">居民备注</div>
+                            <div class="detail-value detail-textarea" id="viewResidentRemarks">
+                                热心邻里，经常反映小区问题。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 附件信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-paperclip" style="color: #8b5cf6;"></i>
+                        附件信息
+                    </div>
+                    <div class="attachment-list" id="viewAttachmentList">
+                        <div class="attachment-item">
+                            <i class="fas fa-image attachment-icon"></i>
+                            <div class="attachment-info">
+                                <div class="attachment-name">楼道照明问题.jpg</div>
+                                <div class="attachment-size">245KB</div>
+                            </div>
+                        </div>
+                        <div class="attachment-item">
+                            <i class="fas fa-file-audio attachment-icon"></i>
+                            <div class="attachment-info">
+                                <div class="attachment-name">现场录音.mp3</div>
+                                <div class="attachment-size">1.2MB</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 后续处置信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-tasks" style="color: #f59e0b;"></i>
+                        后续处置信息
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">是否需要后续处置</div>
+                            <div class="detail-value" id="viewNeedFollowUp">是</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">是否完成处置</div>
+                            <div class="detail-value" id="viewDisposalCompleted">是</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">处置情况</div>
+                            <div class="detail-value detail-textarea" id="viewDisposalSituation">
+                                已联系物业维修人员，预计明天上午进行维修。
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">完成情况</div>
+                            <div class="detail-value detail-textarea" id="viewCompletionStatus">
+                                维修已完成，楼道照明恢复正常，居民表示满意。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="modalFooterBtns">
+                <button class="btn-close" id="closeModalBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数中的专题名称
+        const urlParams = new URLSearchParams(window.location.search);
+        const topicName = urlParams.get('topicName') || urlParams.get('name');
+        
+        if (topicName) {
+            const decodedTopicName = decodeURIComponent(topicName);
+            document.getElementById('navbarTitle').textContent = decodedTopicName;
+            document.title = decodedTopicName + ' - 移动端';
+            
+            // 如果是从特定专题进入，设置专题筛选的默认值并执行筛选
+            const topicFilter = document.getElementById('topicFilter');
+            if (topicFilter) {
+                topicFilter.value = decodedTopicName;
+                // 延迟执行筛选，确保页面加载完成
+                setTimeout(() => {
+                    performSearch();
+                }, 100);
+            }
+        }
+
+        // 处置状态字段联动逻辑
+        function toggleDisposalCompletedFilter() {
+            const needDisposalFilter = document.getElementById('needDisposalFilter');
+            const disposalCompletedFilter = document.getElementById('disposalCompletedFilter');
+            
+            if (needDisposalFilter.value === 'no') {
+                // 当"需要处置"选择"否"时，锁定"完成处置"为不可选择
+                disposalCompletedFilter.disabled = true;
+                disposalCompletedFilter.value = ''; // 重置为"全部"
+                disposalCompletedFilter.style.backgroundColor = '#f3f4f6';
+                disposalCompletedFilter.style.color = '#9ca3af';
+            } else {
+                // 当"需要处置"选择"全部"或"是"时，启用"完成处置"
+                disposalCompletedFilter.disabled = false;
+                disposalCompletedFilter.style.backgroundColor = '';
+                disposalCompletedFilter.style.color = '';
+            }
+        }
+
+        // 页面交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 搜索表单展开/收起功能
+            const searchHeader = document.querySelector('.search-header');
+            const searchForm = document.getElementById('searchForm');
+            const searchToggle = document.querySelector('.search-toggle');
+            
+            searchHeader.addEventListener('click', function() {
+                const isExpanded = searchForm.classList.contains('expanded');
+                
+                if (isExpanded) {
+                    // 收起
+                    searchForm.classList.remove('expanded');
+                    searchToggle.classList.remove('expanded');
+                } else {
+                    // 展开
+                    searchForm.classList.add('expanded');
+                    searchToggle.classList.add('expanded');
+                }
+            });
+            
+            // 重置按钮
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                document.querySelectorAll('.form-input, .form-select').forEach(input => {
+                    input.value = '';
+                });
+                document.getElementById('myRecordsOnly').checked = false;
+                
+                // 重置处置状态字段的联动状态
+                const disposalCompletedFilter = document.getElementById('disposalCompletedFilter');
+                disposalCompletedFilter.disabled = false;
+                disposalCompletedFilter.style.backgroundColor = '';
+                disposalCompletedFilter.style.color = '';
+                
+                // 重置后显示所有记录
+                const recordItems = document.querySelectorAll('.record-item');
+                recordItems.forEach(item => {
+                    item.style.display = '';
+                });
+                
+                // 更新记录数量显示
+                const recordsHeader = document.querySelector('.records-header span');
+                if (recordsHeader) {
+                    recordsHeader.textContent = `共找到 ${recordItems.length} 条记录`;
+                }
+            });
+
+            // 查询按钮
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                console.log('执行查询');
+                performSearch();
+            });
+
+            // 只看我创建的切换
+            document.getElementById('myRecordsOnly').addEventListener('change', function() {
+                console.log('切换筛选条件:', this.checked ? '只看我创建的' : '查看全部');
+                // 这里可以添加筛选逻辑
+            });
+
+            // 关闭弹框事件
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            
+            // 点击弹框外部关闭
+            document.getElementById('recordModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        });
+
+        // 查看记录
+        function viewRecord(id) {
+            console.log('查看记录:', id);
+            // 根据ID加载不同的记录数据
+            loadViewData(id);
+            document.getElementById('recordModal').classList.remove('hidden');
+        }
+
+        // 关闭弹框
+        function closeModal() {
+            document.getElementById('recordModal').classList.add('hidden');
+        }
+
+        // 加载查看数据（模拟）
+        function loadViewData(id) {
+            // 模拟不同记录的数据
+            const mockData = {
+                1: {
+                    topic: '巡查走访专题',
+                    location: '惠新南里5号院3号楼1单元101',
+                    target: '张燕',
+                    time: '2025-05-20 18:14:30',
+                    creator: '高明',
+                    description: '居民反映楼道灯不亮，影响夜间出行安全。经现场查看，确实存在照明问题，需要及时维修。',
+                    resident: '张燕 (1号楼101)',
+                    residentTags: ['高龄老人', '电动车主'],
+                    residentRemarks: '热心邻里，经常反映小区问题。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系物业维修人员，预计明天上午进行维修。',
+                    completionStatus: '维修已完成，楼道照明恢复正常，居民表示满意。',
+                    attachments: [
+                        { name: '楼道照明问题.jpg', type: 'image', size: '245KB' },
+                        { name: '现场录音.mp3', type: 'audio', size: '1.2MB' }
+                    ]
+                },
+                2: {
+                    topic: '安全隐患排查',
+                    location: '惠新南里5号院3号楼电梯',
+                    target: '唐继存',
+                    time: '2025-05-14 15:14:34',
+                    creator: '李明',
+                    description: '电梯运行异常，有异响，需要维修。',
+                    resident: '唐继存 (3号楼201)',
+                    residentTags: ['高龄老人'],
+                    residentRemarks: '经常使用电梯，对电梯状况比较关注。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已联系电梯维保公司，等待技术人员上门检查。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '电梯异响录音.mp3', type: 'audio', size: '800KB' }
+                    ]
+                },
+                3: {
+                    topic: '环境卫生整治',
+                    location: '惠新南里5号院垃圾收集点',
+                    target: '-',
+                    time: '2025-05-14 15:14:20',
+                    creator: '王芳',
+                    description: '垃圾桶满溢，周围环境卫生较差。',
+                    resident: '-',
+                    residentTags: [],
+                    residentRemarks: '无相关居民。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已通知保洁公司加强清理频次。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '垃圾收集点现状.jpg', type: 'image', size: '1.5MB' }
+                    ]
+                },
+                4: {
+                    topic: '便民服务专项',
+                    location: '惠新南里5号院大门口',
+                    target: '刘大爷',
+                    time: '2025-05-14 15:12:30',
+                    creator: '高明',
+                    description: '门禁系统故障，居民进出不便。',
+                    resident: '刘大爷 (门卫)',
+                    residentTags: ['门卫'],
+                    residentRemarks: '负责小区门禁管理，反映及时。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系门禁系统维修公司。',
+                    completionStatus: '门禁系统已修复，运行正常。',
+                    attachments: [
+                        { name: '门禁故障照片.jpg', type: 'image', size: '890KB' }
+                    ]
+                },
+                5: {
+                    topic: '安全隐患排查',
+                    location: '惠新南里5号院健身区',
+                    target: '-',
+                    time: '2025-05-14 15:11:46',
+                    creator: '张伟',
+                    description: '健身器材损坏，存在安全隐患。',
+                    resident: '-',
+                    residentTags: [],
+                    residentRemarks: '无相关居民。',
+                    needFollowUp: '否',
+                    disposalCompleted: '-',
+                    disposalSituation: '已设置警示标识，暂时封闭该区域。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '健身器材损坏.jpg', type: 'image', size: '1.1MB' }
+                    ]
+                },
+                6: {
+                    topic: '物业管理专题',
+                    location: '惠新南里二层238号楼4单元202号',
+                    target: '刘青朱',
+                    time: '2025-03-04 14:06:56',
+                    creator: '李明',
+                    description: '居民家中水管漏水，影响楼下邻居。',
+                    resident: '刘青朱 (4单元202)',
+                    residentTags: ['中年居民'],
+                    residentRemarks: '配合度较高，积极解决问题。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系专业维修人员上门维修。',
+                    completionStatus: '水管漏水问题已解决，楼下邻居满意。',
+                    attachments: [
+                        { name: '水管漏水现场.jpg', type: 'image', size: '1.3MB' },
+                        { name: '维修完成照片.jpg', type: 'image', size: '980KB' }
+                    ]
+                }
+            };
+
+            const data = mockData[id] || mockData[1]; // 默认使用第一条数据
+
+            // 填充数据到查看弹框
+            document.getElementById('viewTopic').textContent = data.topic;
+            document.getElementById('viewLocation').textContent = data.location;
+            document.getElementById('viewTime').textContent = data.time;
+            document.getElementById('viewCreator').textContent = data.creator;
+            document.getElementById('viewDescription').textContent = data.description;
+            document.getElementById('viewResident').textContent = data.resident;
+            document.getElementById('viewResidentRemarks').textContent = data.residentRemarks;
+            document.getElementById('viewNeedFollowUp').textContent = data.needFollowUp;
+
+            // 控制后续处置信息显隐
+            const disposalCompletedItem = document.getElementById('viewDisposalCompleted').closest('.detail-item');
+            const disposalSituationRow = document.getElementById('viewDisposalSituation').closest('.detail-row.full');
+            const completionStatusRow = document.getElementById('viewCompletionStatus').closest('.detail-row.full');
+
+            if (data.needFollowUp === '否') {
+                if(disposalCompletedItem) disposalCompletedItem.style.display = 'none';
+                if(disposalSituationRow) disposalSituationRow.style.display = 'none';
+                if(completionStatusRow) completionStatusRow.style.display = 'none';
+            } else {
+                if(disposalCompletedItem) disposalCompletedItem.style.display = '';
+                document.getElementById('viewDisposalCompleted').textContent = data.disposalCompleted;
+                if(disposalSituationRow) disposalSituationRow.style.display = '';
+                document.getElementById('viewDisposalSituation').textContent = data.disposalSituation;
+                // 根据是否完成处置，显隐完成情况
+                if (data.disposalCompleted === '是') {
+                    if(completionStatusRow) completionStatusRow.style.display = '';
+                    document.getElementById('viewCompletionStatus').textContent = data.completionStatus;
+                } else {
+                    if(completionStatusRow) completionStatusRow.style.display = 'none';
+                }
+            }
+
+            // 填充居民标签
+            const tagsContainer = document.getElementById('viewResidentTags');
+            const tagList = tagsContainer.querySelector('.tag-list');
+            tagList.innerHTML = '';
+            data.residentTags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'tag-item';
+                tagElement.textContent = tag;
+                tagList.appendChild(tagElement);
+            });
+
+            // 填充附件列表
+            const attachmentContainer = document.getElementById('viewAttachmentList');
+            attachmentContainer.innerHTML = '';
+            data.attachments.forEach(attachment => {
+                const attachmentElement = document.createElement('div');
+                attachmentElement.className = 'attachment-item';
+                attachmentElement.innerHTML = `
+                    <i class="fas fa-${attachment.type === 'image' ? 'image' : 'file-audio'} attachment-icon"></i>
+                    <div class="attachment-info">
+                        <div class="attachment-name">${attachment.name}</div>
+                        <div class="attachment-size">${attachment.size}</div>
+                    </div>
+                `;
+                attachmentContainer.appendChild(attachmentElement);
+            });
+
+            // 判断data.resident为'-'或空时，隐藏相关居民信息模块
+            const residentInfoSection = document.getElementById('residentInfoSection');
+            if (!data.resident || data.resident === '-') {
+                residentInfoSection.style.display = 'none';
+            } else {
+                residentInfoSection.style.display = '';
+            }
+
+            // 显示底部按钮
+            showFooterBtns(data.creator, id);
+        }
+
+        function showFooterBtns(creator, id) {
+            const footer = document.getElementById('modalFooterBtns');
+            footer.innerHTML = '';
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-primary';
+            editBtn.style.minWidth = '88px';
+            editBtn.textContent = '修改';
+            editBtn.onclick = function() {
+                window.location.href = `topic_detail_template_wentishangbao_houxu.html?edit=${id}`;
+            };
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn-secondary';
+            delBtn.style.minWidth = '88px';
+            delBtn.textContent = '删除';
+            delBtn.onclick = function() {
+                if (confirm('确定要删除该巡查走访记录吗？此操作不可恢复。')) {
+                    if (confirm('请再次确认，是否真的要删除？')) {
+                        closeModal();
+                        const row = document.querySelector(`[data-record-id='${id}']`);
+                        if (row) row.remove();
+                        console.log('已删除记录ID:', id);
+                    }
+                }
+            };
+            footer.appendChild(editBtn);
+            footer.appendChild(delBtn);
+        }
+
+        // 执行搜索筛选功能
+        function performSearch() {
+            const topicFilter = document.getElementById('topicFilter').value;
+            const myRecordsOnly = document.getElementById('myRecordsOnly').checked;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const targetName = document.getElementById('targetName').value;
+            const creatorName = document.getElementById('creatorName').value;
+            const needDisposal = document.getElementById('needDisposalFilter').value;
+            const disposalCompleted = document.getElementById('disposalCompletedFilter').value;
+            const locationKeyword = document.getElementById('locationKeyword').value;
+            
+            console.log('筛选条件:', {
+                topicFilter,
+                myRecordsOnly,
+                startDate,
+                endDate,
+                targetName,
+                creatorName,
+                needDisposal,
+                disposalCompleted,
+                locationKeyword
+            });
+            
+            // 这里可以添加实际的筛选逻辑
+            // 比如筛选记录项，显示/隐藏符合条件的记录
+            filterRecords({
+                topicFilter,
+                myRecordsOnly,
+                startDate,
+                endDate,
+                targetName,
+                creatorName,
+                needDisposal,
+                disposalCompleted,
+                locationKeyword
+            });
+        }
+        
+        // 筛选记录显示
+        function filterRecords(filters) {
+            const recordItems = document.querySelectorAll('.record-item');
+            let visibleCount = 0;
+            
+            recordItems.forEach(item => {
+                let shouldShow = true;
+                
+                // 工作专题筛选
+                if (filters.topicFilter) {
+                    const topicElement = item.querySelector('.record-topic');
+                    if (!topicElement || topicElement.textContent.trim() !== filters.topicFilter) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // 地点关键词筛选
+                if (filters.locationKeyword) {
+                    const locationElement = item.querySelector('.record-location');
+                    if (!locationElement || !locationElement.textContent.includes(filters.locationKeyword)) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // 相关居民筛选
+                if (filters.targetName) {
+                    const targetElement = item.querySelector('.record-target');
+                    if (!targetElement || !targetElement.textContent.includes(filters.targetName)) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // 显示/隐藏记录项
+                if (shouldShow) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // 更新记录数量显示
+            const recordsHeader = document.querySelector('.records-header span');
+            if (recordsHeader) {
+                recordsHeader.textContent = `共找到 ${visibleCount} 条记录`;
+            }
+        }
+
+        // 初始化页面时设置正确的记录数量
+        function initializeRecordCount() {
+            const recordItems = document.querySelectorAll('.record-item');
+            const recordsHeader = document.querySelector('.records-header span');
+            if (recordsHeader) {
+                recordsHeader.textContent = `共找到 ${recordItems.length} 条记录`;
+            }
+        }
+        
+        // 页面加载完成后初始化
+        setTimeout(() => {
+            initializeRecordCount();
+        }, 50);
+
+        console.log('巡查走访记录移动端页面初始化完成');
+    </script>
+</body>
+</html> 

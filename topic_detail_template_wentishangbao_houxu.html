@@ -1,0 +1,3030 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巡查走访样式 - 社小智</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            overflow-y: auto;
+        }
+
+        :root {
+            --primary-color: #2479CC;
+            --primary-light: #e6f2ff;
+            --primary-dark: #1a5b99;
+            --accent-color: #ff6a00;
+            --text-color: #333;
+            --light-gray: #f6f6f6;
+        }
+
+        .top-nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            padding: 0 16px;
+            color: #333;
+            position: relative;
+            height: 64px;
+            line-height: 64px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 16px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .topic-tabs {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid white;
+            font-weight: 500;
+        }
+        
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 图片上传区域样式 */
+        .image-upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background-color: #f7fafc;
+            cursor: pointer;
+        }
+        
+        .image-upload-area:hover {
+            border-color: #4299e1;
+            background-color: #ebf8ff;
+        }
+        
+        .image-upload-area.dragover {
+            border-color: #3182ce;
+            background-color: #bee3f8;
+        }
+        
+        .uploaded-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* 录音按钮样式 */
+        .recording-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .recording-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .recording-btn.recording {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        
+        .upload-audio-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-audio-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #2980b9, #1f5582);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* 识别结果样式 */
+        .recognition-result {
+            background-color: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        
+        .recognition-result.processing {
+            background-color: #fff7e6;
+            border-color: #ffd591;
+        }
+
+        /* 音频项样式 */
+        .audio-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 自动润色按钮样式 */
+        .auto-organize-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .auto-organize-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .auto-organize-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 撤回按钮样式 */
+        .auto-organize-btn.bg-orange-500 {
+            background: linear-gradient(45deg, #f97316, #ea580c);
+        }
+        
+        .auto-organize-btn.bg-orange-500:hover {
+            background: linear-gradient(45deg, #ea580c, #c2410c);
+        }
+        
+        /* 重新匹配按钮样式 */
+        .auto-organize-btn.bg-green-500 {
+            background: linear-gradient(45deg, #10b981, #059669);
+        }
+        
+        .auto-organize-btn.bg-green-500:hover {
+            background: linear-gradient(45deg, #059669, #047857);
+        }
+
+        /* 消息提示样式 */
+        .message-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 300px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .message-toast.show {
+            transform: translateX(0);
+        }
+        
+        .message-success { background-color: #10b981; }
+        .message-error { background-color: #ef4444; }
+        .message-warning { background-color: #f59e0b; }
+        .message-info { background-color: #3b82f6; }
+        
+        /* 抽屉弹框样式 */
+        .modal-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="container mx-auto px-4 flex items-center justify-between h-full">
+            <div class="flex items-center">
+                <a href="#" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#2479CC">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                    <div class="ml-2">
+                        <div class="text-xl font-bold text-blue-600">社小智</div>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="hidden md:flex">
+                <a href="#" class="nav-item">首页</a>
+                <a href="#" class="nav-item">工单办理助手</a>
+                <a href="#" class="nav-item">公文模板</a>
+                <a href="#" class="nav-item">找找云文档</a>
+                <a href="#" class="nav-item">工单分析办理PRO</a>
+                <a href="#" class="nav-item">社情民意助手</a>
+                <a href="work_area.html" class="nav-item active">工作专区</a>
+            </nav>
+            
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                    <img src="https://via.placeholder.com/32" alt="用户头像" class="rounded-full">
+                </div>
+                <span class="text-gray-700">用户名</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 专题名称显示区域 -->
+    <div class="bg-blue-600 text-white py-4" style="background-color: var(--primary-color) !important;">
+        <div class="content-wrapper px-4">
+            <div class="flex items-center justify-center">
+                <span class="text-xl font-semibold" id="topicName">巡查走访样式的专题名称</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 专题选项卡 -->
+    <div class="topic-tabs">
+        <div class="content-wrapper px-4">
+            <div class="flex overflow-x-auto">
+                <a href="#" class="tab-item flex items-center active">
+                    <i class="fas fa-home mr-2"></i>
+                    主页
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <main class="content-wrapper px-4 py-6">
+        <!-- 专题指引 -->
+        <div class="bg-blue-50 rounded-lg shadow-sm p-4 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-semibold text-blue-800">专题指引</h2>
+                    <p class="text-sm text-gray-600 mt-1"></p>
+                </div>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center" id="btnWorkflowGuide">
+                    <i class="fas fa-tasks mr-2"></i>
+                    查看工作流程指引
+                </button>
+            </div>
+            
+            <!-- 专题说明文字 -->
+            <div class="mt-4 p-4 bg-white rounded-lg border border-blue-100">
+                <div class="text-gray-700 leading-relaxed">
+                    <p class="mb-3">智能巡查走访系统是提升社区治理效率、优化居民服务体验的重要工具。本专题围绕巡查发现、信息收集、智能识别、居民匹配等核心功能，提供全面系统的巡查走访流程指引，助力构建高效便民的社区服务体系。</p>
+                    <p class="mb-3">高质量的巡查走访应突出信息准确、处置及时和跟踪到位，通过图片识别、语音转文字、智能地址匹配等技术手段，大幅提升信息收集的准确性和处理效率。系统能够自动关联相关居民信息，为精准服务提供有力支撑。</p>
+                    <p>本专题提供巡查走访全流程指引，包括多媒体信息采集、智能内容识别、自动信息匹配、后续处置跟踪等环节，同时配套智能化工具，帮助社区工作者高效开展巡查工作，提升居民满意度和社区治理水平。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 智能巡查走访记录界面 -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-brain text-blue-600 mr-2"></i>
+                    智能巡查走访
+                </h2>
+                <div class="flex space-x-2">
+                    <button type="button" id="saveDraftBtn" class="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">
+                        <i class="fas fa-save mr-1"></i>保存草稿
+                    </button>
+                    <button type="button" id="loadDraftBtn" class="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 hidden">
+                        <i class="fas fa-folder-open mr-1"></i>加载草稿
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 智能输入区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- 图片识别区域 -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-gray-700 flex items-center">
+                        <i class="fas fa-camera text-green-600 mr-2"></i>
+                        图片智能识别
+                    </h3>
+                    
+                    <!-- 图片上传区域 -->
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <input type="file" id="imageInput" accept="image/*" multiple class="hidden">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-600 mb-2">点击或拖拽上传图片</p>
+                            <p class="text-sm text-gray-500">支持JPG、PNG格式，可多张上传</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 上传的图片预览 -->
+                    <div id="uploadedImages" class="grid grid-cols-3 gap-2 hidden">
+                        <!-- 动态生成的图片预览 -->
+                    </div>
+                    
+                    <!-- 图片识别结果 -->
+                    <div id="imageRecognitionResult" class="recognition-result hidden">
+                        <h4 class="font-medium text-gray-800 mb-2">
+                            <i class="fas fa-eye text-blue-600 mr-1"></i>识别结果
+                        </h4>
+                        <div id="recognitionText" class="text-sm text-gray-700"></div>
+                        <div class="mt-2">
+                            <button type="button" id="applyImageRecognition" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+                                <i class="fas fa-check mr-1"></i>应用到表单
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 语音录制区域 -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-gray-700 flex items-center">
+                        <i class="fas fa-microphone text-red-600 mr-2"></i>
+                        语音智能解析
+                    </h3>
+                    
+                    <!-- 录音按钮和上传按钮 -->
+                    <div class="flex justify-center space-x-4">
+                        <!-- 录音按钮 -->
+                        <div class="text-center">
+                            <button type="button" id="recordBtn" class="recording-btn">
+                                <i class="fas fa-microphone text-xl"></i>
+                            </button>
+                            <p class="text-sm text-gray-600 mt-2">点击开始录音</p>
+                            <div id="recordingStatus" class="text-xs text-red-600 mt-1 hidden">
+                                <i class="fas fa-circle animate-pulse mr-1"></i>录音中...
+                            </div>
+                        </div>
+                        
+                        <!-- 上传音频按钮 -->
+                        <div class="text-center">
+                            <input type="file" id="audioFileInput" accept="audio/*" class="hidden">
+                            <button type="button" id="uploadAudioBtn" class="upload-audio-btn">
+                                <i class="fas fa-upload text-xl"></i>
+                            </button>
+                            <p class="text-sm text-gray-600 mt-2">上传音频文件</p>
+                            <p class="text-xs text-gray-500">支持MP3、WAV等格式</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 录音文件列表 -->
+                    <div id="audioList" class="space-y-2">
+                        <!-- 动态生成的录音文件 -->
+                    </div>
+                    
+                    <!-- 语音识别结果 -->
+                    <div id="voiceRecognitionResult" class="recognition-result hidden">
+                        <h4 class="font-medium text-gray-800 mb-2">
+                            <i class="fas fa-volume-up text-blue-600 mr-1"></i>识别结果
+                        </h4>
+                        <div id="voiceRecognitionText" class="text-sm text-gray-700"></div>
+                        <div class="mt-2">
+                            <button type="button" id="applyVoiceRecognition" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+                                <i class="fas fa-check mr-1"></i>应用到表单
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 智能表单区域 -->
+            <form id="intelligentForm" class="space-y-4">
+                <!-- 问题描述 -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <span class="text-red-500">*</span> 走访描述
+                    </label>
+                    <div class="relative">
+                        <textarea id="problemDescription" rows="4" class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2" placeholder="请详细描述巡查发现的情况..." required></textarea>
+                        <div class="absolute top-2 right-2 flex space-x-1">
+                            <button type="button" id="autoOrganizeBtn" class="auto-organize-btn" title="自动整理文字">
+                                <i class="fas fa-magic mr-1"></i>润色
+                            </button>
+                            <button type="button" id="undoOrganizeBtn" class="auto-organize-btn bg-orange-500 hover:bg-orange-600 hidden" title="撤回润色">
+                                <i class="fas fa-undo mr-1"></i>撤回
+                            </button>
+                            <button type="button" id="rematchAllBtn" class="auto-organize-btn bg-green-500 hover:bg-green-600" title="重新匹配地点和居民">
+                                <i class="fas fa-sync-alt mr-1"></i>重新匹配
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">语音和图片识别的内容会自动添加到这里</div>
+                </div>
+                
+                <!-- 巡查地点 -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <span class="text-red-500">*</span> 巡查地点
+                        <span id="locationMatchStatus" class="ml-2 text-xs text-blue-600 hidden">
+                            <i class="fas fa-spinner fa-spin mr-1"></i>正在智能匹配地址...
+                        </span>
+                    </label>
+                    <input type="text" id="problemLocation" class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2" placeholder="将智能匹配具体地址，也可手动修改" required>
+                    <div class="text-xs text-gray-500 mt-1">系统会从楼栋、房间表中智能匹配最精确的地址信息</div>
+                </div>
+                
+                <!-- 相关居民 -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        相关居民
+                        <span id="residentMatchStatus" class="ml-2 text-xs text-blue-600 hidden">
+                            <i class="fas fa-spinner fa-spin mr-1"></i>正在智能匹配...
+                        </span>
+                    </label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="relatedResident" class="flex-1 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2" placeholder="将根据巡查情况自动匹配相关居民" readonly>
+                        <button type="button" id="advancedSearchBtn" class="px-3 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                            <i class="fas fa-search-plus mr-1"></i>检索
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">系统会根据巡查情况自动匹配相关居民信息，也可手动检索</div>
+                </div>
+                
+                <!-- 居民信息管理区域 -->
+                <div id="residentInfoSection" class="form-group hidden">
+                    <div class="bg-gray-50 rounded-lg p-4 border">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-medium text-gray-800 flex items-center">
+                                <i class="fas fa-user-edit text-purple-600 mr-2"></i>
+                                居民信息管理
+                            </h4>
+                            <button type="button" id="editResidentBtn" class="px-3 py-1 bg-purple-500 text-white rounded text-sm hover:bg-purple-600">
+                                <i class="fas fa-edit mr-1"></i>修改信息
+                            </button>
+                        </div>
+                        
+                        <!-- 当前标签显示 -->
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">当前标签</label>
+                            <div id="currentTags" class="flex flex-wrap gap-1 min-h-[32px] p-2 bg-white border rounded">
+                                <!-- 动态生成的标签 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 当前备注显示 -->
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">当前备注</label>
+                            <div id="currentRemarks" class="p-2 bg-white border rounded min-h-[60px] text-sm text-gray-700">
+                                <!-- 显示当前备注内容 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 智能建议区域 -->
+                        <div id="intelligentSuggestions" class="bg-blue-50 border border-blue-200 rounded p-3 hidden">
+                            <div class="flex items-center justify-between mb-2">
+                                <h5 class="font-medium text-blue-800 text-sm">
+                                    <i class="fas fa-lightbulb mr-1"></i>智能建议
+                                </h5>
+                                <button type="button" id="closeSuggestions" class="text-blue-500 hover:text-blue-700 text-xs">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- 建议添加的标签 -->
+                            <div id="suggestedTags" class="mb-2">
+                                <div class="text-xs text-blue-700 mb-1">建议添加标签：</div>
+                                <div class="flex flex-wrap gap-1">
+                                    <!-- 动态生成的建议标签 -->
+                                </div>
+                            </div>
+                            
+                            <!-- 建议添加的备注 -->
+                            <div id="suggestedRemarks">
+                                <div class="text-xs text-blue-700 mb-1">建议添加备注：</div>
+                                <div class="text-sm text-blue-800 bg-blue-100 p-2 rounded">
+                                    <!-- 动态生成的建议备注 -->
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end mt-3 space-x-2">
+                                <button type="button" id="applySuggestions" class="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
+                                    <i class="fas fa-check mr-1"></i>应用建议
+                                </button>
+                                <button type="button" id="ignoreSuggestions" class="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600">
+                                    <i class="fas fa-times mr-1"></i>忽略
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 附件展示 -->
+                <div class="form-group">
+                    <label for="uploadAttachmentInput" class="block text-sm font-medium text-gray-700 mb-1">
+                        上传附件
+                    </label>
+                    <input type="file" id="uploadAttachmentInput" accept="image/*,audio/*,video/*" multiple class="block w-full text-sm text-transparent mb-1
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-100 file:text-blue-700
+                        hover:file:bg-blue-200 cursor-pointer
+                    ">
+                    <p class="text-xs text-gray-500 mb-2">支持图片 (如 JPG, PNG)、音频 (如 MP3, WAV) 和视频 (如 MP4, MOV) 格式，最多10个文件。</p>
+                    <div id="attachmentList" class="space-y-2">
+                        <div class="text-sm text-gray-500 italic">暂无附件</div>
+                    </div>
+                </div>
+                
+                <!-- 后续处置相关选项 -->
+                <div class="form-group border-t pt-4">
+                    <h3 class="text-lg font-medium text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-tasks text-purple-600 mr-2"></i>
+                        后续处置管理
+                    </h3>
+                    
+                    <!-- 是否需要后续处置 -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            是否需要后续处置
+                        </label>
+                        <div class="flex space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="needFollowUp" value="yes" class="form-radio text-blue-600" onchange="toggleFollowUpFields()">
+                                <span class="ml-2 text-sm text-gray-700">是</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="needFollowUp" value="no" class="form-radio text-blue-600" checked onchange="toggleFollowUpFields()">
+                                <span class="ml-2 text-sm text-gray-700">否</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- 后续处置相关字段（条件显示） -->
+                    <div id="followUpFields" class="space-y-4 hidden">
+                        <!-- 处置情况 -->
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                <span class="text-red-500">*</span> 处置情况
+                            </label>
+                            <textarea id="disposalSituation" rows="3" class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2" placeholder="请详细描述处置情况和采取的措施..."></textarea>
+                        </div>
+                        
+                        <!-- 是否完成处置 -->
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> 是否完成处置
+                            </label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="disposalCompleted" value="yes" class="form-radio text-blue-600" onchange="toggleCompletionField()">
+                                    <span class="ml-2 text-sm text-gray-700">是</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="disposalCompleted" value="no" class="form-radio text-blue-600" checked onchange="toggleCompletionField()">
+                                    <span class="ml-2 text-sm text-gray-700">否</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- 完成情况 -->
+                        <div class="form-group hidden" id="completionStatusField">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                <span class="text-red-500">*</span> 完成情况
+                            </label>
+                            <textarea id="completionStatus" rows="3" class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2" placeholder="请详细描述处置完成情况、效果评估等..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 提交按钮 -->
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="clearFormBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                        <i class="fas fa-times mr-1"></i>清空表单
+                    </button>
+                    <button type="submit" id="submitFormBtn" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <i class="fas fa-paper-plane mr-1"></i>提交
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- 高级居民搜索弹框 -->
+    <div id="residentSearchModal" class="fixed inset-0 flex items-center justify-center z-[10000] hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative z-10 p-4 max-h-[90vh] overflow-y-auto mx-4">
+            <div class="flex justify-between items-center border-b pb-2 mb-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">居民搜索</h3>
+                <button type="button" id="closeResidentSearch" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 居民姓名搜索框 -->
+            <div class="relative mb-4">
+                <input type="text" id="residentNameSearchInput" class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 pr-10" placeholder="请输入居民姓名搜索...">
+                <button type="button" id="executeResidentNameSearch" class="absolute inset-y-0 right-0 px-3 flex items-center text-blue-600 hover:text-blue-700">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- 请选择居民 -->
+            <p class="text-sm text-gray-600 mb-3">请选择居民</p>
+
+            <!-- 居民列表 -->
+            <div id="residentListContainer" class="space-y-3">
+                <!-- 示例居民项 -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50" onclick="selectResident(this)" data-name="刘宝辉" data-id="110105************5628">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-xl text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-base font-semibold text-gray-800">刘宝辉</h4>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">水岸豪庭1栋东1101号</p>
+                            <div class="mt-2 space-y-1 text-xs text-gray-600">
+                                <div class="flex justify-between">
+                                    <span>身份证号:</span>
+                                    <span class="font-mono">110105************5628</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>联系电话:</span>
+                                    <span class="text-blue-600 font-mono">132****8888</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>更新时间:</span>
+                                    <span class="font-mono">2023-12-01 12:14</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50" onclick="selectResident(this)" data-name="李大妈" data-id="110105************6739">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-xl text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-base font-semibold text-gray-800">李大妈</h4>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">水岸豪庭2栋305号</p>
+                            <div class="mt-2 space-y-1 text-xs text-gray-600">
+                                <div class="flex justify-between">
+                                    <span>身份证号:</span>
+                                    <span class="font-mono">110105************6739</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>联系电话:</span>
+                                    <span class="text-blue-600 font-mono">138****9999</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>更新时间:</span>
+                                    <span class="font-mono">2023-11-28 15:32</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50" onclick="selectResident(this)" data-name="王奶奶" data-id="110105************4821">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-xl text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-base font-semibold text-gray-800">王奶奶</h4>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">水岸豪庭1栋101号</p>
+                            <div class="mt-2 space-y-1 text-xs text-gray-600">
+                                <div class="flex justify-between">
+                                    <span>身份证号:</span>
+                                    <span class="font-mono">110105************4821</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>联系电话:</span>
+                                    <span class="text-blue-600 font-mono">156****7777</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>更新时间:</span>
+                                    <span class="font-mono">2023-12-02 09:45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50" onclick="selectResident(this)" data-name="刘师傅" data-id="110105************5934">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-xl text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-base font-semibold text-gray-800">刘师傅</h4>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">水岸豪庭3栋402号</p>
+                            <div class="mt-2 space-y-1 text-xs text-gray-600">
+                                <div class="flex justify-between">
+                                    <span>身份证号:</span>
+                                    <span class="font-mono">110105************5934</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>联系电话:</span>
+                                    <span class="text-blue-600 font-mono">189****6666</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>更新时间:</span>
+                                    <span class="font-mono">2023-11-30 14:20</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 如果没有结果，显示提示 -->
+            <div id="noResidentResults" class="text-center text-gray-500 py-4 hidden">
+                <i class="fas fa-info-circle mr-2"></i>
+                没有找到匹配的居民信息
+            </div>
+
+            <!-- 底部的操作按钮 -->
+            <div class="flex justify-end space-x-3 mt-4 pt-3 border-t">
+                <button type="button" class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50" onclick="document.getElementById('residentSearchModal').classList.add('hidden')">
+                    取消
+                </button>
+                <!-- 选择按钮可以根据需要添加逻辑 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 居民信息编辑弹框 -->
+    <div id="residentEditModal" class="fixed inset-0 flex items-center justify-center z-[10000] hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full relative z-10 p-4 max-h-[90vh] overflow-y-auto mx-4">
+            <div class="flex justify-between items-center border-b pb-2 mb-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">编辑居民信息</h3>
+                <button type="button" id="closeResidentEdit" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- 居民姓名显示 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">居民姓名</label>
+                    <div id="editResidentName" class="px-3 py-2 bg-gray-100 rounded text-sm text-gray-800">
+                        <!-- 显示当前选中的居民姓名 -->
+                    </div>
+                </div>
+                
+                <!-- 标签编辑 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">标签管理</label>
+                    <div class="space-y-2">
+                        <!-- 当前标签列表 -->
+                        <div>
+                            <div class="text-xs text-gray-600 mb-1">当前标签：</div>
+                            <div id="editCurrentTags" class="flex flex-wrap gap-1 min-h-[32px] p-2 border rounded bg-gray-50">
+                                <!-- 可删除的标签 -->
+                            </div>
+                        </div>
+                        <!-- 选择标签按钮 -->
+                        <div>
+                            <button type="button" id="openTagSelectorBtn" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200">
+                                <i class="fas fa-tags mr-1"></i>选择标签
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 备注编辑 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注管理</label>
+                    <div class="space-y-2">
+                        <!-- 当前备注显示 -->
+                        <div>
+                            <div class="text-xs text-gray-600 mb-1">当前备注：</div>
+                            <div id="editCurrentRemarks" class="p-2 border rounded bg-gray-50 text-sm text-gray-700 min-h-[60px]">
+                                <!-- 显示当前备注 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 添加新备注 -->
+                        <div>
+                            <div class="text-xs text-gray-600 mb-1">添加备注：</div>
+                            <textarea id="newRemarkInput" rows="3" class="w-full rounded border px-2 py-1 text-sm" placeholder="输入新的备注信息"></textarea>
+                            <div class="text-xs text-gray-500 mt-1">新备注将追加到现有备注之后</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                <button type="button" id="cancelEditResident" class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+                    取消
+                </button>
+                <button type="button" id="saveResidentInfo" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                    <i class="fas fa-save mr-1"></i>保存更新
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工作流程指引抽屉 -->
+    <div id="workflowGuideDrawer" class="fixed inset-0 z-[9999] modal-hidden">
+        <!-- 遮罩层 -->
+        <div id="workflowGuideOverlay" class="absolute inset-0 bg-black bg-opacity-30"></div>
+        
+        <!-- 右侧抽屉 -->
+        <div class="absolute right-0 top-0 bottom-0 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 bg-white shadow-xl transform transition-transform duration-300 translate-x-full" id="workflowGuideContent">
+            <!-- 抽屉头部 -->
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <h2 class="text-xl font-bold">巡查走访样式 · 智能巡查处理指南</h2>
+                </div>
+                <button id="closeWorkflowGuide" class="text-white p-2 rounded-full hover:bg-blue-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 抽屉内容区 - 工作流程 -->
+            <div class="p-6 overflow-y-auto" style="max-height: calc(100vh - 70px);">
+                <!-- 返回首页按钮 -->
+                <div class="mb-8">
+                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span>返回首页</span>
+                    </a>
+                </div>
+                
+                <!-- 工作流程时间线 -->
+                <div class="relative">
+                    <!-- 垂直时间线 -->
+                    <div class="absolute left-8 top-0 bottom-0 w-1 bg-blue-200"></div>
+                    
+                    <!-- 步骤1：问题发现与信息收集 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-blue-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-search text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-blue-600 font-semibold">1. 巡查发现与信息收集</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">参与人：</span>
+                                        <span>社区工作者、网格员、居民志愿者</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">收集方式：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <span class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center">
+                                                <i class="fas fa-camera text-blue-500 mr-2"></i>
+                                                <span>图片拍摄记录</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center">
+                                                <i class="fas fa-microphone text-green-500 mr-2"></i>
+                                                <span>语音描述记录</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center">
+                                                <i class="fas fa-edit text-purple-500 mr-2"></i>
+                                                <span>文字详细描述</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：利用多媒体方式全面记录问题现状，确保信息完整准确，为后续处理提供充分依据。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤2：智能识别与信息整理 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-green-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-brain text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-green-600 font-semibold">2. 智能识别与信息整理</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">智能功能：</span>
+                                        <span>图片识别、语音转文字、文字自动整理</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">处理结果：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <span class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center">
+                                                <i class="fas fa-eye text-blue-500 mr-2"></i>
+                                                <span>图片内容识别</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center">
+                                                <i class="fas fa-volume-up text-green-500 mr-2"></i>
+                                                <span>语音内容转换</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center">
+                                                <i class="fas fa-magic text-purple-500 mr-2"></i>
+                                                <span>文字规范整理</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：系统自动识别和整理信息，提高录入效率和准确性，减少人工处理工作量。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤3：地址匹配与居民关联 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-yellow-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-map-marker-alt text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-yellow-600 font-semibold">3. 地址匹配与居民关联</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">匹配功能：</span>
+                                        <span>智能地址识别、居民信息关联、标签管理</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">匹配精度：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <span class="px-3 py-2 bg-red-50 text-red-600 rounded flex items-center">
+                                                <i class="fas fa-building text-red-500 mr-2"></i>
+                                                <span>精确房间级别</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-orange-50 text-orange-600 rounded flex items-center">
+                                                <i class="fas fa-home text-orange-500 mr-2"></i>
+                                                <span>楼栋级别</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center">
+                                                <i class="fas fa-map text-blue-500 mr-2"></i>
+                                                <span>功能区域</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：系统自动匹配最精确的地址信息和相关居民，建立完整的问题档案和居民画像。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤4：问题分类与处置安排 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-pink-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-tasks text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-pink-600 font-semibold">4. 问题分类与处置安排</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">处置流程：</span>
+                                        <span>问题分类、责任分工、处置计划制定</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">处置方式：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <span class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center">
+                                                <i class="fas fa-user-check text-green-500 mr-2"></i>
+                                                <span>直接处理</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center">
+                                                <i class="fas fa-share text-blue-500 mr-2"></i>
+                                                <span>转办处理</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center">
+                                                <i class="fas fa-users text-purple-500 mr-2"></i>
+                                                <span>协调处理</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：根据问题性质和紧急程度，制定合适的处置方案，明确责任人和完成时限。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤5：跟踪反馈与效果评估 -->
+                    <div class="relative mb-12">
+                        <div class="flex items-start">
+                            <!-- 图标 -->
+                            <div class="bg-indigo-500 rounded-full p-3 z-10 mr-4">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="bg-white rounded-lg shadow-md p-5 w-full">
+                                <h3 class="text-xl text-indigo-600 font-semibold">5. 跟踪反馈与效果评估</h3>
+                                
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <span class="font-medium">跟踪内容：</span>
+                                        <span>处置进度、完成情况、居民满意度</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <span class="font-medium">评估指标：</span>
+                                        <div class="flex mt-2 gap-3 flex-wrap">
+                                            <span class="px-3 py-2 bg-green-50 text-green-600 rounded flex items-center">
+                                                <i class="fas fa-clock text-green-500 mr-2"></i>
+                                                <span>处置时效</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-blue-50 text-blue-600 rounded flex items-center">
+                                                <i class="fas fa-check-circle text-blue-500 mr-2"></i>
+                                                <span>完成质量</span>
+                                            </span>
+                                            <span class="px-3 py-2 bg-purple-50 text-purple-600 rounded flex items-center">
+                                                <i class="fas fa-smile text-purple-500 mr-2"></i>
+                                                <span>满意度</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                                        <p><i class="fas fa-info-circle mr-1"></i> 提示：建立完整的跟踪反馈机制，确保问题得到有效解决，持续提升服务质量。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标签选择弹窗 -->
+    <div id="tagSelectorModal" class="fixed inset-0 flex items-center justify-center z-[10001] hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-40"></div>
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative z-10 p-6 max-h-[80vh] overflow-y-auto mx-4">
+            <div class="flex justify-between items-center border-b pb-2 mb-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">选择标签</h3>
+                <button type="button" id="closeTagSelector" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <div id="allTagList" class="flex flex-wrap gap-2 max-h-60 overflow-y-auto">
+                    <!-- 动态生成所有可选标签，支持多选高亮 -->
+                </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button type="button" id="confirmTagSelection" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('页面开始加载JavaScript...');
+        
+        // 全局变量
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingCount = 0;
+        let attachments = [];
+        let draftData = null;
+        let originalTextBeforeOrganize = null;
+        
+        // 智能地址匹配全局变量
+        let isLocationMatching = false;
+        let isResidentMatching = false;
+        
+        // 居民信息管理全局变量
+        let currentResidentData = null;
+        let residentDatabase = {
+            // 模拟居民数据库
+            '张大爷 (1号楼201)': {
+                name: '张大爷',
+                address: '1号楼201',
+                tags: ['高龄老人', '电动车主'],
+                remarks: '热心邻里，经常反映小区问题。'
+            },
+            '李大妈 (2号楼305)': {
+                name: '李大妈',
+                address: '2号楼305',
+                tags: ['垃圾分类积极', '社区志愿者'],
+                remarks: '积极参与社区活动，垃圾分类示范户。'
+            },
+            '王奶奶 (1号楼101)': {
+                name: '王奶奶',
+                address: '1号楼101',
+                tags: ['高龄老人', '行动不便'],
+                remarks: '独居老人，需要特别关注。'
+            },
+            '赵爷爷 (3号楼202)': {
+                name: '赵爷爷',
+                address: '3号楼202',
+                tags: ['高龄老人', '问题反馈积极'],
+                remarks: '经常反映电梯故障问题。'
+            },
+            '小李 (2号楼403)': {
+                name: '小李',
+                address: '2号楼403',
+                tags: ['宠物饲养'],
+                remarks: '养了一只金毛犬，平时比较听话。'
+            }
+        };
+        
+        // 显示消息提示
+        function showMessage(message, type = 'info') {
+            console.log('显示消息:', message, type);
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message-toast message-${type}`;
+            messageDiv.textContent = message;
+            
+            document.body.appendChild(messageDiv);
+            
+            // 滑入动画
+            setTimeout(() => {
+                messageDiv.classList.add('show');
+            }, 10);
+            
+            // 自动消失
+            setTimeout(() => {
+                messageDiv.classList.remove('show');
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // 图片上传功能
+        function initImageUpload() {
+            console.log('初始化图片上传功能...');
+            
+            const imageUploadArea = document.getElementById('imageUploadArea');
+            const imageInput = document.getElementById('imageInput');
+            const uploadedImages = document.getElementById('uploadedImages');
+            
+            if (!imageUploadArea || !imageInput || !uploadedImages) {
+                console.error('图片上传元素未找到');
+                return;
+            }
+            
+            // 点击上传
+            imageUploadArea.addEventListener('click', function() {
+                console.log('点击图片上传区域');
+                imageInput.click();
+            });
+            
+            // 拖拽上传
+            imageUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                console.log('拖拽经过');
+                imageUploadArea.classList.add('dragover');
+            });
+            
+            imageUploadArea.addEventListener('dragleave', function(e) {
+                console.log('拖拽离开');
+                imageUploadArea.classList.remove('dragover');
+            });
+            
+            imageUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                console.log('拖拽释放');
+                imageUploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                handleImageUpload(files);
+            });
+            
+            // 文件选择
+            imageInput.addEventListener('change', function(e) {
+                console.log('文件选择改变');
+                handleImageUpload(e.target.files);
+            });
+            
+            console.log('图片上传功能初始化完成');
+        }
+        
+        function handleImageUpload(files) {
+            console.log('处理图片上传:', files.length, '个文件');
+            
+            const uploadedImages = document.getElementById('uploadedImages');
+            uploadedImages.classList.remove('hidden');
+            
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    console.log('处理图片文件:', file.name);
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageDiv = document.createElement('div');
+                        imageDiv.className = 'relative';
+                        imageDiv.innerHTML = `
+                            <img src="${e.target.result}" class="uploaded-image" alt="上传的图片">
+                            <button type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" onclick="removeImage(this)">
+                                ×
+                            </button>
+                        `;
+                        uploadedImages.appendChild(imageDiv);
+                        
+                        // 添加到附件列表
+                        attachments.push({
+                            type: 'image',
+                            name: file.name,
+                            data: e.target.result,
+                            file: file,
+                            timestamp: new Date().toLocaleTimeString()
+                        });
+                        
+                        // 模拟图片识别
+                        simulateImageRecognition(file, index);
+                        updateAttachmentList();
+                        
+                        showMessage(`图片 "${file.name}" 上传成功`, 'success');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    showMessage('不支持的文件格式，请上传图片文件', 'error');
+                }
+            });
+        }
+        
+        function removeImage(button) {
+            console.log('删除图片');
+            const imageDiv = button.parentElement;
+            const imageIndex = Array.from(imageDiv.parentElement.children).indexOf(imageDiv);
+            
+            // 从附件列表中移除
+            attachments = attachments.filter((item, index) => !(item.type === 'image'));
+            
+            imageDiv.remove();
+            updateAttachmentList();
+            showMessage('图片已删除', 'success');
+        }
+        
+        function simulateImageRecognition(file, index) {
+            console.log('模拟图片识别:', file.name);
+            
+            const resultDiv = document.getElementById('imageRecognitionResult');
+            const recognitionText = document.getElementById('recognitionText');
+            
+            // 显示处理中状态
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('processing');
+            recognitionText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>正在识别图片内容...';
+            
+            // 模拟识别延迟
+            setTimeout(() => {
+                resultDiv.classList.remove('processing');
+                
+                // 模拟识别结果
+                const mockResults = [
+                    {
+                        text: "识别到：路灯损坏，灯泡不亮，存在安全隐患"
+                    },
+                    {
+                        text: "识别到：垃圾桶满溢，周围散落垃圾，影响环境卫生"
+                    },
+                    {
+                        text: "识别到：下水道井盖破损，可能造成行人安全隐患"
+                    }
+                ];
+                
+                const result = mockResults[index % mockResults.length];
+                recognitionText.innerHTML = `
+                    <div class="bg-blue-50 p-3 rounded">
+                        <p class="font-medium text-blue-800">识别内容：</p>
+                        <p class="text-blue-700 mt-1">${result.text}</p>
+                    </div>
+                `;
+                
+                // 存储识别结果
+                window.recognitionResults = window.recognitionResults || {};
+                window.recognitionResults.image = result;
+                
+                showMessage('图片识别完成', 'success');
+                
+            }, 2000);
+        }
+        
+        // 语音录制功能
+        function initVoiceRecording() {
+            console.log('初始化语音录制功能...');
+            
+            const recordBtn = document.getElementById('recordBtn');
+            const uploadAudioBtn = document.getElementById('uploadAudioBtn');
+            const audioFileInput = document.getElementById('audioFileInput');
+            
+            if (!recordBtn || !uploadAudioBtn || !audioFileInput) {
+                console.error('语音录制元素未找到');
+                return;
+            }
+            
+            // 录音按钮事件
+            recordBtn.addEventListener('click', async function() {
+                console.log('点击录音按钮');
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    stopRecording();
+                } else {
+                    startRecording();
+                }
+            });
+            
+            // 上传音频按钮事件
+            uploadAudioBtn.addEventListener('click', function() {
+                console.log('点击上传音频按钮');
+                audioFileInput.click();
+            });
+            
+            // 音频文件选择事件
+            audioFileInput.addEventListener('change', function(e) {
+                console.log('音频文件选择改变');
+                const file = e.target.files[0];
+                if (file) {
+                    handleAudioFileUpload(file);
+                }
+            });
+            
+            console.log('语音录制功能初始化完成');
+        }
+        
+        async function startRecording() {
+            console.log('开始录音');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = function(event) {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = function() {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    saveAudioRecording(audioBlob);
+                    
+                    // 停止音频流
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+                
+                // 更新UI
+                const recordBtn = document.getElementById('recordBtn');
+                const recordingStatus = document.getElementById('recordingStatus');
+                
+                recordBtn.classList.add('recording');
+                recordBtn.innerHTML = '<i class="fas fa-stop text-xl"></i>';
+                recordingStatus.classList.remove('hidden');
+                
+                showMessage('录音开始', 'info');
+                
+            } catch (error) {
+                console.error('录音失败:', error);
+                showMessage('录音功能不可用，请检查麦克风权限', 'error');
+            }
+        }
+        
+        function stopRecording() {
+            console.log('停止录音');
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                
+                // 更新UI
+                const recordBtn = document.getElementById('recordBtn');
+                const recordingStatus = document.getElementById('recordingStatus');
+                
+                recordBtn.classList.remove('recording');
+                recordBtn.innerHTML = '<i class="fas fa-microphone text-xl"></i>';
+                recordingStatus.classList.add('hidden');
+                
+                showMessage('录音已停止', 'info');
+            }
+        }
+        
+        function saveAudioRecording(audioBlob) {
+            console.log('保存录音文件');
+            recordingCount++;
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audioList = document.getElementById('audioList');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const audioItem = document.createElement('div');
+            audioItem.className = 'audio-item';
+            audioItem.innerHTML = `
+                <div class="flex items-center flex-1">
+                    <i class="fas fa-microphone text-red-500 mr-2"></i>
+                    <div>
+                        <span>录音 ${recordingCount}</span>
+                        <div class="text-xs text-gray-500">${timestamp}</div>
+                    </div>
+                </div>
+                <div class="audio-controls">
+                    <button type="button" onclick="playAudio('${audioUrl}')" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">
+                        <i class="fas fa-play mr-1"></i>播放
+                    </button>
+                    <button type="button" onclick="removeAudioItem(this)" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">
+                        <i class="fas fa-trash mr-1"></i>删除
+                    </button>
+                </div>
+            `;
+            
+            audioList.appendChild(audioItem);
+            
+            // 添加到附件列表
+            attachments.push({
+                type: 'audio',
+                name: `录音${recordingCount}.wav`,
+                data: audioUrl,
+                blob: audioBlob,
+                timestamp: timestamp
+            });
+            
+            // 模拟语音识别
+            simulateVoiceRecognition(audioBlob, recordingCount);
+            updateAttachmentList();
+            
+            showMessage(`录音 ${recordingCount} 已保存`, 'success');
+        }
+        
+        function handleAudioFileUpload(file) {
+            console.log('处理音频文件上传:', file.name);
+            
+            // 验证文件类型
+            const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/mpeg', 'audio/m4a', 'audio/ogg'];
+            if (!allowedTypes.includes(file.type)) {
+                showMessage('不支持的音频格式，请上传MP3、WAV等格式的音频文件', 'error');
+                return;
+            }
+            
+            recordingCount++;
+            const audioUrl = URL.createObjectURL(file);
+            const audioList = document.getElementById('audioList');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const audioItem = document.createElement('div');
+            audioItem.className = 'audio-item';
+            audioItem.innerHTML = `
+                <div class="flex items-center flex-1">
+                    <i class="fas fa-file-audio text-blue-500 mr-2"></i>
+                    <div>
+                        <span>${file.name}</span>
+                        <div class="text-xs text-gray-500">${timestamp}</div>
+                    </div>
+                </div>
+                <div class="audio-controls">
+                    <button type="button" onclick="playAudio('${audioUrl}')" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">
+                        <i class="fas fa-play mr-1"></i>播放
+                    </button>
+                    <button type="button" onclick="removeAudioItem(this)" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">
+                        <i class="fas fa-trash mr-1"></i>删除
+                    </button>
+                </div>
+            `;
+            
+            audioList.appendChild(audioItem);
+            
+            // 添加到附件列表
+            attachments.push({
+                type: 'audio',
+                name: file.name,
+                data: audioUrl,
+                blob: file,
+                timestamp: timestamp,
+                isUploaded: true
+            });
+            
+            // 模拟语音识别
+            simulateVoiceRecognition(file, recordingCount);
+            updateAttachmentList();
+            
+            showMessage(`音频文件 "${file.name}" 已上传`, 'success');
+            
+            // 清空文件输入框
+            document.getElementById('audioFileInput').value = '';
+        }
+        
+        function simulateVoiceRecognition(audioBlob, recordingIndex) {
+            console.log('模拟语音识别');
+            
+            const resultDiv = document.getElementById('voiceRecognitionResult');
+            const voiceRecognitionText = document.getElementById('voiceRecognitionText');
+            
+            // 显示处理中状态
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('processing');
+            voiceRecognitionText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>正在解析语音内容...';
+            
+            // 模拟识别延迟
+            setTimeout(() => {
+                resultDiv.classList.remove('processing');
+                
+                // 模拟识别结果
+                const mockResults = [
+                    {
+                        text: "我发现小区大门口的路灯坏了，晚上那边特别黑，很不安全，希望能尽快修一下。"
+                    },
+                    {
+                        text: "那个，嗯，垃圾桶那边，就是，怎么说呢，垃圾都满了，还有那个味道，嗯，很难闻。"
+                    },
+                    {
+                        text: "三号楼的电梯又坏了，老人上下楼很不方便，这已经是这个月第三次了。"
+                    }
+                ];
+                
+                const result = mockResults[recordingIndex % mockResults.length];
+                
+                voiceRecognitionText.innerHTML = `
+                    <div class="bg-blue-50 p-3 rounded">
+                        <p class="font-medium text-blue-800">语音识别内容：</p>
+                        <p class="text-blue-700 mt-1">${result.text}</p>
+                    </div>
+                `;
+                
+                // 存储识别结果
+                window.recognitionResults = window.recognitionResults || {};
+                window.recognitionResults.voice = result;
+                
+                showMessage('语音识别完成', 'success');
+                
+            }, 2000);
+        }
+        
+        // 应用识别结果到表单
+        function initApplyRecognition() {
+            console.log('初始化应用识别功能...');
+            
+            // 应用图片识别结果
+            const applyImageBtn = document.getElementById('applyImageRecognition');
+            if (applyImageBtn) {
+                applyImageBtn.addEventListener('click', function() {
+                    console.log('应用图片识别结果');
+                    if (window.recognitionResults?.image) {
+                        applyRecognitionToForm(window.recognitionResults.image);
+                    }
+                });
+            }
+            
+            // 应用语音识别结果
+            const applyVoiceBtn = document.getElementById('applyVoiceRecognition');
+            if (applyVoiceBtn) {
+                applyVoiceBtn.addEventListener('click', function() {
+                    console.log('应用语音识别结果');
+                    if (window.recognitionResults?.voice) {
+                        applyRecognitionToForm(window.recognitionResults.voice);
+                    }
+                });
+            }
+        }
+        
+        function applyRecognitionToForm(result) {
+            console.log('应用识别结果到表单:', result);
+            
+            // 添加到巡查情况
+            const descriptionTextarea = document.getElementById('problemDescription');
+            const currentText = descriptionTextarea.value;
+            // 语音识别使用原始文字，图片识别使用处理后的文字
+            const newText = result.text;
+            
+            if (currentText) {
+                descriptionTextarea.value = currentText + '\n\n' + newText;
+            } else {
+                descriptionTextarea.value = newText;
+            }
+            
+            // 自动触发智能匹配
+            setTimeout(() => {
+                autoMatchLocation(newText);
+                setTimeout(() => {
+                    autoMatchResident(newText);
+                }, 500);
+            }, 500);
+            
+            showMessage('识别结果已应用到表单，正在智能匹配地址和居民', 'success');
+        }
+        
+        // 自动整理文字功能
+        function initAutoOrganize() {
+            console.log('初始化自动整理功能...');
+            
+            // 自动整理按钮
+            const autoOrganizeBtn = document.getElementById('autoOrganizeBtn');
+            if (autoOrganizeBtn) {
+                autoOrganizeBtn.addEventListener('click', function() {
+                    console.log('点击自动整理按钮');
+                    const textarea = document.getElementById('problemDescription');
+                    const text = textarea.value.trim();
+                    
+                    if (!text) {
+                        showMessage('请先输入走访描述', 'warning');
+                        return;
+                    }
+                    
+                    // 存储原始文字
+                    originalTextBeforeOrganize = text;
+                    
+                    // 显示处理中状态
+                    autoOrganizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>整理中';
+                    autoOrganizeBtn.disabled = true;
+                    
+                    // 模拟文字整理
+                    setTimeout(() => {
+                        const cleanedText = cleanText(text);
+                        textarea.value = cleanedText;
+                        
+                        autoOrganizeBtn.innerHTML = '<i class="fas fa-magic mr-1"></i>润色';
+                        autoOrganizeBtn.disabled = false;
+                        
+                        // 隐藏整理按钮，显示撤回按钮
+                        autoOrganizeBtn.classList.add('hidden');
+                        document.getElementById('undoOrganizeBtn').classList.remove('hidden');
+                        
+                        showMessage('文字整理完成', 'success');
+                    }, 1500);
+                });
+            }
+            
+            // 撤回整理按钮
+            const undoOrganizeBtn = document.getElementById('undoOrganizeBtn');
+            if (undoOrganizeBtn) {
+                undoOrganizeBtn.addEventListener('click', function() {
+                    console.log('点击撤回整理按钮');
+                    if (originalTextBeforeOrganize) {
+                        const textarea = document.getElementById('problemDescription');
+                        textarea.value = originalTextBeforeOrganize;
+                        
+                        // 隐藏撤回按钮，显示整理按钮
+                        undoOrganizeBtn.classList.add('hidden');
+                        document.getElementById('autoOrganizeBtn').classList.remove('hidden');
+                        
+                        // 清空原始文字存储
+                        originalTextBeforeOrganize = null;
+                        
+                        showMessage('已撤回到整理前的文字', 'success');
+                    }
+                });
+            }
+            
+            // 重新匹配按钮
+            const rematchAllBtn = document.getElementById('rematchAllBtn');
+            if (rematchAllBtn) {
+                rematchAllBtn.addEventListener('click', function() {
+                    console.log('点击重新匹配按钮');
+                    const textarea = document.getElementById('problemDescription');
+                    const text = textarea.value.trim();
+                    
+                    if (!text) {
+                        showMessage('请先输入走访描述', 'warning');
+                        return;
+                    }
+                    
+                    // 显示处理中状态
+                    rematchAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>匹配中';
+                    rematchAllBtn.disabled = true;
+                    
+                    // 先匹配地点
+                    autoMatchLocation(text);
+                    
+                    // 1秒后匹配居民
+                    setTimeout(() => {
+                        autoMatchResident(text);
+                        
+                        // 恢复按钮状态
+                        rematchAllBtn.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>重新匹配';
+                        rematchAllBtn.disabled = false;
+                        
+                        showMessage('重新匹配完成', 'success');
+                    }, 2000);
+                });
+            }
+        }
+        
+        function cleanText(text) {
+            // 模拟文字清理：去除口癖、语气词等
+            return text
+                .replace(/那个|就是|嗯|呃|啊|哎|唉/g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/[，。！？]{2,}/g, '。')
+                .replace(/^[，。！？\s]+|[，。！？\s]+$/g, '')
+                .replace(/([，。！？])\s+/g, '$1');
+        }
+        
+        // 智能地址匹配功能
+        function autoMatchLocation(problemText) {
+            if (isLocationMatching) return; // 防止重复匹配
+            
+            isLocationMatching = true;
+            const statusSpan = document.getElementById('locationMatchStatus');
+            const locationInput = document.getElementById('problemLocation');
+            
+            // 显示匹配状态
+            statusSpan.classList.remove('hidden');
+            statusSpan.className = 'ml-2 text-xs text-blue-600';
+            statusSpan.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>正在智能匹配地址...';
+            
+            // 模拟智能匹配过程
+            setTimeout(() => {
+                const text = problemText.toLowerCase();
+                let matchedLocation = null;
+                let matchLevel = ''; // 匹配级别
+                
+                // 模拟楼栋房间数据库
+                const locationDatabase = [
+                    // 精确房间匹配
+                    { keywords: ['一号楼101', '1号楼101'], location: '阳光社区1号楼101室', level: '精确房间' },
+                    { keywords: ['二号楼205', '2号楼205'], location: '阳光社区2号楼205室', level: '精确房间' },
+                    { keywords: ['三号楼301', '3号楼301'], location: '阳光社区3号楼301室', level: '精确房间' },
+                    
+                    // 楼栋匹配
+                    { keywords: ['一号楼', '1号楼'], location: '阳光社区1号楼', level: '楼栋级别' },
+                    { keywords: ['二号楼', '2号楼'], location: '阳光社区2号楼', level: '楼栋级别' },
+                    { keywords: ['三号楼', '3号楼'], location: '阳光社区3号楼', level: '楼栋级别' },
+                    { keywords: ['四号楼', '4号楼'], location: '阳光社区4号楼', level: '楼栋级别' },
+                    
+                    // 功能区域匹配
+                    { keywords: ['大门', '门口'], location: '阳光社区大门口', level: '功能区域' },
+                    { keywords: ['垃圾桶', '垃圾收集点'], location: '阳光社区垃圾收集点', level: '功能区域' },
+                    { keywords: ['停车场', '车位'], location: '阳光社区地下停车场', level: '功能区域' },
+                    { keywords: ['花园', '绿化'], location: '阳光社区中心花园', level: '功能区域' },
+                    { keywords: ['健身器材', '运动'], location: '阳光社区健身区', level: '功能区域' },
+                    { keywords: ['路灯'], location: '阳光社区主干道', level: '功能区域' },
+                    { keywords: ['电梯'], location: '住宅楼电梯', level: '设施' },
+                    { keywords: ['楼梯'], location: '住宅楼楼梯间', level: '设施' }
+                ];
+                
+                // 按匹配精确度查找
+                for (const item of locationDatabase) {
+                    for (const keyword of item.keywords) {
+                        if (text.includes(keyword)) {
+                            matchedLocation = item.location;
+                            matchLevel = item.level;
+                            break;
+                        }
+                    }
+                    if (matchedLocation) break;
+                }
+                
+                // 更新匹配结果
+                if (matchedLocation) {
+                    locationInput.value = matchedLocation;
+                    statusSpan.className = 'ml-2 text-xs text-green-600';
+                    statusSpan.innerHTML = `<i class="fas fa-check-circle mr-1"></i>智能匹配成功 (${matchLevel})`;
+                } else {
+                    // 没有匹配到具体地址，使用通用描述
+                    const genericLocation = '阳光社区2号楼1单元305室';
+                    locationInput.value = genericLocation;
+                    statusSpan.className = 'ml-2 text-xs text-yellow-600';
+                    statusSpan.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>使用通用地址，建议手动修改';
+                }
+                
+                // 2秒后隐藏状态
+                setTimeout(() => {
+                    statusSpan.classList.add('hidden');
+                }, 3000);
+                
+                isLocationMatching = false;
+            }, 1500);
+        }
+        
+        // 智能居民匹配功能
+        function autoMatchResident(problemText) {
+            if (isResidentMatching) return; // 防止重复匹配
+            
+            isResidentMatching = true;
+            const statusSpan = document.getElementById('residentMatchStatus');
+            const residentInput = document.getElementById('relatedResident');
+            
+            // 显示匹配状态
+            statusSpan.classList.remove('hidden');
+            statusSpan.className = 'ml-2 text-xs text-blue-600';
+            statusSpan.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>正在智能匹配居民...';
+            
+            // 模拟智能匹配过程
+            setTimeout(() => {
+                const text = problemText.toLowerCase();
+                let matchedResident = null;
+                
+                // 模拟居民数据库匹配规则
+                const residentRules = [
+                    { keywords: ['电动车', '三轮车', '摩托'], residents: ['张大爷 (1号楼201)', '李大妈 (2号楼1单元305)'] },
+                    { keywords: ['老人', '老年'], residents: ['王奶奶 (1号楼101)', '赵爷爷 (3号楼202)'] },
+                    { keywords: ['宠物', '狗', '猫'], residents: ['小李 (2号楼403)', '小王 (3号楼501)'] },
+                    { keywords: ['音响', '噪音', '吵闹'], residents: ['刘先生 (1号楼302)', '陈女士 (4号楼201)'] },
+                    { keywords: ['垃圾', '乱丢'], residents: ['无'] },
+                    { keywords: ['电梯', '损坏'], residents: ['无'] },
+                    { keywords: ['路灯', '照明'], residents: ['无'] }
+                ];
+                
+                // 查找匹配的居民
+                for (const rule of residentRules) {
+                    for (const keyword of rule.keywords) {
+                        if (text.includes(keyword)) {
+                            // 随机选择一个相关居民
+                            const randomIndex = Math.floor(Math.random() * rule.residents.length);
+                            matchedResident = rule.residents[randomIndex];
+                            break;
+                        }
+                    }
+                    if (matchedResident) break;
+                }
+                
+                // 更新匹配结果
+                if (matchedResident) {
+                    residentInput.value = matchedResident;
+                    statusSpan.className = 'ml-2 text-xs text-green-600';
+                    statusSpan.innerHTML = '<i class="fas fa-check-circle mr-1"></i>智能匹配成功';
+                    
+                    // 显示居民信息管理区域
+                    showResidentInfoSection(matchedResident, problemText);
+                } else {
+                    residentInput.value = '暂无匹配的居民信息';
+                    statusSpan.className = 'ml-2 text-xs text-gray-500';
+                    statusSpan.innerHTML = '<i class="fas fa-info-circle mr-1"></i>未找到相关居民';
+                    
+                    // 隐藏居民信息管理区域
+                    document.getElementById('residentInfoSection').classList.add('hidden');
+                }
+                
+                // 2秒后隐藏状态
+                setTimeout(() => {
+                    statusSpan.classList.add('hidden');
+                }, 3000);
+                
+                isResidentMatching = false;
+            }, 1000);
+        }
+        
+        // 表单操作
+        function initFormActions() {
+            console.log('初始化表单功能...');
+            
+            // 清空表单
+            const clearFormBtn = document.getElementById('clearFormBtn');
+            if (clearFormBtn) {
+                clearFormBtn.addEventListener('click', function() {
+                    if (confirm('确定要清空表单吗？')) {
+                        console.log('清空表单');
+                        document.getElementById('intelligentForm').reset();
+                        attachments = [];
+                        updateAttachmentList();
+                        
+                        // 清空附件显示区域
+                        document.getElementById('uploadedImages').classList.add('hidden');
+                        document.getElementById('audioList').innerHTML = '';
+                        document.getElementById('imageRecognitionResult').classList.add('hidden');
+                        document.getElementById('voiceRecognitionResult').classList.add('hidden');
+                        
+                        // 重置整理相关状态
+                        document.getElementById('undoOrganizeBtn').classList.add('hidden');
+                        originalTextBeforeOrganize = null;
+                        
+                        // 重置后续处置字段
+                        document.getElementById('followUpFields').classList.add('hidden');
+                        document.getElementById('disposalSituation').required = false;
+                        document.getElementById('completionStatus').required = false;
+                        document.querySelector('input[name="needFollowUp"][value="no"]').checked = true;
+                        document.querySelector('input[name="disposalCompleted"][value="no"]').checked = true;
+                        
+                        recordingCount = 0;
+                        showMessage('表单已清空', 'success');
+                    }
+                });
+            }
+            
+            // 提交表单
+            const intelligentForm = document.getElementById('intelligentForm');
+            if (intelligentForm) {
+                intelligentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('提交表单');
+                    submitProblemReport();
+                });
+            }
+            
+            // 保存草稿
+            const saveDraftBtn = document.getElementById('saveDraftBtn');
+            if (saveDraftBtn) {
+                saveDraftBtn.addEventListener('click', function() {
+                    console.log('保存草稿');
+                    saveDraft();
+                });
+            }
+            
+            // 加载草稿
+            const loadDraftBtn = document.getElementById('loadDraftBtn');
+            if (loadDraftBtn) {
+                loadDraftBtn.addEventListener('click', function() {
+                    console.log('加载草稿');
+                    if (draftData) {
+                        document.getElementById('problemDescription').value = draftData.problemDescription || '';
+                        document.getElementById('problemLocation').value = draftData.problemLocation || '';
+                        document.getElementById('relatedResident').value = draftData.relatedResident || '';
+                        
+                        // 恢复后续处置字段
+                        if (draftData.needFollowUp) {
+                            document.querySelector(`input[name="needFollowUp"][value="${draftData.needFollowUp}"]`).checked = true;
+                            if (draftData.needFollowUp === 'yes') {
+                                document.getElementById('followUpFields').classList.remove('hidden');
+                                document.getElementById('disposalSituation').required = true;
+                                document.getElementById('completionStatus').required = true;
+                                document.getElementById('disposalSituation').value = draftData.disposalSituation || '';
+                                document.getElementById('completionStatus').value = draftData.completionStatus || '';
+                                
+                                if (draftData.disposalCompleted) {
+                                    document.querySelector(`input[name="disposalCompleted"][value="${draftData.disposalCompleted}"]`).checked = true;
+                                }
+                            }
+                        }
+                        
+                        showMessage('草稿已加载', 'success');
+                    }
+                });
+            }
+            
+            // 检索按钮
+            const advancedSearchBtn = document.getElementById('advancedSearchBtn');
+            if (advancedSearchBtn) {
+                advancedSearchBtn.addEventListener('click', function() {
+                    console.log('打开检索弹框');
+                    document.getElementById('residentSearchModal').classList.remove('hidden');
+                });
+            }
+            
+            // 关闭检索弹框
+            const closeResidentSearch = document.getElementById('closeResidentSearch');
+            if (closeResidentSearch) {
+                closeResidentSearch.addEventListener('click', function() {
+                    console.log('关闭检索弹框');
+                    document.getElementById('residentSearchModal').classList.add('hidden');
+                });
+            }
+            
+            // 点击背景关闭弹框
+            const residentSearchModal = document.getElementById('residentSearchModal');
+            if (residentSearchModal) {
+                residentSearchModal.addEventListener('click', function(e) {
+                    if (e.target === residentSearchModal) {
+                        residentSearchModal.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // 重置搜索内容
+            const resetSearch = document.getElementById('resetSearch');
+            if (resetSearch) {
+                resetSearch.addEventListener('click', function() {
+                    console.log('重置搜索内容');
+                    const modal = document.getElementById('residentSearchModal');
+                    const inputs = modal.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        if (input.type === 'text' || input.type === 'number') {
+                            input.value = '';
+                        } else if (input.tagName === 'SELECT') {
+                            input.selectedIndex = 0;
+                        }
+                    });
+                    showMessage('搜索条件已重置', 'success');
+                });
+            }
+            
+            // 确认搜索
+            const confirmSearch = document.getElementById('confirmSearch');
+            if (confirmSearch) {
+                confirmSearch.addEventListener('click', function() {
+                    console.log('执行居民搜索');
+                    
+                    // 显示搜索中状态
+                    confirmSearch.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>搜索中...';
+                    confirmSearch.disabled = true;
+                    
+                    // 模拟搜索
+                    setTimeout(() => {
+                        // 模拟搜索结果
+                        const mockResults = [
+                            '张大爷 (1号楼201室, 户主, 68岁)',
+                            '李大妈 (2号楼305室, 户主, 62岁)',
+                            '王奶奶 (1号楼101室, 户主, 75岁)',
+                            '赵爷爷 (3号楼202室, 户主, 71岁)',
+                            '小李 (2号楼403室, 租户, 28岁)'
+                        ];
+                        
+                        const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)];
+                        
+                        // 应用搜索结果
+                        document.getElementById('relatedResident').value = randomResult;
+                        
+                        // 关闭弹框
+                        document.getElementById('residentSearchModal').classList.add('hidden');
+                        
+                        // 恢复按钮状态
+                        confirmSearch.innerHTML = '立即查询';
+                        confirmSearch.disabled = false;
+                        
+                        showMessage('居民搜索完成，已选择：' + randomResult, 'success');
+                    }, 1500);
+                });
+            }
+            
+            // 居民信息管理相关事件
+            initResidentInfoManagement();
+        }
+        
+        // 初始化居民信息管理功能
+        function initResidentInfoManagement() {
+            console.log('初始化居民信息管理功能...');
+            
+            // 编辑居民信息按钮
+            const editResidentBtn = document.getElementById('editResidentBtn');
+            if (editResidentBtn) {
+                editResidentBtn.addEventListener('click', function() {
+                    console.log('打开居民信息编辑弹框');
+                    openResidentEditModal();
+                });
+            }
+            
+            // 关闭编辑弹框
+            const closeResidentEdit = document.getElementById('closeResidentEdit');
+            if (closeResidentEdit) {
+                closeResidentEdit.addEventListener('click', function() {
+                    document.getElementById('residentEditModal').classList.add('hidden');
+                });
+            }
+            
+            // 取消编辑
+            const cancelEditResident = document.getElementById('cancelEditResident');
+            if (cancelEditResident) {
+                cancelEditResident.addEventListener('click', function() {
+                    document.getElementById('residentEditModal').classList.add('hidden');
+                });
+            }
+            
+            // 保存居民信息
+            const saveResidentInfo = document.getElementById('saveResidentInfo');
+            if (saveResidentInfo) {
+                saveResidentInfo.addEventListener('click', function() {
+                    saveResidentInfoChanges();
+                });
+            }
+            
+            // 智能建议相关事件
+            const applySuggestions = document.getElementById('applySuggestions');
+            if (applySuggestions) {
+                applySuggestions.addEventListener('click', function() {
+                    applyIntelligentSuggestions();
+                });
+            }
+            
+            const ignoreSuggestions = document.getElementById('ignoreSuggestions');
+            if (ignoreSuggestions) {
+                ignoreSuggestions.addEventListener('click', function() {
+                    document.getElementById('intelligentSuggestions').classList.add('hidden');
+                });
+            }
+            
+            const closeSuggestions = document.getElementById('closeSuggestions');
+            if (closeSuggestions) {
+                closeSuggestions.addEventListener('click', function() {
+                    document.getElementById('intelligentSuggestions').classList.add('hidden');
+                });
+            }
+            
+            // 添加标签按钮
+            const addTagBtn = document.getElementById('addTagBtn');
+            if (addTagBtn) {
+                addTagBtn.addEventListener('click', function() {
+                    addNewTag();
+                });
+            }
+            
+            // 新标签输入框回车事件
+            const newTagInput = document.getElementById('newTagInput');
+            if (newTagInput) {
+                newTagInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addNewTag();
+                    }
+                });
+            }
+            
+            // 快速标签选择
+            document.querySelectorAll('.quick-tag-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tag = this.dataset.tag;
+                    addQuickTag(tag);
+                });
+            });
+        }
+        
+        function submitProblemReport() {
+            console.log('提交巡查记录');
+            
+            // 验证后续处置字段
+            if (!validateFollowUpFields()) {
+                return;
+            }
+            
+            const formData = {
+                problemDescription: document.getElementById('problemDescription').value,
+                problemLocation: document.getElementById('problemLocation').value,
+                relatedResident: document.getElementById('relatedResident').value,
+                attachments: attachments,
+                // 新增后续处置相关字段
+                needFollowUp: document.querySelector('input[name="needFollowUp"]:checked').value,
+                disposalSituation: document.getElementById('disposalSituation').value,
+                disposalCompleted: document.querySelector('input[name="disposalCompleted"]:checked')?.value || 'no',
+                completionStatus: document.getElementById('completionStatus').value
+            };
+            
+            console.log('提交的表单数据:', formData);
+            
+            // 模拟提交
+            const submitBtn = document.getElementById('submitFormBtn');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>提交中...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // 重置表单
+                document.getElementById('intelligentForm').reset();
+                attachments = [];
+                updateAttachmentList();
+                
+                // 清空显示区域
+                document.getElementById('uploadedImages').classList.add('hidden');
+                document.getElementById('audioList').innerHTML = '';
+                document.getElementById('imageRecognitionResult').classList.add('hidden');
+                document.getElementById('voiceRecognitionResult').classList.add('hidden');
+                
+                // 重置后续处置字段
+                document.getElementById('followUpFields').classList.add('hidden');
+                document.getElementById('disposalSituation').required = false;
+                document.getElementById('completionStatus').required = false;
+                
+                recordingCount = 0;
+                
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>提交';
+                submitBtn.disabled = false;
+                
+                showMessage('问题提交成功！编号：WTS' + Date.now().toString().slice(-6), 'success');
+            }, 2000);
+        }
+        
+        function saveDraft() {
+            const formData = {
+                problemDescription: document.getElementById('problemDescription').value,
+                problemLocation: document.getElementById('problemLocation').value,
+                relatedResident: document.getElementById('relatedResident').value,
+                timestamp: new Date().toISOString(),
+                attachments: attachments,
+                // 新增后续处置相关字段
+                needFollowUp: document.querySelector('input[name="needFollowUp"]:checked').value,
+                disposalSituation: document.getElementById('disposalSituation').value,
+                disposalCompleted: document.querySelector('input[name="disposalCompleted"]:checked')?.value || 'no',
+                completionStatus: document.getElementById('completionStatus').value
+            };
+            
+            localStorage.setItem('problemReportDraft', JSON.stringify(formData));
+            showMessage('草稿已保存', 'success');
+            
+            // 显示加载草稿按钮
+            document.getElementById('loadDraftBtn').classList.remove('hidden');
+        }
+        
+        function loadDraft() {
+            const saved = localStorage.getItem('problemReportDraft');
+            if (saved) {
+                draftData = JSON.parse(saved);
+                document.getElementById('loadDraftBtn').classList.remove('hidden');
+                return true;
+            }
+            return false;
+        }
+        
+        // 更新附件列表
+        function updateAttachmentList() {
+            const attachmentList = document.getElementById('attachmentList');
+            attachmentList.innerHTML = '';
+            
+            if (attachments.length === 0) {
+                attachmentList.innerHTML = '<div class="text-sm text-gray-500 italic">暂无附件</div>';
+                return;
+            }
+            
+            attachments.forEach((attachment, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 bg-gray-50 rounded';
+                
+                // 使用统一的绿色图片图标，并移除时间戳
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-image text-green-500 mr-2"></i>
+                        <div>
+                            <span class="text-sm font-medium">${attachment.name}</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="removeAttachment(${index})" class="text-red-500 hover:text-red-700 text-sm">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                attachmentList.appendChild(item);
+            });
+        }
+        
+        // 全局函数（供HTML内联事件使用）
+        window.removeImage = function(button) {
+            removeImage(button);
+        };
+        
+        window.playAudio = function(audioUrl) {
+            console.log('播放音频:', audioUrl);
+            const audio = new Audio(audioUrl);
+            audio.play().catch(err => {
+                console.error('播放失败:', err);
+                showMessage('音频播放失败', 'error');
+            });
+        };
+        
+        window.removeAudioItem = function(button) {
+            console.log('删除音频项');
+            const audioItem = button.closest('.audio-item');
+            audioItem.remove();
+            
+            // 从附件列表中移除对应的录音
+            const audioIndex = Array.from(audioItem.parentElement.children).indexOf(audioItem);
+            attachments = attachments.filter((item, index) => {
+                return !(item.type === 'audio' && index === audioIndex);
+            });
+            
+            updateAttachmentList();
+            showMessage('录音已删除', 'success');
+        };
+        
+        window.removeAttachment = function(index) {
+            console.log('删除附件:', index);
+            attachments.splice(index, 1);
+            updateAttachmentList();
+            showMessage('附件已删除', 'success');
+        };
+        
+        // 后续处置字段控制函数
+        window.toggleFollowUpFields = function() {
+            console.log('切换后续处置字段显示');
+            const needFollowUp = document.querySelector('input[name="needFollowUp"]:checked').value;
+            const followUpFields = document.getElementById('followUpFields');
+            
+            if (needFollowUp === 'yes') {
+                followUpFields.classList.remove('hidden');
+                // 设置必填属性
+                document.getElementById('disposalSituation').required = true;
+                document.getElementById('completionStatus').required = true;
+                // 重置处置完成状态为否
+                document.querySelector('input[name="disposalCompleted"][value="no"]').checked = true;
+            } else {
+                followUpFields.classList.add('hidden');
+                // 移除必填属性
+                document.getElementById('disposalSituation').required = false;
+                document.getElementById('completionStatus').required = false;
+                // 清空字段内容
+                document.getElementById('disposalSituation').value = '';
+                document.getElementById('completionStatus').value = '';
+                // 重置单选按钮
+                document.querySelector('input[name="disposalCompleted"][value="no"]').checked = true;
+            }
+        };
+        
+        // 完成情况字段控制函数
+        window.toggleCompletionField = function() {
+            console.log('切换完成情况字段');
+            const disposalCompleted = document.querySelector('input[name="disposalCompleted"]:checked')?.value;
+            const completionStatusField = document.getElementById('completionStatusField');
+            const completionStatusTextarea = document.getElementById('completionStatus');
+            
+            if (disposalCompleted === 'yes') {
+                completionStatusField.classList.remove('hidden');
+                completionStatusTextarea.required = true;
+            } else {
+                completionStatusField.classList.add('hidden');
+                completionStatusTextarea.required = false;
+                completionStatusTextarea.value = ''; // 清空内容
+            }
+        };
+        
+        // 表单验证函数
+        function validateFollowUpFields() {
+            const needFollowUp = document.querySelector('input[name="needFollowUp"]:checked').value;
+            
+            if (needFollowUp === 'yes') {
+                const disposalSituation = document.getElementById('disposalSituation').value.trim();
+                const disposalCompleted = document.querySelector('input[name="disposalCompleted"]:checked');
+                const completionStatusField = document.getElementById('completionStatusField');
+                const completionStatus = document.getElementById('completionStatus').value.trim();
+                
+                if (!disposalSituation) {
+                    showMessage('请填写处置情况', 'error');
+                    document.getElementById('disposalSituation').focus();
+                    return false;
+                }
+                
+                if (!disposalCompleted) {
+                    showMessage('请选择是否完成处置', 'error');
+                    return false;
+                }
+                
+                // 只有在完成情况字段显示时才验证
+                if (!completionStatusField.classList.contains('hidden') && !completionStatus) {
+                    showMessage('请填写完成情况', 'error');
+                    document.getElementById('completionStatus').focus();
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        // 页面加载完成后初始化所有功能
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面DOM加载完成，开始初始化...');
+            
+            // 设置专题名称
+            const urlParams = new URLSearchParams(window.location.search);
+            const topicName = urlParams.get('topicName') || urlParams.get('name');
+            
+            if (topicName) {
+                document.getElementById('topicName').textContent = decodeURIComponent(topicName);
+                document.title = decodeURIComponent(topicName) + ' - 社小智';
+            }
+            
+            // 初始化所有功能
+            try {
+                loadDraft();
+                initImageUpload();
+                initVoiceRecording();
+                initApplyRecognition();
+                initAutoOrganize();
+                initFormActions();
+                initWorkflowGuide(); // 初始化工作流程指引
+                initResidentNameSearch(); // 初始化新的居民姓名搜索功能
+                
+                console.log('所有功能初始化完成');
+                showMessage('页面加载完成，所有功能已就绪', 'success');
+            } catch (error) {
+                console.error('初始化过程中出现错误:', error);
+                showMessage('部分功能初始化失败', 'error');
+            }
+        });
+        
+        console.log('JavaScript脚本加载完成');
+        
+        // 初始化工作流程指引功能
+        function initWorkflowGuide() {
+            console.log('初始化工作流程指引功能...');
+            
+            const btnWorkflowGuide = document.getElementById('btnWorkflowGuide');
+            const workflowGuideDrawer = document.getElementById('workflowGuideDrawer');
+            const workflowGuideContent = document.getElementById('workflowGuideContent');
+            const closeWorkflowGuide = document.getElementById('closeWorkflowGuide');
+            const workflowGuideOverlay = document.getElementById('workflowGuideOverlay');
+            
+            if (!btnWorkflowGuide || !workflowGuideDrawer) {
+                console.error('工作流程指引元素未找到');
+                return;
+            }
+            
+            // 打开工作流程指引抽屉
+            btnWorkflowGuide.addEventListener('click', function() {
+                console.log('打开工作流程指引抽屉');
+                workflowGuideDrawer.classList.remove('modal-hidden');
+                // 延迟一点时间让抽屉显示，然后添加滑入动画
+                setTimeout(() => {
+                    workflowGuideContent.classList.remove('translate-x-full');
+                }, 10);
+            });
+            
+            // 关闭抽屉函数
+            function closeWorkflowDrawer() {
+                console.log('关闭工作流程指引抽屉');
+                workflowGuideContent.classList.add('translate-x-full');
+                // 等待动画完成后隐藏抽屉
+                setTimeout(() => {
+                    workflowGuideDrawer.classList.add('modal-hidden');
+                }, 300);
+            }
+            
+            // 关闭按钮事件
+            if (closeWorkflowGuide) {
+                closeWorkflowGuide.addEventListener('click', closeWorkflowDrawer);
+            }
+            
+            // 点击遮罩层关闭
+            if (workflowGuideOverlay) {
+                workflowGuideOverlay.addEventListener('click', closeWorkflowDrawer);
+            }
+            
+            console.log('工作流程指引功能初始化完成');
+        }
+        
+        // 显示居民信息管理区域
+        function showResidentInfoSection(residentName, problemText) {
+            console.log('显示居民信息管理区域:', residentName);
+            
+            const section = document.getElementById('residentInfoSection');
+            const currentTags = document.getElementById('currentTags');
+            const currentRemarks = document.getElementById('currentRemarks');
+            
+            // 获取居民数据
+            const residentData = residentDatabase[residentName] || {
+                name: residentName,
+                address: '',
+                tags: [],
+                remarks: ''
+            };
+            
+            currentResidentData = { ...residentData, fullName: residentName };
+            
+            // 显示当前标签
+            currentTags.innerHTML = '';
+            if (residentData.tags && residentData.tags.length > 0) {
+                residentData.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs';
+                    tagElement.innerHTML = `
+                        <span>${tag}</span>
+                    `;
+                    currentTags.appendChild(tagElement);
+                });
+            } else {
+                currentTags.innerHTML = '<span class="text-gray-500 text-xs">暂无标签</span>';
+            }
+            
+            // 显示当前备注
+            currentRemarks.textContent = residentData.remarks || '暂无备注';
+            
+            // 生成智能建议
+            generateIntelligentSuggestions(problemText, residentData);
+            
+            // 显示管理区域
+            section.classList.remove('hidden');
+        }
+        
+        // 生成智能建议
+        function generateIntelligentSuggestions(problemText, residentData) {
+            console.log('生成智能建议');
+            
+            const text = problemText.toLowerCase();
+            const suggestionsDiv = document.getElementById('intelligentSuggestions');
+            const suggestedTagsDiv = document.getElementById('suggestedTags').querySelector('.flex');
+            const suggestedRemarksDiv = document.getElementById('suggestedRemarks').querySelector('.text-sm');
+            
+            // 清空之前的建议
+            suggestedTagsDiv.innerHTML = '';
+            suggestedRemarksDiv.innerHTML = '';
+            
+            // 基于问题内容生成标签建议
+            const tagSuggestions = [];
+            const remarkSuggestions = [];
+            
+            // 标签建议规则
+            if (text.includes('电动车') || text.includes('三轮车') || text.includes('摩托')) {
+                if (!residentData.tags.includes('电动车主')) {
+                    tagSuggestions.push('电动车主');
+                }
+                remarkSuggestions.push('涉及电动车相关问题');
+            }
+            
+            if (text.includes('垃圾') && text.includes('乱丢')) {
+                if (!residentData.tags.includes('垃圾处理不当')) {
+                    tagSuggestions.push('垃圾处理不当');
+                }
+                remarkSuggestions.push('存在垃圾乱丢行为');
+            }
+            
+            if (text.includes('噪音') || text.includes('吵闹') || text.includes('音响')) {
+                if (!residentData.tags.includes('夜间扰民')) {
+                    tagSuggestions.push('夜间扰民');
+                }
+                remarkSuggestions.push('产生噪音扰民问题');
+            }
+            
+            if (text.includes('宠物') || text.includes('狗') || text.includes('猫')) {
+                if (!residentData.tags.includes('宠物饲养')) {
+                    tagSuggestions.push('宠物饲养');
+                }
+                remarkSuggestions.push('饲养宠物相关');
+            }
+            
+            if (text.includes('反映') || text.includes('举报') || text.includes('投诉')) {
+                if (!residentData.tags.includes('问题反馈积极')) {
+                    tagSuggestions.push('问题反馈积极');
+                }
+                remarkSuggestions.push('积极反映社区问题');
+            }
+            
+            // 显示建议
+            if (tagSuggestions.length > 0 || remarkSuggestions.length > 0) {
+                // 生成标签建议
+                tagSuggestions.forEach(tag => {
+                    const tagBtn = document.createElement('button');
+                    tagBtn.type = 'button';
+                    tagBtn.className = 'px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 border border-green-300';
+                    tagBtn.textContent = tag;
+                    tagBtn.onclick = () => addSuggestedTag(tag);
+                    suggestedTagsDiv.appendChild(tagBtn);
+                });
+                
+                // 生成备注建议
+                if (remarkSuggestions.length > 0) {
+                    const currentDate = new Date().toLocaleDateString();
+                    const remarkText = `${currentDate}: ${remarkSuggestions.join('，')}。`;
+                    suggestedRemarksDiv.textContent = remarkText;
+                    suggestedRemarksDiv.dataset.suggestion = remarkText;
+                }
+                
+                // 显示建议区域
+                suggestionsDiv.classList.remove('hidden');
+            } else {
+                // 隐藏建议区域
+                suggestionsDiv.classList.add('hidden');
+            }
+        }
+        
+        // 添加建议的标签
+        function addSuggestedTag(tag) {
+            if (!currentResidentData.tags.includes(tag)) {
+                currentResidentData.tags.push(tag);
+                updateResidentTagsDisplay();
+                showMessage(`已添加标签："${tag}"`, 'success');
+            } else {
+                showMessage(`标签"${tag}"已存在`, 'warning');
+            }
+        }
+        
+        // 更新居民标签显示
+        function updateResidentTagsDisplay() {
+            const currentTags = document.getElementById('currentTags');
+            currentTags.innerHTML = '';
+            
+            if (currentResidentData.tags && currentResidentData.tags.length > 0) {
+                currentResidentData.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs';
+                    tagElement.innerHTML = `
+                        <span>${tag}</span>
+                    `;
+                    currentTags.appendChild(tagElement);
+                });
+            } else {
+                currentTags.innerHTML = '<span class="text-gray-500 text-xs">暂无标签</span>';
+            }
+        }
+        
+        // 打开居民信息编辑弹框
+        function openResidentEditModal() {
+            if (!currentResidentData) return;
+            
+            console.log('打开居民信息编辑弹框:', currentResidentData);
+            
+            // 显示居民姓名
+            document.getElementById('editResidentName').textContent = currentResidentData.fullName;
+            
+            // 显示当前标签（可删除版本）
+            updateEditTagsDisplay();
+            
+            // 显示当前备注
+            document.getElementById('editCurrentRemarks').textContent = currentResidentData.remarks || '暂无备注';
+            
+            // 清空备注输入框
+            document.getElementById('newRemarkInput').value = '';
+            
+            // 显示弹框
+            document.getElementById('residentEditModal').classList.remove('hidden');
+        }
+        
+        // 更新编辑弹框中的标签显示
+        function updateEditTagsDisplay() {
+            const editCurrentTags = document.getElementById('editCurrentTags');
+            editCurrentTags.innerHTML = '';
+            
+            if (currentResidentData.tags && currentResidentData.tags.length > 0) {
+                currentResidentData.tags.forEach((tag, index) => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs';
+                    tagElement.innerHTML = `
+                        <span>${tag}</span>
+                        <button type="button" class="ml-1 text-blue-600 hover:text-blue-800" onclick="removeTag(${index})">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    `;
+                    editCurrentTags.appendChild(tagElement);
+                });
+            } else {
+                editCurrentTags.innerHTML = '<span class="text-gray-500 text-xs">暂无标签</span>';
+            }
+        }
+        
+        // 添加新标签
+        function addNewTag() {
+            const input = document.getElementById('newTagInput');
+            const tag = input.value.trim();
+            
+            if (!tag) {
+                showMessage('请输入标签内容', 'warning');
+                return;
+            }
+            
+            if (currentResidentData.tags.includes(tag)) {
+                showMessage(`标签"${tag}"已存在`, 'warning');
+                return;
+            }
+            
+            currentResidentData.tags.push(tag);
+            updateEditTagsDisplay();
+            input.value = '';
+            showMessage(`已添加标签："${tag}"`, 'success');
+        }
+        
+        // 添加快速标签
+        function addQuickTag(tag) {
+            if (currentResidentData.tags.includes(tag)) {
+                showMessage(`标签"${tag}"已存在`, 'warning');
+                return;
+            }
+            
+            currentResidentData.tags.push(tag);
+            updateEditTagsDisplay();
+            showMessage(`已添加标签："${tag}"`, 'success');
+        }
+        
+        // 删除标签
+        window.removeTag = function(index) {
+            const removedTag = currentResidentData.tags[index];
+            currentResidentData.tags.splice(index, 1);
+            updateEditTagsDisplay();
+            showMessage(`已删除标签："${removedTag}"`, 'success');
+        };
+        
+        // 应用智能建议
+        function applyIntelligentSuggestions() {
+            const suggestedRemarksDiv = document.getElementById('suggestedRemarks').querySelector('.text-sm');
+            const suggestionText = suggestedRemarksDiv.dataset.suggestion;
+            
+            if (suggestionText) {
+                // 添加到备注
+                if (currentResidentData.remarks) {
+                    currentResidentData.remarks += '\n' + suggestionText;
+                } else {
+                    currentResidentData.remarks = suggestionText;
+                }
+                
+                // 更新显示
+                document.getElementById('currentRemarks').textContent = currentResidentData.remarks;
+                document.getElementById('editCurrentRemarks').textContent = currentResidentData.remarks;
+                
+                showMessage('智能建议已应用', 'success');
+            }
+            
+            // 隐藏建议区域
+            document.getElementById('intelligentSuggestions').classList.add('hidden');
+        }
+        
+        // 保存居民信息更改
+        function saveResidentInfoChanges() {
+            console.log('保存居民信息更改');
+            
+            // 获取新添加的备注
+            const newRemark = document.getElementById('newRemarkInput').value.trim();
+            if (newRemark) {
+                const currentDate = new Date().toLocaleDateString();
+                const remarkWithDate = `${currentDate}: ${newRemark}`;
+                
+                if (currentResidentData.remarks) {
+                    currentResidentData.remarks += '\n' + remarkWithDate;
+                } else {
+                    currentResidentData.remarks = remarkWithDate;
+                }
+            }
+            
+            // 保存到数据库
+            residentDatabase[currentResidentData.fullName] = {
+                name: currentResidentData.name,
+                address: currentResidentData.address,
+                tags: [...currentResidentData.tags],
+                remarks: currentResidentData.remarks
+            };
+            
+            // 更新主界面显示
+            updateResidentTagsDisplay();
+            document.getElementById('currentRemarks').textContent = currentResidentData.remarks || '暂无备注';
+            
+            // 关闭弹框
+            document.getElementById('residentEditModal').classList.add('hidden');
+            
+            // 隐藏智能建议区域
+            document.getElementById('intelligentSuggestions').classList.add('hidden');
+            
+            showMessage('居民信息已更新保存', 'success');
+        }
+
+        // 替换原有 handleAttachmentUpload 和相关事件监听
+        const commonUploadInput = document.getElementById('uploadAttachmentInput');
+        if (commonUploadInput) {
+            commonUploadInput.addEventListener('change', function() {
+                const files = this.files;
+                if (!files || files.length === 0) return;
+
+                Array.from(files).forEach(file => {
+                    const fileType = file.type.split('/')[0]; // 'image', 'audio', 'video'
+                    let attachmentType = '';
+                    let iconClass = 'fa-file'; // Default icon
+
+                    if (fileType === 'image') {
+                        attachmentType = 'image';
+                        iconClass = 'fa-image';
+                    } else if (fileType === 'audio') {
+                        attachmentType = 'audio';
+                        iconClass = 'fa-file-audio';
+                    } else if (fileType === 'video') {
+                        attachmentType = 'video';
+                        iconClass = 'fa-file-video';
+                    } else {
+                        showMessage(`不支持的文件类型: ${file.name}`, 'warning');
+                        return; // 跳过不支持的文件类型
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        attachments.push({
+                            type: attachmentType,
+                            name: file.name,
+                            data: e.target.result, // Base64 string for preview or actual data
+                            file: file, // The actual file object for potential uploads
+                            timestamp: new Date().toLocaleTimeString(),
+                            icon: iconClass
+                        });
+                        updateAttachmentList(); // 更新附件列表显示
+                    };
+
+                    if (fileType === 'image' || fileType === 'video') {
+                        // 对于图片和视频，可以读取DataURL用于预览
+                        reader.readAsDataURL(file);
+                    } else if (fileType === 'audio') {
+                        // 对于音频，也可以读取DataURL，或者直接用blob，取决于后续如何处理
+                        reader.readAsDataURL(file); 
+                    }
+                    showMessage(`附件 "${file.name}" 已添加`, 'success');
+                });
+                this.value = ''; // 清空选择，以便可以再次选择相同文件
+            });
+        }
+
+        // 新增：打开居民搜索弹框的函数
+        function openResidentSearchModal() {
+            document.getElementById('residentSearchModal').classList.remove('hidden');
+            // 可以在这里预加载一些居民数据或执行默认搜索
+            renderResidentList(mockResidentData); // 初始加载模拟数据
+        }
+
+        // 新增：模拟的居民数据 (与截图一致)
+        const mockResidentData = [
+            {
+                name: '刘宝辉',
+                address: '水岸豪庭1栋东1101号',
+                idCard: '110105************5628',
+                phone: '132****8888',
+                updateTime: '2023-12-01 12:14'
+            },
+            {
+                name: '李大妈',
+                address: '水岸豪庭2栋305号',
+                idCard: '110105************6739',
+                phone: '138****9999',
+                updateTime: '2023-11-28 15:32'
+            },
+            {
+                name: '王奶奶',
+                address: '水岸豪庭1栋101号',
+                idCard: '110105************4821',
+                phone: '156****7777',
+                updateTime: '2023-12-02 09:45'
+            },
+            {
+                name: '刘师傅',
+                address: '水岸豪庭3栋402号',
+                idCard: '110105************5934',
+                phone: '189****6666',
+                updateTime: '2023-11-30 14:20'
+            }
+        ];
+
+        // 新增：渲染居民列表的函数
+        function renderResidentList(residents) {
+            const container = document.getElementById('residentListContainer');
+            const noResultsDiv = document.getElementById('noResidentResults');
+            container.innerHTML = ''; // 清空现有列表
+
+            if (!residents || residents.length === 0) {
+                noResultsDiv.classList.remove('hidden');
+                return;
+            }
+            noResultsDiv.classList.add('hidden');
+
+            residents.forEach(resident => {
+                const residentDiv = document.createElement('div');
+                residentDiv.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50';
+                residentDiv.setAttribute('data-name', resident.name);
+                residentDiv.setAttribute('data-id', resident.idCard);
+                residentDiv.onclick = function() { selectResident(this); };
+
+                residentDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-xl text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-base font-semibold text-gray-800">${resident.name}</h4>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">${resident.address}</p>
+                            <div class="mt-2 space-y-1 text-xs text-gray-600">
+                                <div class="flex justify-between">
+                                    <span>身份证号:</span>
+                                    <span class="font-mono">${resident.idCard}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>联系电话:</span>
+                                    <span class="text-blue-600 font-mono">${resident.phone}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>更新时间:</span>
+                                    <span class="font-mono">${resident.updateTime}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(residentDiv);
+            });
+        }
+
+        // 新增：选择居民的函数
+        window.selectResident = function(element) {
+            const residentName = element.getAttribute('data-name');
+            const residentId = element.getAttribute('data-id'); // This is the idCard
+            // 新增：获取住址
+            const selectedResidentObject = mockResidentData.find(r => r.idCard === residentId);
+            let displayText = residentName;
+            if (selectedResidentObject && selectedResidentObject.address) {
+                displayText = `${residentName}（${selectedResidentObject.address}）`;
+            }
+            document.getElementById('relatedResident').value = displayText;
+            document.getElementById('residentSearchModal').classList.add('hidden');
+            showMessage(`已选择居民：${residentName}`, 'success');
+
+            if (selectedResidentObject) {
+                showResidentInfoSection(selectedResidentObject, ''); 
+            } else {
+                console.error("Selected resident not found in mockResidentData:", residentId);
+                showMessage("无法加载所选居民的详细信息。", "error");
+                document.getElementById('residentInfoSection').classList.add('hidden');
+                currentResidentData = null;
+            }
+        }
+
+        // 新增：居民姓名搜索功能初始化
+        function initResidentNameSearch() {
+            const searchInput = document.getElementById('residentNameSearchInput');
+            const searchButton = document.getElementById('executeResidentNameSearch');
+
+            if (searchInput && searchButton) {
+                searchButton.addEventListener('click', performResidentSearch);
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performResidentSearch();
+                    }
+                });
+            }
+        }
+
+        // 新增：执行居民姓名搜索
+        function performResidentSearch() {
+            const searchTerm = document.getElementById('residentNameSearchInput').value.trim().toLowerCase();
+            const filteredResidents = mockResidentData.filter(resident => 
+                resident.name.toLowerCase().includes(searchTerm)
+            );
+            renderResidentList(filteredResidents);
+            if (filteredResidents.length === 0) {
+                showMessage('没有找到匹配的居民信息', 'info');
+            }
+        }
+
+    </script>
+</body>
+</html> 

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社小智系统原型导航</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        
+        :root {
+            --primary-color: #2479CC;
+            --primary-light: #e6f2ff;
+            --primary-dark: #1a5b99;
+            --accent-color: #ff6a00;
+            --text-color: #333;
+            --light-gray: #f6f6f6;
+        }
+        
+        .header-banner {
+            background: linear-gradient(120deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .page-card {
+            background-color: white;
+            border-radius: 6px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #d0d0d0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .page-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-color);
+        }
+        
+        .page-card-preview {
+            height: 120px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.02);
+            z-index: 1;
+        }
+        
+        .page-card-body {
+            padding: 12px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-card-title i {
+            margin-right: 6px;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+        
+        .page-card-desc {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 12px;
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+        
+        .mt-auto {
+            border-top: 1px solid #eee;
+            margin-top: 4px;
+            padding-top: 8px;
+        }
+        
+        .role-tag {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-right: 5px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border: 1px solid rgba(36, 121, 204, 0.3);
+        }
+        
+        .role-tag.admin {
+            background-color: #fff5e6;
+            color: #ff8c00;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+        
+        .module-title {
+            position: relative;
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .module-title i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .btn-open {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-open i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        .btn-open:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .filter-bar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 12px 24px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .filter-button {
+            padding: 6px 16px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+        
+        .filter-button.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部横幅 -->
+    <header class="header-banner">
+        <div class="content-wrapper">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="text-3xl font-bold flex items-center">
+                        <i class="fas fa-city mr-3"></i>
+                        社小智工作系统
+                    </h1>
+                    <p class="mt-2 opacity-80">社区工作场景化智能辅助平台</p>
+                </div>
+                <div>
+                    <img src="https://via.placeholder.com/120x60?text=LOGO" alt="系统Logo" class="h-16">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-wrapper pb-12">
+        <!-- 角色与权限说明 -->
+        <section class="mb-8">
+            <div class="bg-white rounded-lg p-6 shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-users-cog mr-2 text-blue-600"></i>
+                    系统角色说明
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-user text-blue-600"></i>
+                            </div>
+                            <h3 class="text-lg font-medium">社工用户</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm">日常使用者，可访问所有专题的查阅功能。能够便捷地查找和使用活动相关的资源、工具、模板，并记录工作。无管理权限。</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-user-shield text-orange-600"></i>
+                            </div>
+                            <h3 class="text-lg font-medium">管理员</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm">系统管理者，除了拥有所有社工用户的权限外，还能管理和配置专题内容，包括专题分类、内容配置和用户权限管理。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 筛选栏 -->
+        <div class="filter-bar mb-6">
+            <div class="flex items-center">
+                <div class="mr-4 text-gray-600">按角色筛选:</div>
+                <div class="flex space-x-2">
+                    <button class="filter-button active" data-role="all">全部页面</button>
+                    <button class="filter-button" data-role="user">社工用户</button>
+                    <button class="filter-button" data-role="admin">管理员</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 前端使用模块 -->
+        <section class="mb-10" data-module="frontend-pages">
+            <h2 class="module-title">
+                <i class="fas fa-desktop"></i>
+                前端使用页面
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- 工作专区入口页 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-th-large"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-th-large"></i>
+                            工作专区入口
+                        </div>
+                        <div class="page-card-desc">
+                            专题入口列表页，展示所有活动专题，支持"按动作分类"和"按业务分类"两种视图切换，方便用户从不同维度查找专题。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="work_area.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 活动专题页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            活动专题页面
+                        </div>
+                        <div class="page-card-desc">
+                            活动策划与组织专题页面，提供活动全流程管理支持，包括策划方案、执行计划、总结报告等功能。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="topic_detail_template_huodong.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 工作总结专题页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-file-signature"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-file-signature"></i>
+                            工作总结专题
+                        </div>
+                        <div class="page-card-desc">
+                            提供工作总结编写的专题页面，包括总结模板、智能生成、历史记录等功能，帮助社工高效完成工作总结。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="topic_detail_template_gongzuozongjie.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 巡查走访专题页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-clipboard-check"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-clipboard-check"></i>
+                            巡查走访专题
+                        </div>
+                        <div class="page-card-desc">
+                            社区巡查走访与记录专题页面，支持居民标签筛选、快速查询、记录填写和数据统计功能。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="topic_detail_template_wentishangbao_houxu.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 功能区页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-tools"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-tools"></i>
+                            功能区页面
+                        </div>
+                        <div class="page-card-desc">
+                            展示不同功能模块的资源和工具，包含资源卡片、筛选功能等，为用户提供丰富的功能工具集。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="gongneng.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 巡查走访列表页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-route"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-route"></i>
+                            巡查走访列表
+                        </div>
+                        <div class="page-card-desc">
+                            巡查走访相关的列表展示页面，提供巡查任务管理、走访记录查看等功能。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="xuncha_zouzang_list.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 移动端页面模块 -->
+        <section class="mb-10" data-module="mobile-pages">
+            <h2 class="module-title">
+                <i class="fas fa-mobile-alt"></i>
+                小程序端页面
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- 社工工作专区小程序端页面（新增） -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-user-friends"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-user-friends"></i>
+                            社工工作专区小程序端
+                        </div>
+                        <div class="page-card-desc">
+                            专为社工日常移动办公设计，聚合工具箱、工作统计、备忘录等高频功能，极简高效，适配小程序端体验。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="sj_社工.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 小程序端工作专区原型 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-mobile-alt"></i>
+                            社区书记工作专区
+                        </div>
+                        <div class="page-card-desc">
+                            小程序端完整原型展示，包含AI工作站、工作专区、专题详情等多个页面的横向排列展示，适配移动端设计规范。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="sj.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 宣传活动移动端页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            宣传活动小程序端
+                        </div>
+                        <div class="page-card-desc">
+                            宣传活动专题的移动端独立页面，375px宽度设计，包含活动日历、专题指引、工作流程等功能模块。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="xuanchuan_huodong_mobile.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 工作总结移动端页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-file-signature"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-file-signature"></i>
+                            工作总结小程序端
+                        </div>
+                        <div class="page-card-desc">
+                            工作总结专题的移动端独立页面，包含AI工作总结生成器、公文模版、专题指引等移动端优化功能。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="gongzuo_zongjie_mobile.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 巡查走访移动端页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-clipboard-check"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-clipboard-check"></i>
+                            巡查走访小程序端
+                        </div>
+                        <div class="page-card-desc">
+                            巡查走访专题的移动端独立页面，适配触摸操作，优化表单输入体验，支持移动端特有的交互方式。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="wenti_shangbao_mobile.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 巡查走访移动端页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-route"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-route"></i>
+                            巡查走访小程序端
+                        </div>
+                        <div class="page-card-desc">
+                            巡查走访记录的移动端页面，展示巡查记录列表、详情查看等功能，适配移动端操作习惯。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="xuncha_zouzang_list_mobile.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 功能区移动端页面 -->
+                <div class="page-card" data-roles="user,admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-tools"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-tools"></i>
+                            四个功能区小程序端
+                        </div>
+                        <div class="page-card-desc">
+                            功能区页面的移动端版本，展示各类功能工具和资源，采用移动端友好的卡片布局和交互设计。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag">社工用户</span>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="gongneng_mobile.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 后台管理模块 -->
+        <section class="mb-10" data-module="admin-pages">
+            <h2 class="module-title">
+                <i class="fas fa-cog"></i>
+                后台管理页面
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- 专题管理页面 -->
+                <div class="page-card" data-roles="admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-cogs"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-cogs"></i>
+                            专题管理
+                        </div>
+                        <div class="page-card-desc">
+                            管理员专用页面，用于管理专区内容，包括专题管理、内容配置等功能。提供完整的专题生命周期管理。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="topic_admin.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 专题分类管理页面 -->
+                <div class="page-card" data-roles="admin">
+                    <div class="page-card-preview">
+                        <i class="fas fa-sitemap"></i>
+                        <div class="preview-overlay"></div>
+                    </div>
+                    <div class="page-card-body">
+                        <div class="page-card-title">
+                            <i class="fas fa-sitemap"></i>
+                            专题分类管理
+                        </div>
+                        <div class="page-card-desc">
+                            管理员专用页面，用于管理专题分类，定义专题类型及其关联配置，帮助用户更好地进行专题组织与查找。
+                        </div>
+                        <div class="mt-auto pt-2 flex justify-between items-center">
+                            <div>
+                                <span class="role-tag admin">管理员</span>
+                            </div>
+                            <a href="topic_category_admin.html" class="btn-open" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                打开页面
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-100 py-6 border-t border-gray-200">
+        <div class="content-wrapper">
+            <div class="text-center text-gray-600">
+                <p>社小智系统原型 © 2023-2025</p>
+                <p class="text-sm mt-1">本原型仅用于演示，部分功能可能并不完整</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 角色筛选功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterButtons = document.querySelectorAll('.filter-button');
+            const pageCards = document.querySelectorAll('.page-card');
+            
+            // 筛选按钮点击事件
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 更新按钮样式
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 获取选择的角色
+                    const selectedRole = this.getAttribute('data-role');
+                    
+                    // 筛选卡片
+                    pageCards.forEach(card => {
+                        const cardRoles = card.getAttribute('data-roles').split(',');
+                        if (selectedRole === 'all' || cardRoles.includes(selectedRole)) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

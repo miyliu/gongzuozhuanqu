@@ -1,0 +1,2711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4个功能区 - 社小智</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 图片裁剪组件 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            /* 确保父页面有滚动条 */
+            overflow-y: auto;
+        }
+
+        :root {
+            --primary-color: #2479CC;
+            --primary-light: #e6f2ff;
+            --primary-dark: #1a5b99;
+            --accent-color: #ff6a00;
+            --text-color: #333;
+            --light-gray: #f6f6f6;
+        }
+
+        .top-nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            padding: 0 20px;
+            color: #333;
+            position: relative;
+            height: 64px;
+            line-height: 64px;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+            background-color: rgba(36, 121, 204, 0.05);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+            background-color: var(--primary-light);
+        }
+
+        .topic-tabs {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid white;
+            font-weight: 500;
+        }
+        
+        .filter-bar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 12px 24px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 12px;
+            background-color: white;
+            color: #333;
+            min-width: 120px;
+            font-size: 13px;
+        }
+        
+        .filter-select option {
+            font-size: 13px;
+        }
+        
+        .filter-label {
+            color: #666;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+        
+        .resource-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eaeaea;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .resource-image {
+            height: 160px;
+            width: 100%;
+            object-fit: cover;
+            position: relative;
+        }
+        
+        .resource-image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+            color: white;
+            padding: 8px 12px;
+            font-weight: 500;
+            font-size: 16px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        }
+        
+        .resource-body {
+            padding: 16px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .resource-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        
+        .resource-desc {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+        
+        .resource-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .content-section {
+            /* 默认隐藏，通过JavaScript控制显示 */
+        }
+        
+        .content-section.hidden {
+            display: none;
+        }
+        
+        .btn-manage {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-manage:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        .btn-manage.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-upload {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-upload:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .sort-select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 12px;
+            background-color: white;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .edit-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: none;
+            gap: 4px;
+        }
+        
+        .resource-card:hover .edit-actions {
+            display: flex;
+        }
+        
+        .btn-edit, .btn-delete {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn-edit:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc3545;
+        }
+        
+        .resource-stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .view-details {
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toggle-switch input:checked + div {
+            background-color: var(--primary-color);
+        }
+        
+        .toggle-switch input:checked + div .toggle-dot {
+            transform: translateX(20px);
+        }
+        
+        .toggle-dot {
+            transition: transform 0.3s;
+        }
+        
+        /* iframe样式 */
+        .content-iframe {
+            width: 100%;
+            border: none;
+            min-height: 800px;
+        }
+
+        /* 弹框样式 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-hidden {
+            display: none;
+        }
+
+        /* 统一蓝色样式 */
+        .bg-blue-500, .bg-blue-600 {
+            background-color: var(--primary-color) !important;
+        }
+
+        .bg-blue-500:hover, .bg-blue-600:hover, .hover\\:bg-blue-600:hover, .hover\\:bg-blue-700:hover {
+            background-color: var(--primary-dark) !important;
+        }
+
+        .text-blue-600, .text-blue-500 {
+            color: var(--primary-color) !important;
+        }
+
+        .text-blue-600:hover, .text-blue-800:hover, .hover\\:text-blue-800:hover {
+            color: var(--primary-dark) !important;
+        }
+
+        .border-blue-600 {
+            border-color: var(--primary-color) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-nav">
+        <div class="content-wrapper px-4">
+            <div class="flex justify-between items-center h-full">
+                <div class="flex items-center">
+                    <!-- Logo -->
+                    <div class="flex items-center mr-8">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center mr-2" style="background-color: var(--primary-color) !important;">
+                            <i class="fas fa-brain text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold" style="color: var(--primary-color) !important;">社小智</span>
+                    </div>
+                    
+                    <!-- 主菜单 -->
+                    <div class="flex items-center space-x-1">
+                        <a href="index.html" class="nav-item">
+                            首页
+                        </a>
+                        <a href="#" class="nav-item">
+                            工单办理助手
+                        </a>
+                        <a href="#" class="nav-item">
+                            公文模版
+                        </a>
+                        <a href="#" class="nav-item">
+                            找找云文档
+                        </a>
+                        <a href="#" class="nav-item">
+                            工单分析办理PRO
+                        </a>
+                        <a href="#" class="nav-item">
+                            社情民意助手
+                        </a>
+                        <a href="work_area.html" class="nav-item active">
+                            工作专区
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-600 mr-4">欢迎，张社工</span>
+                    <button class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user-circle text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 专题名称显示区域 -->
+    <div class="bg-blue-600 text-white py-3" style="background-color: var(--primary-color) !important;">
+        <div class="content-wrapper px-4">
+            <div class="flex items-center">
+                <i class="fas fa-home mr-2"></i>
+                <span class="text-sm">主页</span>
+                <span class="mx-2">/</span>
+                <span class="text-sm font-medium" id="topicName">宣传活动样式，显示专题名称</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能选项卡 -->
+    <div class="topic-tabs">
+        <div class="content-wrapper px-4">
+            <div class="flex overflow-x-auto">
+                <a href="#" class="tab-item" data-content="ai">
+                    <i class="fas fa-robot mr-2"></i>
+                    AI助手
+                </a>
+                <a href="#" class="tab-item active" data-content="library">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    案例库
+                </a>
+                <a href="#" class="tab-item" data-content="templates">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    素材库
+                </a>
+                <a href="#" class="tab-item" data-content="history">
+                    <i class="fas fa-history mr-2"></i>
+                    使用记录
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <main class="content-wrapper px-4 py-6" id="mainContentArea">
+        <!-- AI助手内容区域 -->
+        <div class="content-section hidden" id="content-ai">
+            <div class="bg-white rounded-lg shadow-sm h-full flex flex-col" style="min-height: 600px;">
+                <!-- 聊天消息区域 -->
+                <div class="flex-1 p-4 overflow-y-auto" id="chatMessages">
+                    <!-- AI开场白 -->
+                    <div class="flex items-start mb-6">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
+                                <i class="fas fa-robot text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-100 rounded-lg p-4 max-w-4xl">
+                                <p class="text-gray-800 mb-4">您好！我是您的AI助手，专门为社区工作者提供宣传活动策划和执行方面的专业指导。</p>
+                                
+                                <div class="mb-4">
+                                    <p class="text-gray-800 mb-3">我可以为您提供以下宣传活动辅导：</p>
+                                    <ul class="text-gray-800 space-y-1">
+                                        <li>• <strong>活动策划</strong>：从主题确定到执行方案的全流程指导</li>
+                                        <li>• <strong>宣传推广</strong>：多渠道宣传策略和素材制作建议</li>
+                                        <li>• <strong>参与度提升</strong>：居民动员和互动环节设计技巧</li>
+                                        <li>• <strong>海报设计</strong>：AI智能绘制活动海报，快速生成精美宣传图</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- 预置问题建议 -->
+                                <div class="space-y-2">
+                                    <p class="text-sm text-gray-600 mb-3">您可以尝试以下问题：</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        <button class="preset-question bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm text-left transition-colors border border-blue-200">
+                                            我想组织一场面向青少年的爱国主义教育活动，有什么建议？
+                                        </button>
+                                        <button class="preset-question bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm text-left transition-colors border border-blue-200">
+                                            如何提高社区居民参与度？
+                                        </button>
+                                        <button class="preset-question bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm text-left transition-colors border border-blue-200">
+                                            社区活动策划有哪些注意事项？
+                                        </button>
+                                        <button class="preset-question bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm text-left transition-colors border border-blue-200">
+                                            帮我制作一张活动海报
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 消息输入区域 -->
+                <div class="border-t bg-gray-50 p-4">
+                    <!-- 模版选择区域 -->
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <button id="selectTemplateBtn" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                                <i class="fas fa-file-alt mr-2"></i>
+                                选择模版
+                            </button>
+                            <div id="selectedTemplate" class="hidden flex items-center bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                                <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                <span id="selectedTemplateName" class="text-blue-700 text-sm"></span>
+                                <button id="removeTemplate" class="ml-2 text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-end space-x-3">
+                        <div class="flex-1">
+                            <textarea 
+                                id="messageInput" 
+                                placeholder="请输入您的问题..." 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                rows="1"
+                                style="min-height: 44px; max-height: 120px;"
+                            ></textarea>
+                        </div>
+                        <button 
+                            id="sendButton" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+                            style="min-height: 44px;"
+                        >
+                            发送
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 案例库内容区域 - 默认显示 -->
+        <div class="content-section" id="content-library">
+            <!-- 筛选栏 -->
+            <div class="filter-bar flex flex-wrap items-center justify-between">
+                <div class="flex flex-wrap items-center gap-4 mb-2 md:mb-0">
+                    <!-- 移除文件格式过滤项 -->
+                </div>
+                <div class="flex items-center">
+                    <button id="btnManage" class="btn-manage mr-4">
+                        <i class="fas fa-cog"></i>
+                        管理模式
+                    </button>
+                    <button class="btn-upload mr-4" id="btnUploadCase">
+                        <i class="fas fa-upload"></i>
+                        上传案例
+                    </button>
+                    <div class="flex items-center">
+                        <span class="filter-label">排序方式：</span>
+                        <select class="sort-select">
+                            <option>最近更新</option>
+                            <option>最多浏览</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 资源列表 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8" id="resourceContainer">
+                <!-- 资源卡片1 - 最新 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/community_meeting.png" alt="社区活动" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类知识普及宣传活动</h3>
+                        <p class="resource-desc">通过趣味游戏、知识问答等互动形式，向社区居民普及垃圾分类知识，提高环保意识。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 1.2k</div>
+                                <div class="text-gray-500">2025-01-15</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片2 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/presentation_education.png" alt="宣传展板" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类宣传教育PPT</h3>
+                        <p class="resource-desc">包含垃圾分类的基础知识、分类标准、常见误区和有效实践案例的PPT课件。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 956</div>
+                                <div class="text-gray-500">2025-01-12</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片3 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/community_cleaning.png" alt="社区活动" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类宣传短视频</h3>
+                        <p class="resource-desc">生动形象的短视频演示如何正确进行垃圾分类，适合在社区宣传栏、电子屏等场所播放。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 1.5k</div>
+                                <div class="text-gray-500">2025-01-10</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片4 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/poster_recycle.png" alt="宣传海报" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类知识宣传海报套装</h3>
+                        <p class="resource-desc">一套10张高清垃圾分类宣传海报，包含分类指南、环保理念、实践技巧等内容。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 876</div>
+                                <div class="text-gray-500">2025-01-08</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片5 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/youth_education.png" alt="环保讲座" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">青少年环保知识讲座</h3>
+                        <p class="resource-desc">针对青少年群体的环保知识讲座方案，包含互动环节、知识竞赛和实践活动。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 732</div>
+                                <div class="text-gray-500">2025-01-05</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片6 -->
+                <div class="resource-card">
+                    <div class="relative">
+                        <img src="images/children_games.png" alt="互动游戏" class="resource-image">
+                        <div class="edit-actions">
+                            <button class="btn-edit" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <h3 class="resource-title">垃圾分类趣味互动游戏</h3>
+                        <p class="resource-desc">面向儿童的垃圾分类互动游戏方案，通过游戏化的方式激发孩子们对垃圾分类的兴趣。</p>
+                        <div class="resource-footer">
+                            <div class="resource-stats">
+                                <div><i class="far fa-eye mr-1"></i> 645</div>
+                                <div class="text-gray-500">2025-01-03</div>
+                            </div>
+                            <a href="javascript:void(0);" class="view-details text-blue-600 hover:text-blue-800 font-medium">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页导航 -->
+            <div class="flex justify-center">
+                <nav class="flex space-x-2">
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        上一页
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-blue-600 border border-blue-600 text-white">
+                        1
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        2
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        3
+                    </a>
+                    <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        下一页
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 素材库内容区域 -->
+        <div class="content-section hidden" id="content-templates">
+            <!-- 筛选栏 -->
+            <div class="filter-bar flex flex-wrap items-center justify-between">
+                <div class="flex flex-wrap items-center gap-4 mb-2 md:mb-0">
+                    <div class="flex items-center">
+                        <span class="filter-label">文档格式：</span>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>DOC</option>
+                            <option>PPT</option>
+                            <option>PDF</option>
+                            <option>XLS</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button id="btnManageDoc" class="btn-manage mr-4">
+                        <i class="fas fa-cog"></i>
+                        管理模式
+                    </button>
+                    <button class="btn-upload mr-4" id="btnUploadDoc">
+                        <i class="fas fa-upload"></i>
+                        上传素材
+                    </button>
+                    <div class="flex items-center">
+                        <span class="filter-label">排序方式：</span>
+                        <select class="sort-select">
+                            <option>最近更新</option>
+                            <option>最多下载</option>
+                            <option>最多引用</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 公文模版列表 -->
+            <div class="bg-gray-100 pb-8">
+                <!-- 第一行公文模版 - 大尺寸预览 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-4 px-2 pt-4">
+                    <!-- 公文模版1 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/wechat_2025-05-18_121127_135.png" alt="组织生活会记录格式" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">组织生活会记录格式</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数99</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版2 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/wechat_2025-05-18_121144_131.png" alt="社区工作者考勤汇总表" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作者考勤汇总表</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数39</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版3 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/wechat_2025-05-18_121111_143.png" alt="社区工作总结模板" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作总结模板</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数31</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版4 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/wechat_2025-05-18_121202_226.png" alt="领导席卡" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">领导席卡</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数24</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版5 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/wechat_2025-05-18_121047_295.png" alt="社区工作者年度考核登记表" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作者年度考核登记表</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数18</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第二行公文模版 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-4 px-2">
+                    <!-- 公文模版6 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/certificate_template.png" alt="荣誉证书模板" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">荣誉证书模板</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数13</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版7 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/staff_form.png" alt="社区工作者档案表" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作者档案表</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数12</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版8 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/seat_card.png" alt="座位牌" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">座位牌</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数12</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版9 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/work_manual.png" alt="汇编资料工作手册" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">汇编资料工作手册</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数9</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 公文模版10 -->
+                    <div class="bg-white pb-3 shadow-sm rounded-md flex flex-col cursor-pointer material-card">
+                        <div class="relative">
+                            <img src="images/doc_templates/receipt_template.png" alt="社区工作回执单" class="w-full h-44 object-contain p-2">
+                            <div class="edit-actions">
+                                <button class="btn-edit" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" title="删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center px-2 mt-2">
+                            <h3 class="text-sm font-medium">社区工作回执单</h3>
+                            <div class="text-xs text-gray-500 mt-1">下载次数8</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="bg-blue-500 text-white px-4 py-1 rounded inline-flex items-center justify-center text-sm hover:bg-blue-600">
+                                <i class="fas fa-download mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页导航 -->
+                <div class="flex justify-center">
+                    <nav class="flex space-x-2">
+                        <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                            上一页
+                        </a>
+                        <a href="#" class="py-2 px-4 bg-blue-600 border border-blue-600 text-white">
+                            1
+                        </a>
+                        <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                            2
+                        </a>
+                        <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                            3
+                        </a>
+                        <a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                            下一页
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用记录内容区域 -->
+        <div class="content-section hidden" id="content-history">
+            <iframe src="usage_history.html" frameborder="0" class="content-iframe"></iframe>
+        </div>
+    </main>
+
+    <!-- 上传案例弹框 -->
+    <div id="uploadCaseModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">添加/编辑案例</h3>
+                <button id="closeUploadCaseModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="uploadCaseForm">
+                    <!-- 案例标题 -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="caseTitle">
+                            案例标题 <span class="text-red-500">*</span>
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                               id="caseTitle" type="text" placeholder="请输入案例标题" required>
+                    </div>
+                    
+                    <!-- 案例视频 -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            案例视频
+                        </label>
+                        <div class="space-y-3">
+                            <!-- 在线视频链接选项 -->
+                            <div class="flex items-center">
+                                <input type="radio" id="videoLink" name="videoType" value="link" checked class="mr-2">
+                                <label for="videoLink" class="text-sm font-medium text-gray-700">在线视频链接</label>
+                            </div>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                   id="videoUrl" type="url" placeholder="请输入视频链接地址">
+                            
+                            <!-- 上传视频文件选项 -->
+                            <div class="flex items-center">
+                                <input type="radio" id="videoFile" name="videoType" value="file" class="mr-2">
+                                <label for="videoFile" class="text-sm font-medium text-gray-700">上传视频文件</label>
+                            </div>
+                            <input type="file" id="videoFileInput" class="w-full py-2 text-sm" accept="video/*" disabled>
+                        </div>
+                    </div>
+                    
+                    <!-- 案例描述 -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="caseDescription">
+                            案例描述 <span class="text-red-500">*</span>
+                        </label>
+                        <!-- 富文本编辑工具栏 -->
+                        <div class="border border-gray-300 rounded-t">
+                            <div class="bg-gray-50 px-3 py-2 border-b border-gray-300 flex items-center space-x-2">
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="粗体">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="斜体">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="下划线">
+                                    <i class="fas fa-underline"></i>
+                                </button>
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="删除线">
+                                    <i class="fas fa-strikethrough"></i>
+                                </button>
+                                <div class="w-px h-4 bg-gray-300"></div>
+                                <select class="text-sm border-none bg-transparent" title="字体样式">
+                                    <option>Normal</option>
+                                    <option>标题1</option>
+                                    <option>标题2</option>
+                                </select>
+                                <div class="w-px h-4 bg-gray-300"></div>
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="无序列表">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="有序列表">
+                                    <i class="fas fa-list-ol"></i>
+                                </button>
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="链接">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                                <button type="button" class="text-gray-600 hover:text-gray-800 p-1" title="图片">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea class="w-full border border-gray-300 border-t-0 rounded-b px-3 py-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                  id="caseDescription" rows="6" placeholder="请输入案例详细描述，支持复制粘贴格式文本..." required></textarea>
+                    </div>
+                    
+                    <!-- 封面图片 -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="caseCover">
+                            封面图片 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <button type="button" class="bg-gray-100 border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-200" id="selectCoverBtn">
+                                选择文件
+                            </button>
+                            <span class="text-sm text-gray-500" id="coverFileName">未选择文件</span>
+                        </div>
+                        <input type="file" id="caseCover" class="hidden" accept="image/*" required>
+                        <div class="mt-2 text-xs text-gray-500">建议尺寸：600×360px，支持jpg、png格式</div>
+                        <div id="coverPreviewContainer" class="mt-2 hidden">
+                            <img id="coverPreview" class="max-h-32 border rounded" />
+                        </div>
+                    </div>
+                    
+                    <!-- 案例文件 -->
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="caseFile">
+                            案例文件
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <button type="button" class="bg-gray-100 border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-200" id="selectFileBtn">
+                                选择文件
+                            </button>
+                            <span class="text-sm text-gray-500" id="caseFileName">未选择文件</span>
+                        </div>
+                        <input type="file" id="caseFile" class="hidden" multiple accept=".doc,.docx,.pdf">
+                        <div class="mt-2 text-xs text-gray-500">支持doc、docx、pdf格式文件，最多选择10个文件，单文件最大50MB</div>
+                        <div id="selectedFilesList" class="mt-2 hidden">
+                            <div class="text-sm font-medium text-gray-700 mb-2">已选择的文件：</div>
+                            <div id="fileListContainer" class="space-y-1"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 按钮区域 -->
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="btnCancelCaseUpload" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                            取消
+                        </button>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                            保存
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传素材弹框 -->
+    <div id="uploadDocModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">上传素材</h3>
+                <button id="closeUploadDocModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <form id="uploadDocForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="docTitle">
+                            素材名称 <span class="text-red-500">*</span>
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="docTitle" type="text" placeholder="请输入素材名称" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="docPreview">
+                            模板预览图 <span class="text-red-500">*</span>
+                        </label>
+                        <input type="file" id="docPreview" class="w-full py-2 text-sm" accept="image/*" required>
+                        <div class="mt-2 text-xs text-gray-500">建议尺寸：300×200px，支持JPG、PNG格式</div>
+                        <div id="previewContainer" class="mt-2 hidden">
+                            <img id="imagePreview" class="max-h-40 border rounded" />
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="docLargePreview">
+                            大预览图 <span class="text-red-500">*</span>
+                        </label>
+                        <input type="file" id="docLargePreview" class="w-full py-2 text-sm" accept="image/*" required>
+                        <div class="mt-2 text-xs text-gray-500">建议尺寸：800×600px，用于详情展示，支持JPG、PNG格式</div>
+                        <div id="largePreviewContainer" class="mt-2 hidden">
+                            <img id="largeImagePreview" class="max-h-40 border rounded" />
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="docDescription">
+                            素材说明
+                        </label>
+                        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="docDescription" rows="3" placeholder="请输入素材说明（可选）"></textarea>
+                        <div class="mt-2 text-xs text-gray-500">可选项，用于详细描述素材用途和特点</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="aiAssistantReference" class="mr-2">
+                            <span class="text-sm text-gray-700">AI助手可引用</span>
+                        </label>
+                        <div class="mt-1 text-xs text-gray-500">勾选后，AI助手可以在回答问题时引用此素材</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="docFile">
+                            选择文件 <span class="text-red-500">*</span>
+                        </label>
+                        <input type="file" id="docFile" class="w-full py-2 text-sm" required>
+                        <div class="mt-2 text-xs text-gray-500">支持DOC、DOCX、PDF、XLS、XLSX、PPT、PPTX等格式文件</div>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-4 border-t">
+                        <button type="button" id="btnCancelDocUpload" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            取消
+                        </button>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            上传
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 案例详情弹框 -->
+    <div id="caseDetailModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">案例详情</h3>
+                <button id="closeCaseDetailModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800" id="detailTitle">垃圾分类知识普及宣传活动</h2>
+                    <div class="mt-2 text-sm text-gray-500">发布时间：2025-01-15 | 浏览量：1.2k</div>
+                </div>
+                
+                <div class="mb-6">
+                    <!-- 案例视频展示区域 -->
+                    <div id="caseVideoContainer" class="mb-6">
+                        <div class="bg-black rounded-lg overflow-hidden">
+                            <!-- 视频播放区域 -->
+                            <div id="videoPlayer" class="w-full h-80 bg-black flex items-center justify-center relative">
+                                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50"></div>
+                                <div class="text-white text-center p-4 z-10">
+                                    <div class="w-16 h-16 bg-gray-600 bg-opacity-80 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-play text-2xl ml-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-gray-700 leading-relaxed space-y-4">
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">案例描述</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="font-medium mb-2">通过趣味游戏、知识问答等互动形式，向社区居民普及垃圾分类知识，提高环保意识。本活动采用了多种创新方式提高居民参与度：</h4>
+                                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-4">
+                                    <li>设置垃圾分类投放体验区，让居民实际操作</li>
+                                    <li>举办垃圾分类知识竞赛，设置奖品激励参与</li>
+                                    <li>通过图文并茂的展板展示垃圾分类知识</li>
+                                    <li>邀请环保专家进行现场答疑解惑</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <img src="images/community_meeting.png" alt="活动现场" class="w-full rounded-lg shadow-sm">
+                        </div>
+                        
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">活动背景</h3>
+                        <p>随着城市生活垃圾的日益增多，垃圾分类已成为提高资源利用率、改善环境质量的重要措施。为响应国家垃圾分类政策，提高社区居民的环保意识和垃圾分类能力，我们组织了这次知识普及宣传活动。</p>
+                        
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">活动内容</h3>
+                        <p>活动采用"理论+实践"的方式，首先由环保专家进行垃圾分类知识讲解，详细介绍了四类垃圾的分类标准和投放方法。随后设置了趣味问答环节，居民通过答题赢取小礼品。最后进行实际操作练习，让居民亲手体验正确的垃圾分类流程。</p>
+                        
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">活动效果</h3>
+                        <p>本次活动共有120余名居民参与，发放宣传资料200份，现场答疑50余人次。通过活动，居民对垃圾分类的知晓率从65%提升到95%，实际分类准确率提高了30%。活动得到了居民的一致好评，纷纷表示要在日常生活中认真实践垃圾分类。</p>
+                        
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">活动亮点</h3>
+                        <p>结合了知识宣讲和互动体验，寓教于乐，使枯燥的垃圾分类知识变得生动有趣。设置了针对不同年龄段的参与环节，全家可一起参与，增强了社区的凝聚力。</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 border-t pt-4">
+                    <h3 class="text-lg font-medium text-gray-800 mb-3">相关资料</h3>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                        <div class="flex items-center">
+                            <i class="far fa-file-pdf text-red-500 mr-3 text-xl"></i>
+                            <div>
+                                <div class="font-medium">垃圾分类知识普及宣传活动方案.pdf</div>
+                                <div class="text-sm text-gray-500">2.5MB - PDF文档</div>
+                            </div>
+                        </div>
+                        <a href="javascript:void(0);" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            下载文档
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-2 pt-6 border-t mt-6">
+                    <button id="btnCloseCaseDetail" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 素材详情弹框 -->
+    <div id="materialDetailModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 900px; max-height: 85vh;">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">素材详情</h3>
+                <button id="closeMaterialDetailModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800" id="materialDetailTitle">组织生活会记录格式</h2>
+                    <div class="mt-2 text-sm text-gray-500">
+                        <span>下载次数：<span id="materialDownloadCount">99</span></span>
+                        <span class="mx-2">|</span>
+                        <span>上传时间：<span id="materialUploadTime">2025-01-15</span></span>
+                        <span class="mx-2">|</span>
+                        <span>文件格式：<span id="materialFileFormat">DOCX</span></span>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <!-- 素材说明 -->
+                    <div class="mb-4">
+                        <div id="materialDescription" class="text-sm text-gray-700">
+                            <p>本素材为标准的组织生活会记录格式模板，包含会议基本信息、参会人员、会议议程、讨论内容、决议事项等完整要素。适用于党支部、团支部等各类组织生活会的记录整理工作。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 大预览图 -->
+                    <div class="mb-4">
+                        <div class="border rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center" style="height: 400px;">
+                            <img id="materialLargePreview" src="images/doc_templates/wechat_2025-05-18_121127_135.png" alt="素材预览" class="max-w-full max-h-full object-contain">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t pt-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gray-500">文件大小：<span id="materialFileSize">156KB</span></span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                                <i class="fas fa-download mr-2"></i>
+                                下载素材
+                            </button>
+                            <button id="btnCloseMaterialDetail" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">
+                                关闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模版选择弹框 -->
+    <div id="templateSelectModal" class="modal-backdrop modal-hidden">
+        <div class="modal-content" style="max-width: 600px; max-height: 80vh;">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">选择素材模版</h3>
+                <button id="closeTemplateModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <!-- 可引用素材列表 -->
+                <div class="max-h-96 overflow-y-auto">
+                    <div class="space-y-3" id="availableTemplates">
+                        <!-- 动态生成的模版列表 -->
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template1">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template1" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">组织生活会记录格式</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template2">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template2" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">社区工作总结模板</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template3">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template3" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">社区工作者考勤汇总表</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template4">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template4" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">领导席卡</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template5">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template5" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">社区工作者年度考核登记表</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template6">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template6" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">荣誉证书模板</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template7">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template7" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">社区工作者档案表</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template8">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template8" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">座位牌</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-item border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors" data-template-id="template9">
+                            <div class="flex items-center">
+                                <input type="radio" name="templateSelect" value="template9" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                        <h4 class="font-medium text-gray-800">汇编资料工作手册</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                    <button id="cancelTemplateSelect" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">
+                        取消
+                    </button>
+                    <button id="confirmTemplateSelect" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" disabled>
+                        确认选择
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 选项卡切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取并设置专题名称
+            function updateTopicName() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const topicName = urlParams.get('topicName') || urlParams.get('name');
+                const topicNameElement = document.getElementById('topicName');
+                
+                if (topicName && topicNameElement) {
+                    topicNameElement.textContent = decodeURIComponent(topicName);
+                    // 同时更新页面标题
+                    document.title = decodeURIComponent(topicName) + ' - 后四个页签 - 社小智';
+                }
+            }
+            
+            // 初始化专题名称
+            updateTopicName();
+            
+            const tabItems = document.querySelectorAll('.tab-item');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            tabItems.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    tabItems.forEach(t => t.classList.remove('active'));
+                    contentSections.forEach(section => section.classList.add('hidden'));
+                    
+                    // 添加当前选项卡的活动状态
+                    this.classList.add('active');
+                    
+                    // 显示对应的内容区域
+                    const contentId = 'content-' + this.getAttribute('data-content');
+                    const targetSection = document.getElementById(contentId);
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                        
+                        // 如果是iframe内容，确保iframe高度自适应
+                        const iframe = targetSection.querySelector('iframe');
+                        if (iframe) {
+                            // 发送消息给iframe请求高度
+                            iframe.addEventListener('load', function() {
+                                this.contentWindow.postMessage({type: 'request_height'}, '*');
+                            });
+                        }
+                    }
+                });
+            });
+
+            // 监听来自iframe的高度消息
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'iframe_content_height') {
+                    // 找到发送消息的iframe并设置高度
+                    const iframes = document.querySelectorAll('iframe');
+                    iframes.forEach(iframe => {
+                        if (iframe.contentWindow === event.source) {
+                            iframe.style.height = event.data.height + 'px';
+                        }
+                    });
+                }
+            });
+
+            // 管理模式切换
+            const btnManage = document.getElementById('btnManage');
+            const btnManageDoc = document.getElementById('btnManageDoc');
+            
+            if (btnManage) {
+                btnManage.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const editActions = document.querySelectorAll('.edit-actions');
+                    editActions.forEach(action => {
+                        action.style.display = this.classList.contains('active') ? 'flex' : 'none';
+                    });
+                });
+            }
+
+            // 格式筛选功能已移除，因为案例库不再需要文件格式过滤
+
+            // 素材库管理模式切换
+            if (btnManageDoc) {
+                btnManageDoc.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const editActions = document.querySelectorAll('#content-templates .edit-actions');
+                    editActions.forEach(action => {
+                        action.style.display = this.classList.contains('active') ? 'flex' : 'none';
+                    });
+                });
+            }
+
+            // 上传素材弹框功能
+            const btnUploadDoc = document.getElementById('btnUploadDoc');
+            const uploadDocModal = document.getElementById('uploadDocModal');
+            const closeUploadDocModal = document.getElementById('closeUploadDocModal');
+            const btnCancelDocUpload = document.getElementById('btnCancelDocUpload');
+            const uploadDocForm = document.getElementById('uploadDocForm');
+            
+            if (btnUploadDoc) {
+                btnUploadDoc.addEventListener('click', function() {
+                    uploadDocModal.classList.remove('modal-hidden');
+                });
+            }
+            
+            if (closeUploadDocModal) {
+                closeUploadDocModal.addEventListener('click', function() {
+                    uploadDocModal.classList.add('modal-hidden');
+                    resetUploadForm();
+                });
+            }
+            
+            if (btnCancelDocUpload) {
+                btnCancelDocUpload.addEventListener('click', function() {
+                    uploadDocModal.classList.add('modal-hidden');
+                    resetUploadForm();
+                });
+            }
+            
+            // 预览图片上传预览功能
+            const docPreview = document.getElementById('docPreview');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+
+            if (docPreview) {
+                docPreview.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagePreview.src = e.target.result;
+                            previewContainer.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewContainer.classList.add('hidden');
+                    }
+                });
+            }
+
+            // 大预览图上传预览功能
+            const docLargePreview = document.getElementById('docLargePreview');
+            const largePreviewContainer = document.getElementById('largePreviewContainer');
+            const largeImagePreview = document.getElementById('largeImagePreview');
+
+            if (docLargePreview) {
+                docLargePreview.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            largeImagePreview.src = e.target.result;
+                            largePreviewContainer.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        largePreviewContainer.classList.add('hidden');
+                    }
+                });
+            }
+
+            // 重置上传表单
+            function resetUploadForm() {
+                if (uploadDocForm) {
+                    uploadDocForm.reset();
+                    if (previewContainer) {
+                        previewContainer.classList.add('hidden');
+                    }
+                    if (largePreviewContainer) {
+                        largePreviewContainer.classList.add('hidden');
+                    }
+                }
+            }
+
+            if (uploadDocForm) {
+                uploadDocForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // 获取表单数据
+                    const title = document.getElementById('docTitle').value;
+                    const preview = document.getElementById('docPreview').files[0];
+                    const largePreview = document.getElementById('docLargePreview').files[0];
+                    const description = document.getElementById('docDescription').value;
+                    const aiReference = document.getElementById('aiAssistantReference').checked;
+                    const file = document.getElementById('docFile').files[0];
+                    
+                    if (!title) {
+                        alert('请输入素材名称');
+                        return;
+                    }
+                    
+                    if (!preview) {
+                        alert('请上传模板预览图');
+                        return;
+                    }
+                    
+                    if (!largePreview) {
+                        alert('请上传大预览图');
+                        return;
+                    }
+                    
+                    if (!file) {
+                        alert('请选择文件');
+                        return;
+                    }
+                    
+                    // 这里应该是真实的上传素材逻辑
+                    let successMessage = '素材上传成功！包含：预览图、大预览图和文件';
+                    if (description) successMessage += '、素材说明';
+                    if (aiReference) successMessage += '，已设置为AI助手可引用';
+                    
+                    alert(successMessage);
+                    uploadDocModal.classList.add('modal-hidden');
+                    resetUploadForm();
+                });
+            }
+
+            // 案例详情弹框功能
+            const viewDetailsLinks = document.querySelectorAll('.view-details');
+            const resourceCards = document.querySelectorAll('.resource-card');
+            const caseDetailModal = document.getElementById('caseDetailModal');
+            const closeCaseDetailModal = document.getElementById('closeCaseDetailModal');
+            const btnCloseCaseDetail = document.getElementById('btnCloseCaseDetail');
+
+            // 显示案例详情的函数
+            function showCaseDetail(card) {
+                if (caseDetailModal) {
+                    caseDetailModal.classList.remove('modal-hidden');
+                    
+                    // 获取案例标题和信息
+                    const title = card.querySelector('.resource-title').textContent;
+                    const detailTitle = document.getElementById('detailTitle');
+                    if (detailTitle) {
+                        detailTitle.textContent = title;
+                    }
+                    
+                    // 处理视频显示 - 显示视频播放器样式
+                    const videoContainer = document.getElementById('caseVideoContainer');
+                    const videoPlayer = document.getElementById('videoPlayer');
+                    
+                    if (videoContainer && videoPlayer) {
+                        // 总是显示视频容器，模拟有视频的样式
+                        videoContainer.classList.remove('hidden');
+                        
+                        // 根据案例随机决定是否有实际视频内容
+                        const hasVideo = Math.random() > 0.3; // 70%的概率有视频
+                        
+                        if (hasVideo) {
+                            // 创建视频元素
+                            videoPlayer.innerHTML = `
+                                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-30"></div>
+                                <video controls class="w-full h-full object-cover" poster="images/community_meeting.png">
+                                    <source src="#" type="video/mp4">
+                                    您的浏览器不支持视频播放
+                                </video>
+                            `;
+                        } else {
+                            // 显示播放按钮样式（但没有实际视频）
+                            videoPlayer.innerHTML = `
+                                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50"></div>
+                                <img src="images/community_meeting.png" alt="案例封面" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-16 h-16 bg-gray-800 bg-opacity-60 rounded-full flex items-center justify-center cursor-pointer hover:bg-opacity-80 transition-all">
+                                        <i class="fas fa-play text-white text-2xl ml-1"></i>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+            }
+
+            // 点击查看详情链接
+            if (viewDetailsLinks.length > 0) {
+                viewDetailsLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation(); // 防止冒泡触发卡片点击
+                        const card = link.closest('.resource-card');
+                        if (card) {
+                            showCaseDetail(card);
+                        }
+                    });
+                });
+            }
+
+            // 点击整个资源卡片也显示详情
+            if (resourceCards.length > 0) {
+                resourceCards.forEach(card => {
+                    card.addEventListener('click', function(e) {
+                        // 如果点击的是编辑按钮或删除按钮，不触发详情
+                        if (e.target.closest('.edit-actions')) {
+                            return;
+                        }
+                        // 如果点击的是查看详情链接，不重复处理
+                        if (e.target.closest('.view-details')) {
+                            return;
+                        }
+                        showCaseDetail(card);
+                    });
+                    
+                    // 添加鼠标悬停效果
+                    card.style.cursor = 'pointer';
+                });
+            }
+
+            // 关闭案例详情弹框
+            if (closeCaseDetailModal) {
+                closeCaseDetailModal.addEventListener('click', function() {
+                    caseDetailModal.classList.add('modal-hidden');
+                });
+            }
+
+            if (btnCloseCaseDetail) {
+                btnCloseCaseDetail.addEventListener('click', function() {
+                    caseDetailModal.classList.add('modal-hidden');
+                });
+            }
+
+            // 素材详情弹框功能
+            const materialCards = document.querySelectorAll('.material-card');
+            const materialDetailModal = document.getElementById('materialDetailModal');
+            const closeMaterialDetailModal = document.getElementById('closeMaterialDetailModal');
+            const btnCloseMaterialDetail = document.getElementById('btnCloseMaterialDetail');
+
+            // 素材数据映射
+            const materialData = {
+                '组织生活会记录格式': {
+                    image: 'images/doc_templates/wechat_2025-05-18_121127_135.png',
+                    downloads: '99',
+                    uploadTime: '2025-01-15',
+                    format: 'DOCX',
+                    description: '本素材为标准的组织生活会记录格式模板，包含会议基本信息、参会人员、会议议程、讨论内容、决议事项等完整要素。适用于党支部、团支部等各类组织生活会的记录整理工作。',
+                    fileSize: '156KB'
+                },
+                '社区工作者考勤汇总表': {
+                    image: 'images/doc_templates/wechat_2025-05-18_121144_131.png',
+                    downloads: '39',
+                    uploadTime: '2025-01-12',
+                    format: 'XLSX',
+                    description: '标准的社区工作者考勤汇总表模板，包含出勤统计、请假记录、加班统计等功能模块，方便社区管理人员进行考勤数据的整理和分析。',
+                    fileSize: '89KB'
+                },
+                '社区工作总结模板': {
+                    image: 'images/doc_templates/wechat_2025-05-18_121111_143.png',
+                    downloads: '31',
+                    uploadTime: '2025-01-10',
+                    format: 'DOCX',
+                    description: '专业的社区工作总结模板，涵盖工作概述、主要成果、存在问题、改进措施等标准格式，适用于月度、季度、年度工作总结。',
+                    fileSize: '234KB'
+                },
+                '领导席卡': {
+                    image: 'images/doc_templates/wechat_2025-05-18_121202_226.png',
+                    downloads: '24',
+                    uploadTime: '2025-01-08',
+                    format: 'DOCX',
+                    description: '精美的领导席卡模板，适用于各类会议、活动场合，设计简洁大方，可根据实际需要调整姓名和职务信息。',
+                    fileSize: '2.1MB'
+                },
+                '社区工作者年度考核登记表': {
+                    image: 'images/doc_templates/wechat_2025-05-18_121047_295.png',
+                    downloads: '18',
+                    uploadTime: '2025-01-05',
+                    format: 'DOCX',
+                    description: '标准的社区工作者年度考核登记表，包含个人基本信息、工作表现、考核评价等完整内容，符合人事管理规范要求。',
+                    fileSize: '178KB'
+                }
+            };
+
+            // 显示素材详情的函数
+            function showMaterialDetail(card) {
+                if (materialDetailModal) {
+                    materialDetailModal.classList.remove('modal-hidden');
+                    
+                    // 获取素材标题
+                    const title = card.querySelector('h3').textContent.trim();
+                    const downloads = card.querySelector('.text-xs').textContent.replace('下载次数', '');
+                    
+                    // 更新弹框内容
+                    const detailTitle = document.getElementById('materialDetailTitle');
+                    const downloadCount = document.getElementById('materialDownloadCount');
+                    const uploadTime = document.getElementById('materialUploadTime');
+                    const fileFormat = document.getElementById('materialFileFormat');
+                    const largePreview = document.getElementById('materialLargePreview');
+                    const description = document.getElementById('materialDescription');
+                    const fileSize = document.getElementById('materialFileSize');
+                    
+                    if (detailTitle) detailTitle.textContent = title;
+                    if (downloadCount) downloadCount.textContent = downloads;
+                    
+                    // 使用素材数据或默认值
+                    const data = materialData[title] || {
+                        image: card.querySelector('img').src,
+                        downloads: downloads,
+                        uploadTime: '2025-01-01',
+                        format: 'DOCX',
+                        description: '这是一个实用的社区工作素材模板，可以帮助提高工作效率。',
+                        fileSize: '100KB'
+                    };
+                    
+                    if (uploadTime) uploadTime.textContent = data.uploadTime;
+                    if (fileFormat) fileFormat.textContent = data.format;
+                    if (largePreview) largePreview.src = data.image;
+                    if (fileSize) fileSize.textContent = data.fileSize;
+                    if (description) {
+                        description.innerHTML = `<p>${data.description}</p>`;
+                    }
+                }
+            }
+
+            // 点击素材卡片显示详情
+            if (materialCards.length > 0) {
+                materialCards.forEach(card => {
+                    card.addEventListener('click', function(e) {
+                        // 如果点击的是编辑按钮或删除按钮，不触发详情
+                        if (e.target.closest('.edit-actions')) {
+                            return;
+                        }
+                        // 如果点击的是下载按钮，不触发详情
+                        if (e.target.closest('button') && e.target.closest('button').querySelector('.fa-download')) {
+                            e.stopPropagation();
+                            alert('开始下载素材...');
+                            return;
+                        }
+                        showMaterialDetail(card);
+                    });
+                });
+            }
+
+            // 关闭素材详情弹框
+            if (closeMaterialDetailModal) {
+                closeMaterialDetailModal.addEventListener('click', function() {
+                    materialDetailModal.classList.add('modal-hidden');
+                });
+            }
+
+            if (btnCloseMaterialDetail) {
+                btnCloseMaterialDetail.addEventListener('click', function() {
+                    materialDetailModal.classList.add('modal-hidden');
+                });
+            }
+
+            // 上传案例弹框功能
+            const btnUploadCase = document.getElementById('btnUploadCase');
+            const uploadCaseModal = document.getElementById('uploadCaseModal');
+            const closeUploadCaseModal = document.getElementById('closeUploadCaseModal');
+            const btnCancelCaseUpload = document.getElementById('btnCancelCaseUpload');
+            const uploadCaseForm = document.getElementById('uploadCaseForm');
+            
+            // 视频类型选择切换
+            const videoLinkRadio = document.getElementById('videoLink');
+            const videoFileRadio = document.getElementById('videoFile');
+            const videoUrlInput = document.getElementById('videoUrl');
+            const videoFileInput = document.getElementById('videoFileInput');
+            
+            // 文件选择按钮
+            const selectCoverBtn = document.getElementById('selectCoverBtn');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            const caseCover = document.getElementById('caseCover');
+            const caseFile = document.getElementById('caseFile');
+            const coverFileName = document.getElementById('coverFileName');
+            const caseFileName = document.getElementById('caseFileName');
+            
+            // 预览容器
+            const coverPreviewContainer = document.getElementById('coverPreviewContainer');
+            const coverPreview = document.getElementById('coverPreview');
+
+            if (btnUploadCase) {
+                btnUploadCase.addEventListener('click', function() {
+                    uploadCaseModal.classList.remove('modal-hidden');
+                });
+            }
+            
+            if (closeUploadCaseModal) {
+                closeUploadCaseModal.addEventListener('click', function() {
+                    uploadCaseModal.classList.add('modal-hidden');
+                    resetCaseForm();
+                });
+            }
+            
+            if (btnCancelCaseUpload) {
+                btnCancelCaseUpload.addEventListener('click', function() {
+                    uploadCaseModal.classList.add('modal-hidden');
+                    resetCaseForm();
+                });
+            }
+
+            // 视频类型切换功能
+            if (videoLinkRadio && videoFileRadio) {
+                videoLinkRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        videoUrlInput.disabled = false;
+                        videoFileInput.disabled = true;
+                    }
+                });
+                
+                videoFileRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        videoUrlInput.disabled = true;
+                        videoFileInput.disabled = false;
+                    }
+                });
+            }
+
+            // 封面图片选择功能
+            if (selectCoverBtn && caseCover) {
+                selectCoverBtn.addEventListener('click', function() {
+                    caseCover.click();
+                });
+                
+                caseCover.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        coverFileName.textContent = file.name;
+                        
+                        // 显示预览
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            coverPreview.src = e.target.result;
+                            coverPreviewContainer.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        coverFileName.textContent = '未选择文件';
+                        coverPreviewContainer.classList.add('hidden');
+                    }
+                });
+            }
+
+            // 案例文件选择功能
+            if (selectFileBtn && caseFile) {
+                selectFileBtn.addEventListener('click', function() {
+                    caseFile.click();
+                });
+                
+                caseFile.addEventListener('change', function() {
+                    const files = Array.from(this.files);
+                    const maxFiles = 10;
+                    const maxSize = 50 * 1024 * 1024; // 50MB
+                    const selectedFilesList = document.getElementById('selectedFilesList');
+                    const fileListContainer = document.getElementById('fileListContainer');
+                    
+                    // 验证文件数量
+                    if (files.length > maxFiles) {
+                        alert(`最多只能选择${maxFiles}个文件，当前选择了${files.length}个文件`);
+                        this.value = ''; // 清空选择
+                        return;
+                    }
+                    
+                    // 验证文件大小
+                    const oversizedFiles = files.filter(file => file.size > maxSize);
+                    if (oversizedFiles.length > 0) {
+                        const oversizedNames = oversizedFiles.map(file => file.name).join('、');
+                        alert(`以下文件超过50MB限制：${oversizedNames}`);
+                        this.value = ''; // 清空选择
+                        return;
+                    }
+                    
+                    if (files.length > 0) {
+                        // 更新文件名显示
+                        if (files.length === 1) {
+                            caseFileName.textContent = files[0].name;
+                        } else {
+                            caseFileName.textContent = `已选择${files.length}个文件`;
+                        }
+                        
+                        // 显示文件列表
+                        fileListContainer.innerHTML = '';
+                        files.forEach((file, index) => {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded text-sm';
+                            fileItem.innerHTML = `
+                                <div class="flex items-center">
+                                    <i class="far fa-file-alt text-blue-500 mr-2"></i>
+                                    <span>${file.name}</span>
+                                    <span class="text-gray-500 ml-2">(${(file.size / 1024 / 1024).toFixed(2)}MB)</span>
+                                </div>
+                                <button type="button" class="text-red-500 hover:text-red-700" onclick="removeFile(${index})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            `;
+                            fileListContainer.appendChild(fileItem);
+                        });
+                        
+                        selectedFilesList.classList.remove('hidden');
+                    } else {
+                        caseFileName.textContent = '未选择文件';
+                        selectedFilesList.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // 移除文件函数
+            window.removeFile = function(index) {
+                const caseFile = document.getElementById('caseFile');
+                const dt = new DataTransfer();
+                const files = Array.from(caseFile.files);
+                
+                // 重新构建文件列表，排除指定索引的文件
+                files.forEach((file, i) => {
+                    if (i !== index) {
+                        dt.items.add(file);
+                    }
+                });
+                
+                // 更新input的files
+                caseFile.files = dt.files;
+                
+                // 触发change事件来更新显示
+                const event = new Event('change', { bubbles: true });
+                caseFile.dispatchEvent(event);
+            };
+
+            // 重置案例表单
+            function resetCaseForm() {
+                if (uploadCaseForm) {
+                    uploadCaseForm.reset();
+                    if (coverFileName) coverFileName.textContent = '未选择文件';
+                    if (caseFileName) caseFileName.textContent = '未选择文件';
+                    if (coverPreviewContainer) coverPreviewContainer.classList.add('hidden');
+                    
+                    // 隐藏文件列表
+                    const selectedFilesList = document.getElementById('selectedFilesList');
+                    if (selectedFilesList) selectedFilesList.classList.add('hidden');
+                    
+                    // 重置视频类型选择
+                    if (videoUrlInput) {
+                        videoUrlInput.disabled = false;
+                        videoUrlInput.required = false; // 改为非必填
+                    }
+                    if (videoFileInput) {
+                        videoFileInput.disabled = true;
+                        videoFileInput.required = false;
+                    }
+                }
+            }
+
+            // 案例表单提交
+            if (uploadCaseForm) {
+                uploadCaseForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // 获取表单数据
+                    const title = document.getElementById('caseTitle').value;
+                    const description = document.getElementById('caseDescription').value;
+                    const cover = document.getElementById('caseCover').files[0];
+                    const videoType = document.querySelector('input[name="videoType"]:checked').value;
+                    
+                    if (!title) {
+                        alert('请输入案例标题');
+                        return;
+                    }
+                    
+                    if (!description) {
+                        alert('请输入案例描述');
+                        return;
+                    }
+                    
+                    if (!cover) {
+                        alert('请选择封面图片');
+                        return;
+                    }
+                    
+                    // 检查视频（非必填，但如果选择了类型就需要填写对应内容）
+                    if (videoType === 'link') {
+                        const videoUrl = document.getElementById('videoUrl').value;
+                        if (videoUrl && !videoUrl.trim()) {
+                            alert('请输入有效的视频链接地址');
+                            return;
+                        }
+                    } else if (videoType === 'file') {
+                        const videoFile = document.getElementById('videoFileInput').files[0];
+                        if (videoFileInput.disabled === false && !videoFile) {
+                            alert('请选择视频文件');
+                            return;
+                        }
+                    }
+                    
+                    // 这里应该是真实的上传案例逻辑
+                    alert('案例上传成功！');
+                    uploadCaseModal.classList.add('modal-hidden');
+                    resetCaseForm();
+                });
+            }
+
+            // AI助手聊天功能
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const chatMessages = document.getElementById('chatMessages');
+            const presetQuestions = document.querySelectorAll('.preset-question');
+
+            // 预置问题点击事件
+            presetQuestions.forEach(button => {
+                button.addEventListener('click', function() {
+                    const question = this.textContent.trim();
+                    sendMessage(question);
+                });
+            });
+
+            // 发送按钮点击事件
+            if (sendButton) {
+                sendButton.addEventListener('click', function() {
+                    const message = messageInput.value.trim();
+                    if (message) {
+                        sendMessage(message);
+                    }
+                });
+            }
+
+            // 输入框回车发送
+            if (messageInput) {
+                messageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        const message = this.value.trim();
+                        if (message) {
+                            sendMessage(message);
+                        }
+                    }
+                });
+
+                // 自动调整输入框高度
+                messageInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                });
+            }
+
+            // 发送消息函数
+            function sendMessage(message) {
+                // 添加用户消息
+                addUserMessage(message);
+                
+                // 清空输入框
+                messageInput.value = '';
+                messageInput.style.height = '44px';
+                
+                // 显示AI正在思考
+                showTypingIndicator();
+                
+                // 准备发送给AI的消息内容
+                let aiMessage = message;
+                if (currentSelectedTemplate) {
+                    aiMessage = `基于模版"${currentSelectedTemplate.name}"，${message}`;
+                }
+                
+                // 检查是否是海报制作请求
+                if (message.includes('制作') && message.includes('海报')) {
+                    setTimeout(() => {
+                        hideTypingIndicator();
+                        showPosterCreationProcess();
+                    }, 1000);
+                } else {
+                    // 普通消息回复
+                    setTimeout(() => {
+                        hideTypingIndicator();
+                        addAIMessage(generateAIResponse(aiMessage, currentSelectedTemplate));
+                    }, 1000 + Math.random() * 1000);
+                }
+            }
+
+            // 添加用户消息
+            function addUserMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'flex items-start mb-4 justify-end';
+                
+                // 构建消息内容，如果有选中的模版，先显示模版信息
+                let messageContent = '';
+                if (currentSelectedTemplate) {
+                    messageContent += `<div class="mb-2 p-2 bg-blue-400 rounded text-xs flex items-center">
+                        <i class="fas fa-file-alt mr-1"></i>
+                        <span>模版：${currentSelectedTemplate.name}</span>
+                    </div>`;
+                }
+                messageContent += `<p>${message}</p>`;
+                
+                messageDiv.innerHTML = `
+                    <div class="flex-1 flex justify-end">
+                        <div class="bg-blue-500 text-white rounded-lg p-3 max-w-2xl">
+                            ${messageContent}
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 ml-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                scrollToBottom();
+            }
+
+            // 添加AI消息
+            function addAIMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'flex items-start mb-4';
+                
+                // 检查消息是否包含HTML内容
+                const hasHTML = message.includes('<div') || message.includes('<img') || message.includes('<button');
+                
+                if (hasHTML) {
+                    messageDiv.innerHTML = `
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
+                                <i class="fas fa-robot text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-100 rounded-lg p-3 max-w-4xl">
+                                <div class="text-gray-800">${message}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
+                                <i class="fas fa-robot text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-100 rounded-lg p-3 max-w-4xl">
+                                <p class="text-gray-800">${message}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                chatMessages.appendChild(messageDiv);
+                
+                // 为生成的按钮添加事件监听器
+                if (hasHTML) {
+                    const buttons = messageDiv.querySelectorAll('button');
+                    buttons.forEach(btn => {
+                        if (btn.textContent.includes('下载海报')) {
+                            btn.addEventListener('click', function() {
+                                const originalText = this.innerHTML;
+                                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>下载中...';
+                                this.disabled = true;
+                                
+                                setTimeout(() => {
+                                    this.innerHTML = '<i class="fas fa-check mr-2"></i>下载完成';
+                                    setTimeout(() => {
+                                        this.innerHTML = originalText;
+                                        this.disabled = false;
+                                    }, 2000);
+                                }, 1500);
+                            });
+                        } else if (btn.textContent.includes('重新制作')) {
+                            btn.addEventListener('click', function() {
+                                addUserMessage('重新制作一张海报');
+                                setTimeout(() => {
+                                    showTypingIndicator();
+                                    setTimeout(() => {
+                                        hideTypingIndicator();
+                                        showPosterCreationProcess();
+                                    }, 1000);
+                                }, 500);
+                            });
+                        }
+                    });
+                }
+                
+                scrollToBottom();
+            }
+
+            // 显示AI正在思考指示器
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typingIndicator';
+                typingDiv.className = 'flex items-start mb-4';
+                typingDiv.innerHTML = `
+                    <div class="flex-shrink-0 mr-3">
+                        <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-100 rounded-lg p-3 max-w-4xl">
+                            <div class="flex items-center space-x-1">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(typingDiv);
+                scrollToBottom();
+            }
+
+            // 隐藏AI正在思考指示器
+            function hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+
+            // 滚动到底部
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // 海报制作过程仿真
+            function showPosterCreationProcess() {
+                // 第一步：开始制作
+                addAIMessage('好的！我来为您制作一张活动海报，正在分析制作需求...');
+                
+                // 第二步：显示制作进度
+                setTimeout(() => {
+                    const progressMessage = `
+                        <div class="p-4 bg-blue-50 rounded-lg border border-blue-200 mb-4">
+                            <div class="flex items-center mb-3">
+                                <div class="w-4 h-4 bg-blue-500 rounded-full animate-pulse mr-2"></div>
+                                <span class="text-blue-700 font-medium">AI正在制作海报...</span>
+                            </div>
+                            <div class="space-y-2 text-sm text-blue-600">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                    <span>✓ 确定主题：社区活动宣传</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
+                                    <span>⏳ 设计布局：图文排版</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-gray-300 rounded-full mr-2"></div>
+                                    <span class="text-gray-400">⏳ 生成海报图片</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    addAIMessage(progressMessage);
+                }, 1500);
+                
+                                 // 第三步：完成制作
+                setTimeout(() => {
+                    const finalMessage = `海报制作完成！🎉
+
+<div class="mt-4 border rounded-lg overflow-hidden bg-white shadow-lg">
+    <img src="images/poster_recycle.png" alt="AI制作的活动海报" class="w-full max-w-md mx-auto">
+    <div class="p-4 bg-gradient-to-r from-green-50 to-blue-50">
+        <div class="flex justify-center space-x-3">
+            <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                <i class="fas fa-download mr-2"></i>下载海报
+            </button>
+            <button class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                <i class="fas fa-redo mr-2"></i>重新制作
+            </button>
+        </div>
+    </div>
+</div>`;
+                    
+                    addAIMessage(finalMessage);
+                }, 3000);
+            }
+
+            // 生成AI回复
+            function generateAIResponse(userMessage, template) {
+                // 如果有选中的模版，优先给出基于模版的回复
+                if (template) {
+                    switch (template.id) {
+                        case 'template1': // 组织生活会记录格式
+                            return `基于"${template.name}"模版，我为您提供以下建议：
+
+• **会议基本信息**：明确记录会议时间、地点、主持人、记录人等基本要素
+• **参会人员**：详细记录出席、请假、缺席人员名单，确保信息完整
+• **会议议程**：按照议程逐项记录，包含学习内容、讨论议题、决议事项
+• **发言记录**：如实记录主要发言人的观点和建议
+• **会议总结**：总结会议成果和后续工作安排
+
+需要我为您提供具体的记录格式示例吗？`;
+                        
+                        case 'template2': // 社区工作总结模板
+                            return `参考"${template.name}"，我建议您的工作总结应包含以下结构：
+
+• **工作概述**：简要介绍本期工作的整体情况和主要任务
+• **主要成果**：用数据和事例详细说明取得的工作成效
+• **创新举措**：突出工作中的亮点和创新做法
+• **存在问题**：客观分析工作中遇到的困难和不足
+• **经验总结**：提炼可复制推广的工作经验
+• **下步计划**：制定针对性的改进措施和工作安排
+
+您希望我针对哪个具体部分提供更详细的撰写指导？`;
+                        
+                        case 'template3': // 社区工作者考勤汇总表
+                            return `基于"${template.name}"，我为您整理了考勤管理的要点：
+
+• **出勤统计**：准确记录每日出勤情况，包含正常出勤、迟到、早退
+• **请假管理**：分类记录事假、病假、公假等不同假期类型
+• **加班记录**：统计加班时间和加班事由，便于工作量评估
+• **异常情况**：记录特殊情况说明，确保数据真实可靠
+• **月度汇总**：生成月度考勤报表，为绩效考核提供依据
+
+需要我为您说明具体的操作流程或表格设计要点吗？`;
+                        
+                        default:
+                            return `基于您选择的"${template.name}"模版，我已经为您准备了针对性的建议。请告诉我您具体需要什么帮助，我会结合该模版为您提供更精准的指导。`;
+                    }
+                }
+                
+                // 原有的预设回复逻辑
+                const responses = {
+                    '我想组织一场面向青少年的爱国主义教育活动，有什么建议？': `针对青少年群体的爱国主义教育活动，我建议您可以从以下几个方面来考虑：
+
+• 结合当下热点，设计活动性强的活动形式
+• 运用多媒体技术，增强活动趣味性  
+• 设置小组竞赛环节，提高参与积极性
+• 邀请相关领域专家进行分享
+
+需要我为您生成一个具体的活动方案吗？`,
+                    
+                    '如何提高社区居民参与度？': `提高社区居民参与度是一个系统性工程，建议从以下几个维度入手：
+
+• 了解居民真实需求，开展针对性活动
+• 建立多元化沟通渠道，及时收集反馈
+• 设计激励机制，如积分兑换、荣誉表彰等
+• 培养社区意见领袖，发挥示范带动作用
+• 选择合适的时间和地点，降低参与门槛
+
+您希望我针对哪个具体方面提供更详细的建议？`,
+                    
+                    '社区活动策划有哪些注意事项？': `社区活动策划需要注意以下关键要素：
+
+• 前期调研：了解居民需求和兴趣点
+• 目标明确：设定清晰的活动目标和预期效果
+• 资源配置：合理安排人力、物力、财力
+• 风险评估：制定应急预案，确保活动安全
+• 宣传推广：多渠道宣传，提高知晓率
+• 效果评估：建立反馈机制，总结经验教训
+
+您想了解哪个环节的具体操作方法？`,
+                    
+                    '帮我制作一张活动海报': `好的！我来为您制作一张活动海报，正在分析制作需求...`
+                };
+
+                // 检查是否有预设回复
+                if (responses[userMessage]) {
+                    return responses[userMessage];
+                }
+
+                // 根据关键词生成回复
+                if (userMessage.includes('海报') || userMessage.includes('制作')) {
+                    return '我可以为您制作各种主题的活动海报！请告诉我您的具体需求，我会为您智能生成专业的宣传海报。';
+                } else if (userMessage.includes('活动') || userMessage.includes('策划')) {
+                    return '关于活动策划，我建议您首先明确活动目标，然后制定详细的执行方案。您可以告诉我具体的活动类型，我来为您提供更有针对性的建议。';
+                } else if (userMessage.includes('工作') || userMessage.includes('总结')) {
+                    return '工作总结是很重要的反思和提升过程。建议您从工作完成情况、取得成效、存在问题、改进措施等几个方面来组织内容。需要我为您提供具体的写作框架吗？';
+                } else if (userMessage.includes('社区') || userMessage.includes('居民')) {
+                    return '社区工作需要以居民需求为导向，建立良好的沟通机制。您遇到了什么具体问题？我可以为您提供更有针对性的解决方案。';
+                } else {
+                    return '感谢您的提问！我会尽力为您提供帮助。您能详细描述一下您遇到的具体情况吗？这样我可以给出更准确的建议。';
+                }
+            }
+
+            // 模版选择相关元素
+            const selectTemplateBtn = document.getElementById('selectTemplateBtn');
+            const templateSelectModal = document.getElementById('templateSelectModal');
+            const closeTemplateModal = document.getElementById('closeTemplateModal');
+            const cancelTemplateSelect = document.getElementById('cancelTemplateSelect');
+            const confirmTemplateSelect = document.getElementById('confirmTemplateSelect');
+            const selectedTemplate = document.getElementById('selectedTemplate');
+            const selectedTemplateName = document.getElementById('selectedTemplateName');
+            const removeTemplate = document.getElementById('removeTemplate');
+            
+            let currentSelectedTemplate = null; // 当前选中的模版
+
+            // 预置问题点击事件
+            presetQuestions.forEach(button => {
+                button.addEventListener('click', function() {
+                    const question = this.textContent.trim();
+                    sendMessage(question);
+                });
+            });
+
+            // 模版选择按钮点击事件
+            if (selectTemplateBtn) {
+                selectTemplateBtn.addEventListener('click', function() {
+                    templateSelectModal.classList.remove('modal-hidden');
+                });
+            }
+
+            // 关闭模版选择弹框
+            if (closeTemplateModal) {
+                closeTemplateModal.addEventListener('click', function() {
+                    templateSelectModal.classList.add('modal-hidden');
+                    resetTemplateSelection();
+                });
+            }
+
+            if (cancelTemplateSelect) {
+                cancelTemplateSelect.addEventListener('click', function() {
+                    templateSelectModal.classList.add('modal-hidden');
+                    resetTemplateSelection();
+                });
+            }
+
+            // 模版选择确认
+            if (confirmTemplateSelect) {
+                confirmTemplateSelect.addEventListener('click', function() {
+                    const selectedRadio = document.querySelector('input[name="templateSelect"]:checked');
+                    if (selectedRadio) {
+                        const templateItem = selectedRadio.closest('.template-item');
+                        const templateName = templateItem.querySelector('h4').textContent;
+                        const templateId = templateItem.dataset.templateId;
+                        
+                        // 设置当前选中的模版
+                        currentSelectedTemplate = {
+                            id: templateId,
+                            name: templateName
+                        };
+                        
+                        // 显示选中的模版
+                        selectedTemplateName.textContent = templateName;
+                        selectedTemplate.classList.remove('hidden');
+                        
+                        // 关闭弹框
+                        templateSelectModal.classList.add('modal-hidden');
+                        resetTemplateSelection();
+                    }
+                });
+            }
+
+            // 移除模版
+            if (removeTemplate) {
+                removeTemplate.addEventListener('click', function() {
+                    currentSelectedTemplate = null;
+                    selectedTemplate.classList.add('hidden');
+                });
+            }
+
+            // 模版选择交互
+            document.addEventListener('change', function(e) {
+                if (e.target.name === 'templateSelect') {
+                    confirmTemplateSelect.disabled = false;
+                }
+            });
+
+            // 模版项点击选择
+            document.addEventListener('click', function(e) {
+                const templateItem = e.target.closest('.template-item');
+                if (templateItem) {
+                    const radio = templateItem.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    confirmTemplateSelect.disabled = false;
+                }
+            });
+
+            // 重置模版选择状态
+            function resetTemplateSelection() {
+                document.querySelectorAll('input[name="templateSelect"]').forEach(radio => {
+                    radio.checked = false;
+                });
+                confirmTemplateSelect.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html> 

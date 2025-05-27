@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作总结 - 移动端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 移动端全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            width: 375px;
+            overflow-x: hidden;
+        }
+        
+        /* 移动端导航栏 */
+        .mobile-navbar {
+            height: 44px;
+            background-color: #2479CC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-navbar-back {
+            position: absolute;
+            left: 16px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .mobile-navbar-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+        
+        /* 移动端内容区域 */
+        .mobile-content {
+            padding: 16px 12px;
+        }
+        
+        /* 卡片样式 */
+        .mobile-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 专题指引样式 */
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .guide-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2479CC;
+        }
+        
+        .guide-btn {
+            background-color: #2479CC;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .guide-btn i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        .guide-content {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 3px solid #2479CC;
+        }
+        
+        .guide-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+        }
+        
+        .mobile-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mobile-card-title i {
+            margin-right: 8px;
+            color: #2479CC;
+        }
+        
+        /* 按钮样式 */
+        .mobile-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .mobile-btn-primary {
+            background-color: #2479CC;
+            color: white;
+        }
+        
+        .mobile-btn-primary:active {
+            background-color: #1a5b99;
+        }
+        
+        .mobile-btn-secondary {
+            background-color: #f0f0f0;
+            color: #333333;
+        }
+        
+        .mobile-btn-secondary:active {
+            background-color: #e0e0e0;
+        }
+        
+        /* 表单样式 */
+        .mobile-form-group {
+            margin-bottom: 16px;
+        }
+        
+        .mobile-form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333333;
+            margin-bottom: 8px;
+        }
+        
+        .mobile-form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .mobile-form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            min-height: 80px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        /* 模版网格 */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .template-item {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #f0f0f0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .template-item:active {
+            background-color: #f5f5f5;
+            transform: scale(0.98);
+        }
+        
+        .template-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .template-item-title {
+            font-size: 12px;
+            color: #333333;
+            line-height: 1.3;
+        }
+        
+        .template-item-meta {
+            font-size: 10px;
+            color: #999999;
+            margin-top: 4px;
+        }
+        
+        /* 弹框样式 */
+        .mobile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .mobile-modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .mobile-modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+        }
+        
+        .mobile-modal-body {
+            padding: 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .mobile-modal-footer {
+            padding: 16px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* 全屏抽屉样式 */
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .mobile-drawer-content {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f7f7f7;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .mobile-drawer.show .mobile-drawer-content {
+            transform: translateX(0);
+        }
+        
+        .mobile-drawer-header {
+            height: 44px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .mobile-drawer-close {
+            color: #2479CC;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .mobile-drawer-title {
+            flex: 1;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            color: #000000;
+        }
+        
+        /* 工作流程步骤样式 */
+        .workflow-step {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .workflow-step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .workflow-step-content {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .workflow-step-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333333;
+        }
+        
+        .workflow-step-desc {
+            font-size: 12px;
+            color: #666666;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .workflow-step-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .workflow-file-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .workflow-file-tag i {
+            margin-right: 4px;
+        }
+        
+        /* 生成结果样式 */
+        .generation-result {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .generation-result-content {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333333;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 加载动画 */
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 移动端导航栏 -->
+    <div class="mobile-navbar">
+        <div class="mobile-navbar-back">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="mobile-navbar-title" id="navbarTitle">工作总结专题</div>
+    </div>
+    
+    <!-- 移动端内容区域 -->
+    <div class="mobile-content">
+        <!-- 专题指引卡片 -->
+        <div class="mobile-card">
+            <div class="guide-header">
+                <h2 class="guide-title">专题指引</h2>
+                <button class="guide-btn" id="btnWorkflowGuide">
+                    <i class="fas fa-tasks"></i>
+                    工作流程
+                </button>
+            </div>
+            <div class="guide-content">
+                <p class="guide-text">
+                    工作总结是对一定时期内工作的回顾、分析和评价。通过系统梳理工作成果，总结经验教训，为今后工作提供参考和指导。
+                </p>
+            </div>
+        </div>
+        
+        <!-- 工作总结生成器 -->
+        <div class="mobile-card">
+            <div class="mobile-card-title">
+                <i class="fas fa-magic"></i>
+                AI工作总结生成器
+            </div>
+            
+            <!-- 时间范围选择 -->
+            <div class="mobile-form-group">
+                <label class="mobile-form-label">总结时间范围</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="date" id="startDate" class="mobile-form-input" style="flex: 1;" value="2025-01-01">
+                    <span style="color: #666666; font-size: 14px;">至</span>
+                    <input type="date" id="endDate" class="mobile-form-input" style="flex: 1;" value="2025-12-31">
+                </div>
+            </div>
+            
+            <!-- 工作范围选择 -->
+            <div class="mobile-form-group">
+                <label class="mobile-form-label">工作范围</label>
+                <div style="display: flex; align-items: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px;">
+                    <input type="checkbox" id="fullCommunityWork" style="margin-right: 8px;">
+                    <label for="fullCommunityWork" style="font-size: 14px; color: #333333; cursor: pointer;" id="fullCommunityLabel">
+                        <span id="fullCommunityText">全社区工作总结</span>
+                        <div style="font-size: 12px; color: #999999; margin-top: 2px;" id="fullCommunityDesc">
+                            (包含所有包楼社工和部门的工作数据)
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- 用户需求输入 -->
+            <div class="mobile-form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label class="mobile-form-label" style="margin-bottom: 0;">总结要求</label>
+                    <button id="resetRequirements" style="background: none; border: none; color: #2479CC; font-size: 12px; cursor: pointer;">
+                        <i class="fas fa-undo mr-1"></i>恢复默认
+                    </button>
+                </div>
+                <textarea id="userRequirements" class="mobile-form-textarea" placeholder="请描述您的总结要求..."></textarea>
+            </div>
+            
+            <!-- 生成按钮 -->
+            <button class="mobile-btn mobile-btn-primary" id="btnGenerateSummary">
+                <i class="fas fa-magic mr-2"></i>
+                一键生成总结
+            </button>
+            
+            <!-- 生成过程 -->
+            <div id="generationProcess" class="hidden" style="text-align: center; padding: 20px;">
+                <div style="font-size: 14px; color: #666666; margin-bottom: 16px;">
+                    正在生成工作总结<span class="loading-dots"></span>
+                </div>
+                <div style="background-color: #f0f0f0; border-radius: 8px; padding: 12px;">
+                    <div id="processSteps" style="font-size: 13px; color: #666; text-align: left;"></div>
+                </div>
+            </div>
+            
+            <!-- 生成结果 -->
+            <div id="summaryResult" class="hidden">
+                <div class="generation-result">
+                    <div class="generation-result-content" id="summaryContent"></div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button class="mobile-btn mobile-btn-secondary" id="copySummary" style="flex: 1;">
+                        <i class="fas fa-copy mr-2"></i>复制内容
+                    </button>
+                    <button class="mobile-btn mobile-btn-secondary" id="exportSummary" style="flex: 1;">
+                        <i class="fas fa-download mr-2"></i>导出云文档
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 工作总结素材 -->
+        <div class="mobile-card">
+            <div class="mobile-card-title">
+                <i class="fas fa-folder-open"></i>
+                工作总结素材
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                <!-- 活动记录 -->
+                <div style="background-color: #e6f7ff; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s;" onclick="showToast('活动记录功能开发中...')">
+                    <div style="width: 40px; height: 40px; background-color: #1890ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                        <i class="fas fa-calendar-alt" style="color: white; font-size: 18px;"></i>
+                    </div>
+                    <div style="font-size: 12px; font-weight: 600; color: #333333;">活动记录</div>
+                    <div style="font-size: 10px; color: #666666; margin-top: 2px;">社区组织的各类活动</div>
+                </div>
+                
+                <!-- 巡查走访 -->
+                <div style="background-color: #f6ffed; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s;" onclick="showToast('巡查走访功能开发中...')">
+                    <div style="width: 40px; height: 40px; background-color: #52c41a; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                        <i class="fas fa-walking" style="color: white; font-size: 18px;"></i>
+                    </div>
+                    <div style="font-size: 12px; font-weight: 600; color: #333333;">巡查走访</div>
+                    <div style="font-size: 10px; color: #666666; margin-top: 2px;">各种巡查包括地址点位和居民的记录情况</div>
+                </div>
+                
+                <!-- 居民台账 -->
+                <div style="background-color: #f9f0ff; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s;" onclick="showToast('居民台账功能开发中...')">
+                    <div style="width: 40px; height: 40px; background-color: #722ed1; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                        <i class="fas fa-users" style="color: white; font-size: 18px;"></i>
+                    </div>
+                    <div style="font-size: 12px; font-weight: 600; color: #333333;">居民台账</div>
+                    <div style="font-size: 10px; color: #666666; margin-top: 2px;">居民档案管理记录</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 工作流程指南抽屉 -->
+    <div class="mobile-drawer" id="workflowGuideDrawer">
+        <div class="mobile-drawer-content" id="workflowGuideContent">
+            <div class="mobile-drawer-header">
+                <div class="mobile-drawer-close" id="closeWorkflowGuide">
+                    <i class="fas fa-times"></i>
+                </div>
+                <div class="mobile-drawer-title">工作流程指南</div>
+                <div style="width: 16px;"></div>
+            </div>
+            
+            <div style="padding: 16px 12px;">
+                <!-- 步骤1 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon" style="background-color: #52c41a;">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">1. 制定总结计划</div>
+                        <div class="workflow-step-desc">确定总结时间范围、内容重点和参与人员，制定详细的工作计划。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag" style="background-color: #e6f7ff; color: #1890ff;">
+                                <i class="far fa-file-word"></i>总结计划表
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 步骤2 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon" style="background-color: #1890ff;">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">2. 收集整理数据</div>
+                        <div class="workflow-step-desc">系统收集工作期间的各类数据、活动记录、巡查走访情况等基础资料。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag" style="background-color: #f6ffed; color: #52c41a;">
+                                <i class="far fa-file-excel"></i>数据统计表
+                            </div>
+                            <div class="workflow-file-tag" style="background-color: #e6f7ff; color: #1890ff;">
+                                <i class="far fa-file-word"></i>活动记录
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 步骤3 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon" style="background-color: #722ed1;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">3. 分析工作成效</div>
+                        <div class="workflow-step-desc">对收集的数据进行深入分析，总结工作亮点和成效，识别存在的问题。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag" style="background-color: #f9f0ff; color: #722ed1;">
+                                <i class="far fa-file-powerpoint"></i>成效分析报告
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 步骤4 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon" style="background-color: #fa8c16;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">4. 征求意见建议</div>
+                        <div class="workflow-step-desc">向相关部门、同事和服务对象征求意见，完善总结内容。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag" style="background-color: #fff7e6; color: #fa8c16;">
+                                <i class="far fa-file-word"></i>意见征集表
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 步骤5 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon" style="background-color: #13c2c2;">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">5. 编写总结报告</div>
+                        <div class="workflow-step-desc">按照规范格式编写正式的工作总结报告，突出重点亮点。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag" style="background-color: #e6fffb; color: #13c2c2;">
+                                <i class="far fa-file-word"></i>总结报告
+                            </div>
+                            <div class="workflow-file-tag" style="background-color: #f6ffed; color: #52c41a;">
+                                <i class="far fa-file-excel"></i>数据汇总表
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 步骤6 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon" style="background-color: #eb2f96;">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">6. 汇报与推广</div>
+                        <div class="workflow-step-desc">通过工作汇报会、简报等形式，推广成功经验和创新做法。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag" style="background-color: #fff0f6; color: #eb2f96;">
+                                <i class="far fa-file-word"></i>工作简报
+                            </div>
+                            <div class="workflow-file-tag" style="background-color: #f9f0ff; color: #722ed1;">
+                                <i class="far fa-file-powerpoint"></i>汇报PPT
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 设置URL参数中的专题名称
+        const urlParams = new URLSearchParams(window.location.search);
+        const topicName = urlParams.get('topicName') || urlParams.get('name');
+        
+        if (topicName) {
+            const decodedTopicName = decodeURIComponent(topicName);
+            document.getElementById('navbarTitle').textContent = decodedTopicName;
+            document.title = decodedTopicName + ' - 社小智';
+        }
+
+        // 工作流程指南抽屉功能
+        const btnWorkflowGuide = document.getElementById('btnWorkflowGuide');
+        const workflowGuideDrawer = document.getElementById('workflowGuideDrawer');
+        const closeWorkflowGuide = document.getElementById('closeWorkflowGuide');
+        const workflowGuideContent = document.getElementById('workflowGuideContent');
+
+        // 打开工作流程指南
+        btnWorkflowGuide.addEventListener('click', function() {
+            workflowGuideDrawer.style.display = 'block';
+            setTimeout(() => {
+                workflowGuideDrawer.classList.add('show');
+            }, 10);
+        });
+
+        // 关闭工作流程指南
+        function closeWorkflowDrawer() {
+            workflowGuideDrawer.classList.remove('show');
+            setTimeout(() => {
+                workflowGuideDrawer.style.display = 'none';
+            }, 300);
+        }
+
+        closeWorkflowGuide.addEventListener('click', closeWorkflowDrawer);
+        
+        // 点击背景关闭
+        workflowGuideDrawer.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWorkflowDrawer();
+            }
+        });
+
+        // 模拟数据
+        const mockData = {
+            activities: [
+                { name: '社区安全巡逻培训活动', date: '2025-01-15' },
+                { name: '防盗防骗安全讲座', date: '2025-02-05' },
+                { name: '社区安全隐患排查行动', date: '2025-03-10' },
+                { name: '青少年安全教育主题活动', date: '2025-04-20' },
+                { name: '居民安全知识竞赛', date: '2025-05-15' },
+                { name: '应急演练活动', date: '2025-06-10' },
+                { name: '社区治安志愿者培训', date: '2025-07-08' },
+                { name: '邻里互助安全行动', date: '2025-08-12' },
+                { name: '老年人防诈骗宣传', date: '2025-09-18' },
+                { name: '消防安全检查活动', date: '2025-10-22' },
+                { name: '年度安全工作总结会', date: '2025-11-25' },
+                { name: '平安社区创建活动', date: '2025-12-15' }
+            ],
+            visits: 156,
+            residentNew: 78,
+            residentUpdate: 134
+        };
+
+        // 模拟用户角色检测
+        const userRole = getUserRole();
+        
+        function getUserRole() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const role = urlParams.get('userRole') || localStorage.getItem('userRole') || 'social_worker';
+            return role;
+        }
+
+        // 根据用户角色设置权限
+        function setupFullCommunityWorkPermission() {
+            const fullCommunityWork = document.getElementById('fullCommunityWork');
+            const fullCommunityLabel = document.getElementById('fullCommunityLabel');
+            const fullCommunityText = document.getElementById('fullCommunityText');
+            const fullCommunityDesc = document.getElementById('fullCommunityDesc');
+            
+            if (userRole === 'social_worker') {
+                fullCommunityWork.disabled = true;
+                fullCommunityWork.checked = false;
+                fullCommunityLabel.style.cursor = 'not-allowed';
+                fullCommunityText.style.color = '#999999';
+                fullCommunityDesc.textContent = '(仅限领导查看全社区数据)';
+                fullCommunityDesc.style.color = '#999999';
+            } else if (userRole === 'leader') {
+                fullCommunityWork.disabled = false;
+                fullCommunityWork.checked = false;
+                fullCommunityLabel.style.cursor = 'pointer';
+                fullCommunityText.style.color = '#333333';
+                fullCommunityDesc.textContent = '(包含所有包楼社工和部门的工作数据，仅领导可勾选)';
+                fullCommunityDesc.style.color = '#999999';
+            }
+        }
+
+        // 更新数据统计
+        function updateDataCounts() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const isFullCommunity = document.getElementById('fullCommunityWork').checked;
+            
+            const filteredActivities = mockData.activities.filter(activity => {
+                return activity.date >= startDate && activity.date <= endDate;
+            });
+            
+            let dataMultiplier = 1;
+            if (isFullCommunity && userRole === 'leader') {
+                dataMultiplier = 3.2;
+            }
+            
+            return {
+                activityCount: filteredActivities.length,
+                visitCount: Math.round(mockData.visits * dataMultiplier),
+                residentNewCount: Math.round(mockData.residentNew * dataMultiplier),
+                residentUpdateCount: Math.round(mockData.residentUpdate * dataMultiplier),
+                isFullCommunity: isFullCommunity
+            };
+        }
+
+        // 预置提示词
+        const defaultPrompt = "请重点突出社区治安工作的创新举措和实际成效，包括但不限于：巡逻防控体系建设、矛盾纠纷调解、安全隐患排查、群众安全感满意度提升等方面的具体数据和典型案例。";
+        
+        // 初始化预置提示词
+        function initializePresetPrompt() {
+            const userRequirements = document.getElementById('userRequirements');
+            if (userRequirements) {
+                userRequirements.value = defaultPrompt;
+            }
+        }
+
+        // 恢复默认提示词
+        document.getElementById('resetRequirements').addEventListener('click', function() {
+            const userRequirements = document.getElementById('userRequirements');
+            if (userRequirements) {
+                userRequirements.value = defaultPrompt;
+                this.innerHTML = '<i class="fas fa-check mr-1"></i>已恢复';
+                this.style.color = '#52c41a';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-undo mr-1"></i>恢复默认';
+                    this.style.color = '#2479CC';
+                }, 1500);
+            }
+        });
+
+        // 一键生成总结功能
+        const btnGenerateSummary = document.getElementById('btnGenerateSummary');
+        const generationProcess = document.getElementById('generationProcess');
+        const summaryResult = document.getElementById('summaryResult');
+        const summaryContent = document.getElementById('summaryContent');
+        const processSteps = document.getElementById('processSteps');
+
+        btnGenerateSummary.addEventListener('click', function() {
+            btnGenerateSummary.disabled = true;
+            btnGenerateSummary.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>正在生成...';
+            generationProcess.classList.remove('hidden');
+            summaryResult.classList.add('hidden');
+            processSteps.innerHTML = '';
+            startGenerationProcess();
+        });
+
+        // 生成过程步骤（与PC端一致）
+        function startGenerationProcess() {
+            const currentData = updateDataCounts();
+            const steps = [
+                { text: '正在统计活动记录...', data: currentData.activityCount + '项活动' },
+                { text: '正在分析巡查走访记录...', data: currentData.visitCount + '次巡查走访' },
+                { text: '正在整理居民台账...', data: `新增${currentData.residentNewCount}个，更新${currentData.residentUpdateCount}个` },
+                { text: '正在生成工作总结...', data: '基于数据分析生成' }
+            ];
+            let currentStep = 0;
+            function showNextStep() {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    const stepElement = document.createElement('div');
+                    stepElement.style.display = 'flex';
+                    stepElement.style.justifyContent = 'space-between';
+                    stepElement.style.alignItems = 'center';
+                    stepElement.style.padding = '6px 0';
+                    stepElement.innerHTML = `
+                        <span>${step.text}</span>
+                        <span style="color:#2479CC;font-weight:600;">${step.data}</span>
+                    `;
+                    processSteps.appendChild(stepElement);
+                    currentStep++;
+                    setTimeout(showNextStep, 1200);
+                } else {
+                    setTimeout(generateSummary, 1000);
+                }
+            }
+            showNextStep();
+        }
+
+        function generateSummary() {
+            const currentData = updateDataCounts();
+            const userRequirements = document.getElementById('userRequirements').value.trim() || defaultPrompt;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            // 构建总结内容
+            const workScope = currentData.isFullCommunity ? "本年度全社区范围内" : "本年度个人工作范围内";
+            const workLevel = currentData.isFullCommunity ? "，统筹协调各包楼社工和相关部门" : "";
+            const reportTitle = currentData.isFullCommunity ? "社区工作总结报告" : "个人工作总结报告";
+            
+            const summaryText = `${reportTitle}
+
+【生成依据】根据您的要求：${userRequirements}
+
+一、工作概述
+
+    ${workScope}，我社区围绕"平安社区"建设目标，扎实开展各项社区工作${workLevel}。共组织开展各类活动${currentData.activityCount}项，深入开展巡查走访${currentData.visitCount}次，新建立居民档案${currentData.residentNewCount}份，更新居民信息${currentData.residentUpdateCount}次。通过系统化的工作部署和精细化管理，社区建设取得了显著成效。
+
+二、主要工作成果
+
+    1. 活动组织成效显著
+    报告期内共组织开展社区活动${currentData.activityCount}项，涵盖安全宣传、文化娱乐、便民服务等多个方面。特别是安全教育类活动，有效提升了居民的安全防范意识，社区安全满意度较上期提升15%。
+
+    2. 巡查走访深入细致
+    累计开展巡查走访${currentData.visitCount}次，覆盖重点区域和居民户数达95%以上。通过定期巡查和入户走访及时了解居民需求，收集意见建议186条，解决实际问题142个，排查安全隐患68处，居民满意度持续提升。
+
+    3. 居民服务管理规范
+    新建立居民档案${currentData.residentNewCount}份，及时更新居民信息${currentData.residentUpdateCount}次，实现了居民信息的动态管理。建立了完善的服务台账，为精准服务提供了有力支撑。
+
+三、经验总结
+
+    1. 坚持以人为本的工作理念，将居民需求作为工作的出发点和落脚点。
+    2. 注重工作的系统性和连续性，通过定期活动和持续巡查走访，建立了良好的服务机制。
+    3. 强化数据管理，通过建立完善的档案制度，提升了工作的精准性和有效性。
+
+四、存在问题和改进方向
+
+    1. 部分活动参与度有待提高，需要进一步创新活动形式和内容。
+    2. 巡查走访工作还需更加精准，重点关注特殊群体和困难家庭。
+    3. 信息化水平需要进一步提升，建立更加完善的数字化管理体系。
+
+五、下一步工作计划
+
+    1. 继续优化活动内容，提高居民参与积极性。
+    2. 深化巡查走访工作，建立常态化服务机制。
+    3. 完善信息管理系统，提升工作效率和服务质量。
+
+    通过持续努力，我们将继续为居民提供更加优质的服务，建设更加和谐美好的社区环境。`;
+
+            // 隐藏生成过程，显示结果
+            generationProcess.classList.add('hidden');
+            summaryResult.classList.remove('hidden');
+            
+            // 打字机效果显示总结
+            typewriterEffect(summaryContent, summaryText);
+            
+            // 恢复按钮状态
+            btnGenerateSummary.disabled = false;
+            btnGenerateSummary.innerHTML = '<i class="fas fa-magic mr-2"></i>一键生成总结';
+        }
+
+        // 打字机效果
+        function typewriterEffect(element, text) {
+            element.innerHTML = '';
+            let index = 0;
+            const speed = 20;
+            
+            function type() {
+                if (index < text.length) {
+                    element.innerHTML += text.charAt(index);
+                    index++;
+                    element.scrollTop = element.scrollHeight;
+                    setTimeout(type, speed);
+                }
+            }
+            
+            type();
+        }
+
+        // 复制功能
+        document.getElementById('copySummary').addEventListener('click', function() {
+            const content = summaryContent.textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                this.innerHTML = '<i class="fas fa-check mr-2"></i>已复制';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-copy mr-2"></i>复制内容';
+                }, 2000);
+            });
+        });
+
+        // 显示提示信息
+        function showToast(message, duration = 2000) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                font-size: 14px;
+                z-index: 9999;
+                max-width: 200px;
+                text-align: center;
+                word-wrap: break-word;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // 导出功能
+        document.getElementById('exportSummary').addEventListener('click', function() {
+            showToast('导出功能开发中...');
+        });
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFullCommunityWorkPermission();
+            initializePresetPrompt();
+        });
+    </script>
+</body>
+</html> 

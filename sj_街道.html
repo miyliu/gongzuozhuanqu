@@ -1,0 +1,2746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作专区-街道层级-小程序</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 小程序端全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 页面容器 - 固定宽度750rpx，横向排列 */
+        .page-container {
+            display: flex;
+            height: 100vh;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 20px;
+            gap: 30px; /* 页面间距 */
+            background-color: #e5e7eb; /* 容器背景色，区分页面 */
+        }
+        
+        /* 页面包装器 - 包含标识和页面 */
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        /* 单个页面 - 小程序标准宽度 */
+        .mini-page {
+            width: 375px; /* 750rpx / 2 */
+            height: calc(100vh - 40px); /* 减去容器padding */
+            flex-shrink: 0;
+            background-color: #f7f7f7;
+            border: 2px solid #d1d5db;
+            border-radius: 12px;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+        
+        /* 页面标识 */
+        .page-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .page-indicator-title {
+            flex: 1;
+        }
+        
+        .open-page-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .open-page-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        .refresh-page-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .refresh-page-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        /* 设置面板样式 */
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .settings-panel {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 350px; /* 适合小程序宽度 */
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .settings-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fafafa;
+        }
+        
+        .settings-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333333;
+            margin: 0;
+        }
+        
+        .settings-body {
+            padding: 12px 16px;
+            overflow-y: auto;
+            max-height: calc(80vh - 100px);
+        }
+        
+        .settings-footer {
+            padding: 10px 16px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            background-color: #fafafa;
+        }
+        
+        .settings-category {
+            margin-bottom: 16px;
+        }
+        
+        .settings-category-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+        }
+        
+        .settings-category-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 三列显示 */
+            gap: 6px;
+        }
+        
+        .settings-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 4px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+            min-height: 60px;
+            position: relative;
+        }
+        
+        .settings-item input[type="checkbox"] {
+            margin-bottom: 4px;
+            width: 14px;
+            height: 14px;
+        }
+        
+        .settings-item label {
+            font-size: 11px;
+            color: #333333;
+            cursor: pointer;
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            word-break: break-all;
+        }
+        
+        .recommended-mark {
+            background-color: #ff4d4f;
+            color: white;
+            font-size: 8px;
+            padding: 1px 4px;
+            border-radius: 8px;
+            margin-top: 2px;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+        }
+        
+        /* 新专题红点标识样式 */
+        .new-topic-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background-color: #ff4d4f;
+            border-radius: 50%;
+            border: 1px solid white;
+            z-index: 10;
+        }
+        
+        .btn-primary {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #40a9ff;
+        }
+        
+        .btn-default {
+            background-color: #ffffff;
+            color: #666666;
+            border: 1px solid #d9d9d9;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-default:hover {
+            border-color: #40a9ff;
+            color: #40a9ff;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #999999;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+        
+        .close-button:hover {
+            color: #666666;
+        }
+        
+        /* 全选区域样式 */
+        .select-all-section {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .select-all-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f0f8ff;
+            border-radius: 6px;
+            border: 1px solid #e6f3ff;
+        }
+        
+        .select-all-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .select-all-item input[type="checkbox"] {
+            margin-right: 6px;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .select-all-item label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333333;
+            cursor: pointer;
+        }
+        
+        .selected-count {
+            color: #666666;
+            font-size: 11px;
+        }
+        
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 详情弹框样式 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .modal-backdrop.hidden {
+            display: none;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+            max-width: 375px;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .modal-close {
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .detail-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .detail-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 13px;
+            color: #374151;
+            background: #f9fafb;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #f3f4f6;
+        }
+        
+        .detail-textarea {
+            min-height: 60px;
+            line-height: 1.4;
+        }
+        
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .tag-item {
+            background: #e0f2fe;
+            color: #0277bd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .attachment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 4px;
+            border: 1px solid #f3f4f6;
+        }
+        
+        .attachment-icon {
+            color: #2479CC;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        
+        .attachment-info {
+            flex: 1;
+        }
+        
+        .attachment-name {
+            font-size: 12px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .attachment-size {
+            font-size: 10px;
+            color: #9ca3af;
+        }
+        
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+        
+        .btn-close {
+            width: 100%;
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* 新专题卡片样式 */
+        .new-topic-card {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 2px solid #ff4d4f;
+            position: relative;
+            min-height: 120px;
+        }
+        
+        .new-topic-card::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 6px;
+            height: 6px;
+            background: #ff4d4f;
+            border-radius: 50%;
+        }
+        
+        .new-topic-card .topic-icon {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+        
+        .new-topic-card .topic-name {
+            font-size: 11px;
+            color: #333;
+            line-height: 1.2;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        .new-topic-card .topic-category {
+            font-size: 9px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+        
+        .new-topic-card .topic-actions {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+        }
+        
+        .new-topic-card .enable-btn {
+            flex: 1;
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .new-topic-card .enable-btn:hover {
+            background: #40a9ff;
+        }
+        
+        .new-topic-card .dismiss-btn {
+            flex: 1;
+            background: #f5f5f5;
+            color: #666;
+            border: none;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .new-topic-card .dismiss-btn:hover {
+            background: #e6e6e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面1: AI工作站完整原型 (移到开头) -->
+        <div class="page-wrapper">
+            <div class="page-indicator">
+                <div class="page-indicator-title">街道层级：AI工作站</div>
+            </div>
+            <div class="mini-page" id="aiWorkstationPage">
+                <!-- 小程序状态栏 -->
+                <div style="height: 44px; background-color: #000000; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; color: white; font-size: 14px; font-weight: 600;">
+                    <span>10:00</span>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <div style="display: flex; gap: 2px;">
+                            <div style="width: 4px; height: 4px; background: white; border-radius: 50%;"></div>
+                            <div style="width: 4px; height: 4px; background: white; border-radius: 50%;"></div>
+                            <div style="width: 4px; height: 4px; background: white; border-radius: 50%;"></div>
+                        </div>
+                        <i class="fas fa-wifi" style="font-size: 12px;"></i>
+                        <div style="width: 20px; height: 10px; border: 1px solid white; border-radius: 2px; position: relative;">
+                            <div style="width: 60%; height: 100%; background: white; border-radius: 1px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- AI工作站导航栏 -->
+                <div style="height: 44px; background-color: #ffffff; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #e5e5e5; position: relative;">
+                    <div style="font-size: 17px; font-weight: 600; color: #000000;">AI工作站</div>
+                    <div style="position: absolute; right: 16px; display: flex; gap: 12px;">
+                        <i class="fas fa-ellipsis-h" style="color: #666; font-size: 16px;"></i>
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-play" style="color: #666; font-size: 10px;"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- 月度工作统计板块（表格型，社区前三名+街道总数） -->
+                <div style="margin-bottom: 24px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 style="font-size: 18px; font-weight: 600; color: #333; margin: 0;">月度工作统计</h2>
+                    <button id="workTableMoreBtn" style="color: #1890ff; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 8px; border-radius: 6px;">更多 <i class="fas fa-chevron-right" style="font-size: 12px;"></i></button>
+                  </div>
+                  <div style="overflow-x: auto;">
+                    <table style="width: 100%; min-width: 420px; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+                      <thead style="background: #1976d2;">
+                        <tr>
+                          <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; text-align: left; border: none;">社区/专题</th>
+                          <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">安全事故</th>
+                          <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">安全隐患</th>
+                          <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">环境检查</th>
+                          <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">居民诉求</th>
+                          <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">台账更新</th>
+                        </tr>
+                      </thead>
+                      <tbody id="workStatsTableBody">
+                        <!-- 由JS渲染数据 -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- 月度工作统计弹框 -->
+                <div id="workStatsTableModal" style="display:none; position:fixed;z-index:10000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;">
+                  <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.15);width:96vw;max-width:420px;max-height:90vh;overflow-y:auto;position:relative; padding-bottom:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px 20px;border-bottom:1px solid #f0f0f0;">
+                      <div style="font-size:16px;font-weight:600;color:#333;">全部社区月度工作统计</div>
+                      <button id="closeWorkStatsTableModal" style="background:none;border:none;font-size:20px;color:#999;cursor:pointer;"><i class="fas fa-times"></i></button>
+                    </div>
+                    <!-- 月份选择器 -->
+                    <div style="padding: 12px 20px 0px 20px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 13px; color: #666;">选择月份：</span>
+                        <select id="modalMonthSelect" style="font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 1px solid #d1d5db; flex-grow: 1;">
+                            <!-- 由JS动态生成月份选项 -->
+                        </select>
+                    </div>
+                    <div style="overflow-x:auto; padding: 12px 20px 0 20px;">
+                      <table style="width:100%;min-width:420px;border-radius:10px;overflow:hidden;background:#fff;">
+                        <thead style="background:#1976d2;">
+                          <tr>
+                            <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;text-align:left;border:none;">社区/专题</th>
+                            <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">安全事故</th>
+                            <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">安全隐患</th>
+                            <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">环境检查</th>
+                            <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">台账更新</th>
+                            <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">居民诉求</th>
+                          </tr>
+                        </thead>
+                        <tbody id="workStatsTableModalBody">
+                          <!-- 由JS渲染全部社区数据 -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <!-- 内容区域 -->
+                <div style="padding: 16px 12px; background-color: #f7f7f7; height: calc(100vh - 132px); overflow-y: auto;">
+                
+                    <!-- 社工工作统计板块 -->
+                    <!-- 这一整块内容全部移除，不再显示社工工作统计和排行榜 -->
+                    
+                    <!-- 工具箱板块 -->
+                    <div style="margin-bottom: 24px;">
+                        <h2 style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 16px 0;">工具箱</h2>
+                        
+                        <!-- 横向滚动容器 -->
+                        <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                            <div style="display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(2, 1fr); gap: 12px; min-width: 420px; width: max-content;">
+                                <!-- 第一行 -->
+                                <!-- 我的文件 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                        <i class="fas fa-folder" style="color: #e17055; font-size: 20px;"></i>
+                                    </div>
+                                    <span style="font-size: 12px; color: #333; font-weight: 500;">我的文件</span>
+                                </div>
+                                
+                                <!-- 工作日历 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                        <i class="fas fa-calendar-alt" style="color: white; font-size: 20px;"></i>
+                                    </div>
+                                    <span style="font-size: 12px; color: #333; font-weight: 500;">工作日历</span>
+                                </div>
+                                
+                                <!-- 活动日历 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                        <i class="fas fa-calendar-check" style="color: white; font-size: 20px;"></i>
+                                    </div>
+                                    <span style="font-size: 12px; color: #333; font-weight: 500;">活动日历</span>
+                                </div>
+                                
+                                <!-- 闪记走访 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                        <i class="fas fa-walking" style="color: white; font-size: 20px;"></i>
+                                    </div>
+                                    <span style="font-size: 12px; color: #333; font-weight: 500;">闪记走访</span>
+                                </div>
+                                
+                                <!-- 水印相机 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #55efc4 0%, #00b894 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                        <i class="fas fa-camera" style="color: white; font-size: 20px;"></i>
+                                    </div>
+                                    <span style="font-size: 12px; color: #333; font-weight: 500;">水印相机</span>
+                                </div>
+                                
+                                <!-- 共享相册 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                        <i class="fas fa-images" style="color: white; font-size: 20px;"></i>
+                                    </div>
+                                    <span style="font-size: 12px; color: #333; font-weight: 500;">共享相册</span>
+                                </div>
+                                
+                                <!-- 第二行 -->
+                                <!-- 云笔记 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                        <i class="fas fa-sticky-note" style="color: white; font-size: 20px;"></i>
+                                    </div>
+                                    <span style="font-size: 12px; color: #333; font-weight: 500;">云笔记</span>
+                                </div>
+                                
+                                <!-- 社情民意助手 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                    <i class="fas fa-users" style="color: white; font-size: 20px;"></i>
+                                </div>
+                                <span style="font-size: 12px; color: #333; font-weight: 500;">社情民意助手</span>
+                            </div>
+                            
+                            <!-- 微信群助手 -->
+                            <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #00b894 0%, #00a085 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                    <i class="fab fa-weixin" style="color: white; font-size: 20px;"></i>
+                                </div>
+                                <span style="font-size: 12px; color: #333; font-weight: 500;">微信群助手</span>
+                            </div>
+                            
+                            <!-- 公文模版 -->
+                            <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 70px;">
+                                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #636e72 0%, #2d3436 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                    <i class="fas fa-file-contract" style="color: white; font-size: 20px;"></i>
+                                </div>
+                                <span style="font-size: 12px; color: #333; font-weight: 500;">公文模版</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 工作场景板块 -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h2 style="font-size: 18px; font-weight: 600; color: #333; margin: 0;">工作场景</h2>
+                        <div style="color: #1890ff; font-size: 14px; display: flex; align-items: center;">
+                            更多 <i class="fas fa-chevron-right" style="margin-left: 4px; font-size: 12px;"></i>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <!-- 社工办事问与答 -->
+                        <div style="background: white; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="fas fa-comments" style="color: white; font-size: 16px;"></i>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <h3 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 4px 0; line-height: 1.2;">社工办事问与答</h3>
+                                    <p style="font-size: 11px; color: #666; margin: 0; line-height: 1.3;">率先接入Deepseek 🔥 你的社区工作...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 社区通知书写 -->
+                        <div style="background: white; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="fas fa-bullhorn" style="color: #d4691a; font-size: 16px;"></i>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <h3 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 4px 0; line-height: 1.2;">社区通知书写</h3>
+                                    <p style="font-size: 11px; color: #666; margin: 0; line-height: 1.3;">帮你写出符合规范的社区通知，字体，...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 公众号文章写作 -->
+                        <div style="background: white; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="fas fa-pen-fancy" style="color: #2d5a87; font-size: 16px;"></i>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <h3 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 4px 0; line-height: 1.2;">公众号文章写作</h3>
+                                    <p style="font-size: 11px; color: #666; margin: 0; line-height: 1.3;">只需要给出简单描述，快速帮您生成...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 社区活动策划书写 -->
+                        <div style="background: white; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="fas fa-lightbulb" style="color: #e17055; font-size: 16px;"></i>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <h3 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 4px 0; line-height: 1.2;">社区活动策划书写</h3>
+                                    <p style="font-size: 11px; color: #666; margin: 0; line-height: 1.3;">不知道该策划哪些社区活动，找小助手...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 筹备业主大会申请 -->
+                        <div style="background: white; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #d1c4e9 0%, #bbdefb 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="fas fa-clipboard-list" style="color: #5e35b1; font-size: 16px;"></i>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <h3 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 4px 0; line-height: 1.2;">筹备业主大会申...</h3>
+                                    <p style="font-size: 11px; color: #666; margin: 0; line-height: 1.3;">让小助理帮你快速书写筹备业主大会申...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 公文校对纠错专家 -->
+                        <div style="background: white; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="fas fa-spell-check" style="color: #e91e63; font-size: 16px;"></i>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <h3 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 4px 0; line-height: 1.2;">公文校对纠错专家</h3>
+                                    <p style="font-size: 11px; color: #666; margin: 0; line-height: 1.3;">帮你书写校对完美格式和文字的公文内容</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 新上线专题板块 -->
+                <!-- 已移除新上线专题板块 -->
+                
+                <!-- 工作专区板块 (集成设置功能) -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h2 style="font-size: 18px; font-weight: 600; color: #333; margin: 0;">工作专区</h2>
+                    </div>
+                    <!-- 五类类型，每类3-6个专题，仿真样式 -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <i class="fas fa-bullhorn" style="color: #ef4444; margin-right: 8px; font-size: 14px;"></i>
+                            <span style="font-size: 14px; font-weight: 600; color: #333;">社区治理</span>
+                            <button id="toggleGovernanceBtn" style="margin-left: auto; background: none; border: none; color: #1890ff; font-size: 12px; cursor: pointer; padding: 2px 8px; border-radius: 6px;">展开</button>
+                        </div>
+                        <div id="governanceTopics" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow: hidden; transition: max-height 0.3s; max-height: 120px;">
+                            <div class="governance-topic" style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-users" style="color: #ef4444; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">居民诉求处理</span>
+                            </div>
+                            <div class="governance-topic" style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-shield-alt" style="color: #ef4444; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">安全隐患排查</span>
+                            </div>
+                            <div class="governance-topic" style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-broom" style="color: #ef4444; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">环境卫生整治</span>
+                            </div>
+                            <div class="governance-topic" style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-gavel" style="color: #ef4444; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">物业纠纷调解服务</span>
+                            </div>
+                            <div class="governance-topic" style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-key" style="color: #ef4444; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">小区公共空间管理与维护</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <i class="fas fa-file-alt" style="color: #3b82f6; margin-right: 8px; font-size: 14px;"></i>
+                            <span style="font-size: 14px; font-weight: 600; color: #333;">工作总结</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-clipboard-list" style="color: #3b82f6; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">月度工作总结</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-chart-bar" style="color: #3b82f6; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">年度考核报告</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-book" style="color: #3b82f6; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">经验交流材料</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <i class="fas fa-calendar-alt" style="color: #10b981; margin-right: 8px; font-size: 14px;"></i>
+                            <span style="font-size: 14px; font-weight: 600; color: #333;">宣传活动</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-bullhorn" style="color: #10b981; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">政策宣传</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-users" style="color: #10b981; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">志愿服务</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-child" style="color: #10b981; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">青少年活动</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <i class="fas fa-stethoscope" style="color: #f59e0b; margin-right: 8px; font-size: 14px;"></i>
+                            <span style="font-size: 14px; font-weight: 600; color: #333;">健康服务</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-heartbeat" style="color: #f59e0b; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">健康档案管理</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-user-nurse" style="color: #f59e0b; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">老年人随访</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-notes-medical" style="color: #f59e0b; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">慢病管理</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <i class="fas fa-leaf" style="color: #8b5cf6; margin-right: 8px; font-size: 14px;"></i>
+                            <span style="font-size: 14px; font-weight: 600; color: #333;">生态文明</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-tree" style="color: #8b5cf6; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">绿化养护</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-recycle" style="color: #8b5cf6; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">垃圾分类指导</span>
+                            </div>
+                            <div style="background: white; border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; min-height: 80px;">
+                                <i class="fas fa-water" style="color: #8b5cf6; font-size: 20px; margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; color: #333; line-height: 1.2;">节能减排宣传</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 备忘录板块 -->
+                <!-- 已移除备忘录板块及相关JS逻辑 -->
+                
+                <!-- 底部群组区域 -->
+                <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <!-- 群组标签栏 -->
+                    <div style="display: flex; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0;">
+                        <div style="padding: 8px 0; margin-right: 24px; border-bottom: 2px solid #1890ff; color: #1890ff; font-size: 14px; font-weight: 600; position: relative;">
+                            群组
+                            <div style="width: 6px; height: 6px; background: #ff4757; border-radius: 50%; position: absolute; top: 4px; right: -8px;"></div>
+                        </div>
+                        <div style="padding: 8px 0; margin-right: 24px; color: #999; font-size: 14px;">分享</div>
+                        <div style="padding: 8px 0; margin-right: 24px; color: #999; font-size: 14px;">收藏</div>
+                        <div style="padding: 8px 0; color: #999; font-size: 14px;">最近</div>
+                    </div>
+                    
+                    <!-- 群组列表 -->
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        <!-- 再次发送分享 -->
+                        <div style="display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f8f9fa;">
+                            <div style="width: 36px; height: 36px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; position: relative;">
+                                <i class="fas fa-users" style="color: white; font-size: 14px;"></i>
+                                <div style="width: 12px; height: 12px; background: #1890ff; border-radius: 50%; position: absolute; bottom: -2px; right: -2px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-star" style="color: white; font-size: 6px;"></i>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 2px;">再次发送分享</div>
+                                <div style="font-size: 11px; color: #999;">近期暂无分享内容</div>
+                            </div>
+                            <i class="fas fa-ellipsis-h" style="color: #ccc; font-size: 12px;"></i>
+                        </div>
+                        
+                        <!-- 888 -->
+                        <div style="display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f8f9fa;">
+                            <div style="width: 36px; height: 36px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; position: relative;">
+                                <i class="fas fa-users" style="color: white; font-size: 14px;"></i>
+                                <div style="width: 12px; height: 12px; background: #1890ff; border-radius: 50%; position: absolute; bottom: -2px; right: -2px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-star" style="color: white; font-size: 6px;"></i>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 2px;">888</div>
+                                <div style="font-size: 11px; color: #999;">刘杨 分享于 01月23日 17:31</div>
+                            </div>
+                            <i class="fas fa-ellipsis-h" style="color: #ccc; font-size: 12px;"></i>
+                        </div>
+                        
+                        <!-- 走访记录模版 -->
+                        <div style="display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f8f9fa;">
+                            <div style="width: 36px; height: 36px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; position: relative;">
+                                <i class="fas fa-users" style="color: white; font-size: 14px;"></i>
+                                <div style="width: 12px; height: 12px; background: #1890ff; border-radius: 50%; position: absolute; bottom: -2px; right: -2px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-star" style="color: white; font-size: 6px;"></i>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 2px;">走访记录模版</div>
+                                <div style="font-size: 11px; color: #999;">近期暂无分享内容</div>
+                            </div>
+                            <i class="fas fa-ellipsis-h" style="color: #ccc; font-size: 12px;"></i>
+                        </div>
+                        
+                        <!-- 5.17社区邻里节活动照片收集 -->
+                        <div style="display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f8f9fa;">
+                            <div style="width: 36px; height: 36px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; position: relative;">
+                                <i class="fas fa-users" style="color: white; font-size: 14px;"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 2px; display: flex; align-items: center;">
+                                    5.17社区邻里节活动照片收集
+                                    <span style="background: #ff4757; color: white; font-size: 10px; padding: 1px 4px; border-radius: 8px; margin-left: 6px;">+1</span>
+                                </div>
+                                <div style="font-size: 11px; color: #999;">近期暂无分享内容</div>
+                            </div>
+                            <i class="fas fa-ellipsis-h" style="color: #ccc; font-size: 12px;"></i>
+                        </div>
+                        
+                        <!-- 母亲节活动收集 -->
+                        <div style="display: flex; align-items: center; padding: 8px 0;">
+                            <div style="width: 36px; height: 36px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-users" style="color: white; font-size: 14px;"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 2px;">母亲节活动收集</div>
+                                <div style="font-size: 11px; color: #999;">刘杨 分享于 周四 16:58</div>
+                            </div>
+                            <i class="fas fa-ellipsis-h" style="color: #ccc; font-size: 12px;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部导航栏 -->
+            <div style="height: 60px; background: white; border-top: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: space-around; position: sticky; bottom: 0;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="width: 32px; height: 32px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-robot" style="color: #666; font-size: 16px;"></i>
+                    </div>
+                    <span style="font-size: 10px; color: #666;">AI办事通</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="width: 32px; height: 32px; background: #1890ff; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-briefcase" style="color: white; font-size: 16px;"></i>
+                    </div>
+                    <span style="font-size: 10px; color: #1890ff; font-weight: 600;">AI工作站</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="width: 32px; height: 32px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user" style="color: #666; font-size: 16px;"></i>
+                    </div>
+                    <span style="font-size: 10px; color: #666;">我的小智</span>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- 设置面板 -->
+    <!-- 已移除设置面板相关代码 -->
+
+    <!-- 巡查走访详情弹框 -->
+    <div id="recordModal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">巡查走访详情</div>
+                <div class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- 基本信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-info-circle" style="color: #2479CC;"></i>
+                        基本信息
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">巡查地点</div>
+                            <div class="detail-value" id="viewLocation">惠新南里5号院3号楼1单元101</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">走访对象</div>
+                            <div class="detail-value" id="viewTarget">张燕</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">走访时间</div>
+                            <div class="detail-value" id="viewTime">2025-05-20 18:14:30</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">创建人</div>
+                            <div class="detail-value" id="viewCreator">高明</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 走访描述 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-edit" style="color: #10b981;"></i>
+                        走访描述
+                    </div>
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">走访情况</div>
+                            <div class="detail-value detail-textarea" id="viewDescription">
+                                居民反映楼道灯不亮，影响夜间出行安全。经现场查看，确实存在照明问题，需要及时维修。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 相关居民信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-users" style="color: #8b5cf6;"></i>
+                        相关居民信息
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">相关居民</div>
+                            <div class="detail-value" id="viewResident">张燕 (1号楼101)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">居民标签</div>
+                            <div class="detail-value" id="viewResidentTags">
+                                <div class="tag-list">
+                                    <span class="tag-item">高龄老人</span>
+                                    <span class="tag-item">电动车主</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">居民备注</div>
+                            <div class="detail-value detail-textarea" id="viewResidentRemarks">
+                                热心邻里，经常反映小区问题。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 附件信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-paperclip" style="color: #8b5cf6;"></i>
+                        附件信息
+                    </div>
+                    <div class="attachment-list" id="viewAttachmentList">
+                        <div class="attachment-item">
+                            <i class="fas fa-image attachment-icon"></i>
+                            <div class="attachment-info">
+                                <div class="attachment-name">楼道照明问题.jpg</div>
+                                <div class="attachment-size">245KB</div>
+                            </div>
+                        </div>
+                        <div class="attachment-item">
+                            <i class="fas fa-file-audio attachment-icon"></i>
+                            <div class="attachment-info">
+                                <div class="attachment-name">现场录音.mp3</div>
+                                <div class="attachment-size">1.2MB</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 后续处置信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-tasks" style="color: #f59e0b;"></i>
+                        后续处置信息
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <div class="detail-label">是否需要后续处置</div>
+                            <div class="detail-value" id="viewNeedFollowUp">是</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">是否完成处置</div>
+                            <div class="detail-value" id="viewDisposalCompleted">是</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">处置情况</div>
+                            <div class="detail-value detail-textarea" id="viewDisposalSituation">
+                                已联系物业维修人员，预计明天上午进行维修。
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row full">
+                        <div class="detail-item">
+                            <div class="detail-label">完成情况</div>
+                            <div class="detail-value detail-textarea" id="viewCompletionStatus">
+                                维修已完成，楼道照明恢复正常，居民表示满意。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="modalFooterBtns">
+                <button class="btn-close" id="closeModalBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 月度工作统计板块（表格型，社区前三名+街道总数） -->
+    <div style="margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 style="font-size: 18px; font-weight: 600; color: #333; margin: 0;">月度工作统计</h2>
+        <button id="workTableMoreBtn" style="color: #1890ff; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 8px; border-radius: 6px;">更多 <i class="fas fa-chevron-right" style="font-size: 12px;"></i></button>
+      </div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; min-width: 420px; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+          <thead style="background: #1976d2;">
+            <tr>
+              <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; text-align: left; border: none;">社区/专题</th>
+              <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">安全事故</th>
+              <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">安全隐患</th>
+              <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">环境检查</th>
+              <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">台账更新</th>
+              <th style="color: #fff; font-size: 13px; font-weight: 500; padding: 8px 10px; border: none;">居民诉求</th>
+            </tr>
+          </thead>
+          <tbody id="workStatsTableBody">
+            <!-- 由JS渲染数据 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- 月度工作统计弹框 -->
+    <div id="workStatsTableModal" style="display:none; position:fixed;z-index:10000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;">
+      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.15);width:96vw;max-width:420px;max-height:90vh;overflow-y:auto;position:relative; padding-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px 20px;border-bottom:1px solid #f0f0f0;">
+          <div style="font-size:16px;font-weight:600;color:#333;">全部社区月度工作统计</div>
+          <button id="closeWorkStatsTableModal" style="background:none;border:none;font-size:20px;color:#999;cursor:pointer;"><i class="fas fa-times"></i></button>
+        </div>
+        <!-- 月份选择器 -->
+        <div style="padding: 12px 20px 0px 20px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; color: #666;">选择月份：</span>
+            <select id="modalMonthSelect" style="font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 1px solid #d1d5db; flex-grow: 1;">
+                <!-- 由JS动态生成月份选项 -->
+            </select>
+        </div>
+        <div style="overflow-x:auto; padding: 12px 20px 0 20px;">
+          <table style="width:100%;min-width:420px;border-radius:10px;overflow:hidden;background:#fff;">
+            <thead style="background:#1976d2;">
+              <tr>
+                <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;text-align:left;border:none;">社区/专题</th>
+                <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">安全事故</th>
+                <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">安全隐患</th>
+                <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">环境检查</th>
+                <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">台账更新</th>
+                <th style="color:#fff;font-size:13px;font-weight:500;padding:8px 10px;border:none;">居民诉求</th>
+              </tr>
+            </thead>
+            <tbody id="workStatsTableModalBody">
+              <!-- 由JS渲染全部社区数据 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        // iframe刷新功能
+        function refreshIframe(iframeId) {
+            const iframe = document.getElementById(iframeId);
+            if (iframe) {
+                const src = iframe.src;
+                iframe.src = '';
+                setTimeout(() => {
+                    iframe.src = src;
+                }, 100);
+                showToast('页面已刷新');
+            }
+        }
+
+        // 推荐的专题列表 - 从原work_area.html复制
+        const recommendedTopics = [
+            // 巡查走访类
+            "安全隐患报告", "食品安全反馈", 
+            
+            // 工作总结类
+            "治安任务总结", "环境整治总结",
+            
+            // 活动组织类 (现在归入宣传活动)
+            "社区文体活动", "志愿服务活动",
+            
+            // 宣传教育类 (现在归入宣传活动)
+            "安全防范宣传", "环境保护宣传",
+            
+            // 巡查走访类
+            "治安巡逻检查", "环境卫生巡查"
+        ];
+
+        // 新上线专题列表（模拟后台数据，实际应从API获取）
+        const newOnlineTopics = [
+            "AI智能巡查助手",
+            "社区安全预警系统", 
+            "智慧垃圾分类指导",
+            "居民诉求智能分析",
+            "社区活动策划助手"
+        ];
+
+        // 检查是否为新上线专题
+        function isNewOnlineTopic(topicName) {
+            return newOnlineTopics.includes(topicName);
+        }
+
+        // 专题分类数据 - 基于原work_area.html的actionCategories
+        const topicCategories = [
+            {
+                name: "巡查走访",
+                icon: "fas fa-bullhorn",
+                color: "text-red-500",
+                gridId: "problemReportGrid",
+                detailPage: "topic_detail_template_wentishangbao_houxu.html", // 对应巡查走访页面
+                topics: [
+                    "恐怖行为报告", "间谍行为报告", "禁毒行为报告", "非法集资报告", "违法行为报告", 
+                    "社区矫正协助", "安置帮教协助", "安全隐患报告", "灾害应急响应", "AI智能巡查助手", "教育诉求反馈", 
+                    "就业困难反馈", "养老服务反馈", "医疗保障反馈", "慈善救助反馈", "残疾人保障反馈", 
+                    "困境儿童反馈", "家暴行为报告", "军属困难反馈", "退役军人反馈", "艾滋病防治反馈", 
+                    "精神卫生反馈", "传染病防控反馈", "动物防疫反馈", "食品安全反馈", "文明行为监督", 
+                    "学前教育反馈", "适龄入学反馈", "社会实践反馈", "家庭教育反馈", "生活垃圾分类违规", 
+                    "智慧垃圾分类指导", "门前三包违规", "养犬违规行为", "节水违规行为", "违建行为报告", "排污行为报告", 
+                    "破坏生态行为", "噪声污染报告", "损绿毁绿行为", "租赁纠纷反馈", "居民诉求反馈", 
+                    "居民诉求智能分析", "社区安全预警系统", "经济普查反馈", "污染源普查反馈", "人口普查反馈", "宗教违法报告"
+                ]
+            },
+            {
+                name: "工作总结",
+                icon: "fas fa-file-alt", 
+                color: "text-blue-500",
+                gridId: "workSummaryGrid",
+                detailPage: "topic_detail_template_gongzuozongjie.html",
+                topics: [
+                    "治安任务总结", "教育政策总结", "就业帮扶总结", "养老服务总结", "医疗保障总结", 
+                    "慈善项目总结", "残疾人服务总结", "困境儿童服务总结", "家暴干预总结", "军属服务总结", 
+                    "退役军人服务总结", "艾滋防控总结", "精神卫生总结", "传染病防控总结", "动物防疫总结", 
+                    "食品安全总结", "文化活动总结", "学前教育总结", "家教指导总结", "环境整治总结", 
+                    "物业监管总结", "人口普查总结", "经济普查总结", "宗教事务总结"
+                ]
+            },
+            {
+                name: "宣传活动", // 合并活动组织和宣传教育
+                icon: "fas fa-calendar-alt",
+                color: "text-green-500", 
+                gridId: "promotionActivityGrid",
+                detailPage: "topic_detail_template_huodong.html",
+                topics: [
+                    // 活动组织类专题
+                    "治安宣传活动", "法律宣传活动", "社区文体活动", "志愿服务活动", "社区活动策划助手", "教育宣传活动", 
+                    "就业帮扶活动", "养老服务活动", "医疗义诊活动", "慈善公益活动", "残疾人关怀活动", 
+                    "困境儿童关爱活动", "家暴预防讲座", "军属慰问活动", "退役军人座谈", "艾滋病宣传日", 
+                    "精神健康讲座", "传染病防控演练", "动物防疫宣传", "食品安全培训", "爱国卫生运动", 
+                    "文化节庆活动", "历史名城宣传", "学前教育开放日", "家长课堂活动", "环境整治志愿行", 
+                    "业主委员会成立大会", "社区议事协商会", "防灾减灾演练", "纠纷调解活动", "法律咨询活动", 
+                    "献血动员活动", "义务植树活动",
+                    // 宣传教育类专题
+                    "治安政策宣传", "社区矫正宣传", "安全防范宣传", "灾害应急宣传", "教育政策宣传", 
+                    "就业政策宣传", "养老政策宣传", "医疗政策宣传", "慈善政策宣传", "残疾人政策宣传", 
+                    "困境儿童政策宣传", "家暴法律宣传", "军属政策宣传", "退役军人政策宣传", "艾滋病防治宣传", 
+                    "精神卫生宣传", "传染病防控宣传", "动物防疫宣传", "食品安全宣传", "文明行为宣传", 
+                    "学前教育宣传", "家庭教育宣传", "垃圾分类宣传", "门前三包宣传", "养犬管理宣传", 
+                    "节能节水宣传", "环境保护宣传", "宗教政策宣传"
+                ]
+            },
+            {
+                name: "巡查走访",
+                icon: "fas fa-walking",
+                color: "text-purple-500",
+                gridId: "inspectionVisitGrid", 
+                detailPage: "topic_detail_template_wentishangbao_houxu.html",
+                topics: [
+                    "治安巡逻检查", "安全隐患巡查", "社区矫正走访", "安置帮教走访", "教育帮扶走访", 
+                    "就业困难走访", "养老服务走访", "医疗保障走访", "慈善救助走访", "残疾人走访", 
+                    "困境儿童走访", "家暴高风险走访", "军属走访慰问", "退役军人走访", "艾滋病重点人群走访", 
+                    "精神障碍患者走访", "传染病易感人群走访", "动物防疫巡查", "食品安全巡查", "文明行为巡查", 
+                    "学前教育巡查", "适龄儿童入学巡查", "家庭教育走访", "环境卫生巡查", "垃圾分类巡查", 
+                    "门前三包巡查", "养犬管理巡查", "节水节能巡查", "违建违排巡查", "绿化损毁巡查", 
+                    "噪音扰民巡查", "租赁秩序巡查", "居民诉求走访", "宗教场所巡查"
+                ]
+            }
+        ];
+
+        // 获取专题图标的函数 - 复用原work_area.html的逻辑
+        function getTopicIcon(topicName) {
+            // 精确匹配
+            if (topicName === "安全防范宣传") return 'fa-shield-alt';
+            if (topicName === "环境保护宣传") return 'fa-leaf';
+            
+            // 关键词匹配
+            if (topicName.includes('恐怖') || topicName.includes('间谍')) return 'fa-skull';
+            if (topicName.includes('禁毒')) return 'fa-pills';
+            if (topicName.includes('非法集资')) return 'fa-money-bill';
+            if (topicName.includes('违法')) return 'fa-gavel';
+            if (topicName.includes('矫正') || topicName.includes('帮教')) return 'fa-user-shield';
+            if (topicName.includes('安全隐患')) return 'fa-exclamation-triangle';
+            if (topicName.includes('灾害') || topicName.includes('防灾')) return 'fa-cloud-showers-heavy';
+            if (topicName.includes('教育') || topicName.includes('学前')) return 'fa-school';
+            if (topicName.includes('就业') || topicName.includes('帮扶')) return 'fa-briefcase';
+            if (topicName.includes('养老')) return 'fa-user-nurse';
+            if (topicName.includes('医疗') || topicName.includes('义诊')) return 'fa-stethoscope';
+            if (topicName.includes('慈善') || topicName.includes('救助')) return 'fa-hand-holding-heart';
+            if (topicName.includes('残疾人')) return 'fa-wheelchair';
+            if (topicName.includes('儿童')) return 'fa-child';
+            if (topicName.includes('家暴')) return 'fa-house-damage';
+            if (topicName.includes('军属') || topicName.includes('退役军人')) return 'fa-medal';
+            if (topicName.includes('艾滋')) return 'fa-ribbon';
+            if (topicName.includes('精神') || topicName.includes('心理')) return 'fa-brain';
+            if (topicName.includes('传染病')) return 'fa-virus';
+            if (topicName.includes('动物') || topicName.includes('防疫')) return 'fa-paw';
+            if (topicName.includes('食品安全')) return 'fa-utensils';
+            if (topicName.includes('文明')) return 'fa-award';
+            if (topicName.includes('实践')) return 'fa-hands-helping';
+            if (topicName.includes('家庭教育')) return 'fa-home';
+            if (topicName.includes('垃圾') || topicName.includes('门前三包')) return 'fa-trash';
+            if (topicName.includes('养犬')) return 'fa-dog';
+            if (topicName.includes('节水') || topicName.includes('节能')) return 'fa-tint';
+            if (topicName.includes('违建') || topicName.includes('排污')) return 'fa-building';
+            if (topicName.includes('生态') || topicName.includes('绿')) return 'fa-leaf';
+            if (topicName.includes('噪声')) return 'fa-volume-up';
+            if (topicName.includes('租赁') || topicName.includes('物业')) return 'fa-key';
+            if (topicName.includes('诉求')) return 'fa-comments';
+            if (topicName.includes('普查')) return 'fa-clipboard-list';
+            if (topicName.includes('宗教')) return 'fa-place-of-worship';
+            if (topicName.includes('总结')) return 'fa-chart-bar';
+            if (topicName.includes('宣传') || topicName.includes('法律')) return 'fa-megaphone';
+            if (topicName.includes('社区文体')) return 'fa-volleyball-ball';
+            if (topicName.includes('志愿')) return 'fa-hands';
+            if (topicName.includes('讲座')) return 'fa-chalkboard-teacher';
+            if (topicName.includes('演练')) return 'fa-people-carry';
+            if (topicName.includes('培训')) return 'fa-user-graduate';
+            if (topicName.includes('卫生')) return 'fa-broom';
+            if (topicName.includes('文化') || topicName.includes('节庆')) return 'fa-music';
+            if (topicName.includes('历史')) return 'fa-monument';
+            if (topicName.includes('开放日')) return 'fa-door-open';
+            if (topicName.includes('课堂')) return 'fa-book-reader';
+            if (topicName.includes('环境')) return 'fa-tree';
+            if (topicName.includes('委员会')) return 'fa-users-cog';
+            if (topicName.includes('协商') || topicName.includes('议事')) return 'fa-comments';
+            if (topicName.includes('纠纷') || topicName.includes('调解')) return 'fa-balance-scale';
+            if (topicName.includes('咨询')) return 'fa-question-circle';
+            if (topicName.includes('献血')) return 'fa-tint';
+            if (topicName.includes('植树')) return 'fa-seedling';
+            if (topicName.includes('政策')) return 'fa-scroll';
+            if (topicName.includes('巡查') || topicName.includes('巡逻') || topicName.includes('走访')) return 'fa-route';
+            if (topicName.includes('座谈')) return 'fa-users';
+            if (topicName.includes('关怀') || topicName.includes('关爱')) return 'fa-heart';
+            if (topicName.includes('爱国')) return 'fa-flag';
+            if (topicName.includes('适龄入学')) return 'fa-user-graduate';
+            if (topicName.includes('家教')) return 'fa-chalkboard-teacher';
+            if (topicName.includes('损绿') || topicName.includes('毁绿')) return 'fa-cut';
+            if (topicName.includes('污染源')) return 'fa-smog';
+            if (topicName.includes('慰问')) return 'fa-gift';
+            if (topicName.includes('应急')) return 'fa-first-aid';
+            if (topicName.includes('居民')) return 'fa-home';
+            if (topicName.includes('重点人群')) return 'fa-user-friends';
+            if (topicName.includes('易感人群')) return 'fa-user-shield';
+            if (topicName.includes('义务')) return 'fa-handshake';
+            if (topicName.includes('扰民')) return 'fa-dizzy';
+            
+            // 新专题特殊图标
+            if (topicName.includes('AI智能巡查')) return 'fa-robot';
+            if (topicName.includes('安全预警')) return 'fa-shield-alt';
+            if (topicName.includes('智慧垃圾分类')) return 'fa-recycle';
+            if (topicName.includes('诉求智能分析')) return 'fa-chart-line';
+            if (topicName.includes('活动策划助手')) return 'fa-calendar-plus';
+            
+            return 'fa-file-alt'; // 默认图标
+        }
+
+        // 用户设置管理功能 - 从原work_area.html复制并适配
+        
+        // 颜色映射函数
+        function getColorValue(colorClass) {
+            const colorMap = {
+                'text-red-500': '#ef4444',
+                'text-blue-500': '#3b82f6', 
+                'text-green-500': '#10b981',
+                'text-yellow-500': '#f59e0b',
+                'text-purple-500': '#8b5cf6'
+            };
+            return colorMap[colorClass] || '#666666';
+        }
+        
+        // 保存用户设置到本地存储
+        function saveUserSettings(settings) {
+            localStorage.setItem('miniapp_topicSettings', JSON.stringify(settings));
+        }
+
+        // 从本地存储加载用户设置
+        function loadUserSettings() {
+            const settings = localStorage.getItem('miniapp_topicSettings');
+            if (!settings) {
+                // 初始化设置，只显示推荐的专题
+                const defaultSettings = {};
+                topicCategories.forEach(category => {
+                    category.topics.forEach(topic => {
+                        defaultSettings[topic] = recommendedTopics.includes(topic);
+                    });
+                });
+                saveUserSettings(defaultSettings);
+                return defaultSettings;
+            }
+            return JSON.parse(settings);
+        }
+
+        // 生成设置面板内容
+        function generateSettingsContent() {
+            const container = document.getElementById('settingsContent');
+            const userSettings = loadUserSettings();
+            
+            container.innerHTML = '';
+            
+            // 为每个分类创建设置项
+            topicCategories.forEach(category => {
+                const categorySection = document.createElement('div');
+                categorySection.className = 'settings-category';
+                
+                categorySection.innerHTML = `
+                    <div class="settings-category-title">
+                        <i class="${category.icon} mr-2" style="color: ${getColorValue(category.color)}"></i>${category.name}
+                    </div>
+                `;
+                
+                const itemsContainer = document.createElement('div');
+                itemsContainer.className = 'settings-category-items';
+                
+                category.topics.forEach(topic => {
+                    const isChecked = userSettings[topic];
+                    const isRecommended = recommendedTopics.includes(topic);
+                    const isNewOnline = isNewOnlineTopic(topic);
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'settings-item';
+                    
+                    const uniqueId = `topic_${topic.replace(/\s+/g, '_')}`;
+                    
+                    // 为推荐专题添加标记
+                    const recommendedMark = isRecommended ? 
+                        `<span class="recommended-mark">推荐</span>` : '';
+                    
+                    // 为新上线专题添加红点标识
+                    const newTopicDot = isNewOnline ? 
+                        `<div class="new-topic-dot" title="新上线专题"></div>` : '';
+                    
+                    itemDiv.innerHTML = `
+                        <input type="checkbox" id="${uniqueId}" ${isChecked ? 'checked' : ''} 
+                            data-topic="${topic}">
+                        <label for="${uniqueId}">
+                            <span>${topic}</span>
+                        </label>
+                        ${recommendedMark}
+                        ${newTopicDot}
+                    `;
+                    
+                    itemsContainer.appendChild(itemDiv);
+                });
+                
+                categorySection.appendChild(itemsContainer);
+                container.appendChild(categorySection);
+            });
+            
+            // 更新选中计数
+            updateSelectedCount();
+        }
+        
+        // 更新已选专题计数
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('#settingsContent input[type="checkbox"][data-topic]');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const countSpan = document.getElementById('selectedCount');
+            if (countSpan) {
+                countSpan.textContent = `已选 ${checkedCount} 个专题`;
+            }
+            
+            // 更新全选复选框状态
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = checkedCount === checkboxes.length;
+            }
+        }
+        
+        // 应用用户设置
+        function applyUserSettings() {
+            const checkboxes = document.querySelectorAll('#settingsContent input[type="checkbox"][data-topic]');
+            const settings = {};
+            
+            checkboxes.forEach(checkbox => {
+                const topic = checkbox.getAttribute('data-topic');
+                settings[topic] = checkbox.checked;
+            });
+            
+            saveUserSettings(settings);
+            renderTopicList(); // 重新渲染专题列表
+            
+            // 隐藏新专题区域（用户已在设置中处理了新专题）
+            const newTopicsSection = document.getElementById('newTopicsSection');
+            if (newTopicsSection) {
+                newTopicsSection.style.display = 'none';
+            }
+            
+            closeSettingsModal();
+            showToast('设置已保存');
+        }
+        
+        // 重置为默认设置
+        function resetUserSettings() {
+            const defaultSettings = {};
+            topicCategories.forEach(category => {
+                category.topics.forEach(topic => {
+                    defaultSettings[topic] = recommendedTopics.includes(topic);
+                });
+            });
+            
+            saveUserSettings(defaultSettings);
+            generateSettingsContent(); // 重新生成设置面板
+            showToast('已恢复默认设置');
+        }
+        
+        // 打开设置面板
+        function openSettingsModal() {
+            generateSettingsContent();
+            document.getElementById('settingsModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 关闭设置面板
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // 创建专题卡片 - 适配AI工作站样式
+        function createTopicCard(topicName, categoryColor, detailPage) {
+            const card = document.createElement('div');
+            card.style.cssText = `
+                background: white; 
+                border-radius: 8px; 
+                padding: 12px 6px; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                text-align: center; 
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+                cursor: pointer; 
+                transition: transform 0.2s;
+                min-height: 80px;
+            `;
+            
+            const icon = getTopicIcon(topicName);
+            const colorValue = getColorValue(categoryColor);
+            
+            card.innerHTML = `
+                <i class="fas ${icon}" style="color: ${colorValue}; font-size: 20px; margin-bottom: 6px;"></i>
+                <span style="font-size: 11px; color: #333; line-height: 1.2;">${topicName}</span>
+            `;
+            
+            // 添加悬停效果
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+            
+            // 添加点击事件
+            card.addEventListener('click', () => {
+                console.log(`点击专题: ${topicName}, 跳转到: ${detailPage}`);
+                showToast(`点击了专题: ${topicName}`);
+            });
+            
+            return card;
+        }
+
+        // 渲染专题列表
+        function renderTopicList() {
+            const userSettings = loadUserSettings();
+            
+            topicCategories.forEach(category => {
+                const grid = document.getElementById(category.gridId);
+                if (!grid) return;
+                
+                // 清空现有内容
+                grid.innerHTML = '';
+                
+                // 只渲染用户选中的专题
+                category.topics.forEach(topicName => {
+                    if (userSettings[topicName]) { // 只显示用户选中的专题
+                        const card = createTopicCard(topicName, category.color, category.detailPage);
+                        grid.appendChild(card);
+                    }
+                });
+            });
+        }
+
+        // 显示提示信息 - 小程序风格
+        function showToast(message, duration = 2000) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                font-size: 14px;
+                z-index: 9999;
+                max-width: 200px;
+                text-align: center;
+                word-wrap: break-word;
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // 备忘录功能 - 获取待处置的巡查走访记录
+        function getPendingMemos() {
+            // 模拟数据 - 需要后续处置且尚未完成的记录
+            return [
+                {
+                    id: 101,
+                    title: '惠新南里5号院2号楼门禁故障',
+                    location: '2号楼门禁处',
+                    createTime: '2025-01-25 11:15',
+                    urgency: 'high', // high, medium, low
+                    description: '门禁系统故障，居民无法正常刷卡进入',
+                    daysOverdue: 2
+                },
+                {
+                    id: 102,
+                    title: '垃圾收集点环境卫生问题',
+                    location: '惠新南里5号院垃圾收集点',
+                    createTime: '2025-01-25 16:20',
+                    urgency: 'medium',
+                    description: '垃圾桶满溢，周围有散落垃圾',
+                    daysOverdue: 1
+                },
+                {
+                    id: 103,
+                    title: '3号楼电梯异响检修',
+                    location: '3号楼电梯',
+                    createTime: '2025-01-25 15:45',
+                    urgency: 'high',
+                    description: '电梯运行时有异响，可能存在安全隐患',
+                    daysOverdue: 1
+                },
+                {
+                    id: 104,
+                    title: '小区路灯照明维修',
+                    location: '惠新南里5号院东侧道路',
+                    createTime: '2025-01-24 19:30',
+                    urgency: 'medium',
+                    description: '多盏路灯不亮，影响夜间通行安全',
+                    daysOverdue: 3
+                },
+                {
+                    id: 105,
+                    title: '绿化带植物补种',
+                    location: '惠新南里5号院中心绿化带',
+                    createTime: '2025-01-24 10:20',
+                    urgency: 'low',
+                    description: '绿化带部分植物枯死，需要及时补种',
+                    daysOverdue: 4
+                }
+            ];
+        }
+
+        // 渲染备忘录列表
+        function renderMemoList() {
+            const pendingMemos = getPendingMemos();
+            const container = document.getElementById('memoContainer');
+            const countElement = document.getElementById('memoCount');
+            
+            // 更新标题中的数量显示
+            if (countElement) {
+                countElement.textContent = `(${pendingMemos.length})`;
+            }
+            
+            if (pendingMemos.length === 0) {
+                container.innerHTML = `
+                    <div style="padding: 32px 16px; text-align: center; color: #999;">
+                        <i class="fas fa-check-circle" style="font-size: 32px; margin-bottom: 12px; color: #d4edda;"></i>
+                        <div style="font-size: 14px; margin-bottom: 4px;">暂无待处置事项</div>
+                        <div style="font-size: 12px;">所有巡查走访事项均已处理完成</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 只显示前3条记录
+            const displayMemos = pendingMemos.slice(0, 3);
+            
+            container.innerHTML = displayMemos.map(memo => {
+                return `
+                    <div style="padding: 12px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; transition: background-color 0.2s;" 
+                         onclick="viewMemoDetail(${memo.id})"
+                         onmouseover="this.style.backgroundColor='#f9fafb'" 
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1; margin-right: 12px;">
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px;">${memo.title}</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 2px;">
+                                    <i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #999;"></i>${memo.location}
+                                </div>
+                                <div style="font-size: 11px; color: #999; line-height: 1.3;">${memo.description}</div>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <div style="font-size: 11px; color: #999;">${memo.createTime}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // 如果有超过3条记录，添加底部提示
+            if (pendingMemos.length > 3) {
+                container.innerHTML += `
+                    <div style="padding: 12px 16px; text-align: center; background: #f9fafb; border-top: 1px solid #f0f0f0;">
+                        <span style="font-size: 12px; color: #666;">还有 ${pendingMemos.length - 3} 项待处置事项，</span>
+                        <span style="font-size: 12px; color: #1890ff; cursor: pointer;" onclick="window.open('xuncha_zouzang_list_mobile.html?filter=pending', '_blank')">点击查看全部</span>
+                    </div>
+                `;
+            }
+        }
+
+        // 查看备忘录详情
+        function viewMemoDetail(memoId) {
+            console.log('查看备忘录详情:', memoId);
+            // 调用现有的查看记录详情功能
+            viewRecord(memoId);
+            showToast(`查看备忘录详情: ${memoId}`);
+        }
+
+        // 新专题发现和管理功能
+        function initNewTopicsDiscovery() {
+            // 从服务器获取新上线的专题（模拟）
+            function fetchNewTopics() {
+                return [
+                    {id: 201, name: "AI智能巡查助手", icon: "fa-robot", color: "#3b82f6", category: "巡查走访"},
+                    {id: 202, name: "社区安全预警系统", icon: "fa-shield-alt", color: "#ef4444", category: "巡查走访"},
+                    {id: 203, name: "智慧垃圾分类指导", icon: "fa-recycle", color: "#10b981", category: "巡查走访"},
+                    {id: 204, name: "居民诉求智能分析", icon: "fa-chart-line", color: "#8b5cf6", category: "巡查走访"},
+                    {id: 205, name: "社区活动策划助手", icon: "fa-calendar-plus", color: "#f59e0b", category: "宣传活动"}
+                ];
+            }
+            
+            // 渲染新专题区域
+            function renderNewTopicsSection() {
+                const newTopics = fetchNewTopics();
+                const section = document.getElementById('newTopicsSection');
+                const grid = document.getElementById('newTopicsGrid');
+                
+                if (newTopics.length > 0) {
+                    grid.innerHTML = ''; // 清空现有内容
+                    
+                    newTopics.forEach(topic => {
+                        const topicEl = document.createElement('div');
+                        topicEl.style.cssText = `
+                            background: white; 
+                            border-radius: 8px; 
+                            padding: 12px 6px; 
+                            display: flex; 
+                            flex-direction: column; 
+                            align-items: center; 
+                            text-align: center; 
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+                            cursor: pointer; 
+                            transition: transform 0.2s;
+                            min-height: 80px;
+                            position: relative;
+                            border: 1px solid #e5e7eb;
+                        `;
+                        
+                        topicEl.innerHTML = `
+                            <div style="position: absolute; top: 2px; right: 2px; width: 6px; height: 6px; background: #ff4d4f; border-radius: 50%;"></div>
+                            <i class="fas ${topic.icon}" style="color: ${topic.color}; font-size: 18px; margin-bottom: 6px;"></i>
+                            <span style="font-size: 10px; color: #333; line-height: 1.2; margin-bottom: 6px;">${topic.name}</span>
+                            <div style="display: flex; gap: 4px; width: 100%;">
+                                <button style="flex: 1; font-size: 8px; padding: 2px 4px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="enableNewTopic(${topic.id})">启用</button>
+                                <button style="flex: 1; font-size: 8px; padding: 2px 4px; background: #d9d9d9; color: #666; border: none; border-radius: 4px; cursor: pointer;" onclick="dismissNewTopic(${topic.id})">忽略</button>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(topicEl);
+                    });
+                    
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            }
+            
+            // 启用新专题
+            window.enableNewTopic = function(topicId) {
+                console.log(`启用新专题ID: ${topicId}`);
+                const newTopics = fetchNewTopics();
+                const topicInfo = newTopics.find(topic => topic.id == topicId);
+                
+                if (topicInfo) {
+                    // 更新用户设置，启用该专题
+                    const userSettings = loadUserSettings();
+                    userSettings[topicInfo.name] = true;
+                    saveUserSettings(userSettings);
+                    
+                    // 重新渲染专题列表
+                    renderTopicList();
+                    
+                    showToast(`已启用专题: ${topicInfo.name}`);
+                    
+                    // 隐藏该专题卡片
+                    hideNewTopicCard(topicId);
+                }
+            };
+            
+            // 忽略新专题
+            window.dismissNewTopic = function(topicId) {
+                console.log(`忽略新专题ID: ${topicId}`);
+                showToast('已忽略该专题');
+                hideNewTopicCard(topicId);
+            };
+            
+            // 隐藏新专题卡片
+            function hideNewTopicCard(topicId) {
+                const cards = document.querySelectorAll('#newTopicsGrid > div');
+                cards.forEach(card => {
+                    const enableBtn = card.querySelector(`button[onclick="enableNewTopic(${topicId})"]`);
+                    if (enableBtn) {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // 检查是否还有可见的新专题
+                const visibleCards = Array.from(cards).filter(card => card.style.display !== 'none');
+                if (visibleCards.length === 0) {
+                    document.getElementById('newTopicsSection').style.display = 'none';
+                }
+            }
+            
+            // 一键启用全部新专题
+            window.enableAllNewTopics = function() {
+                const newTopics = fetchNewTopics();
+                const userSettings = loadUserSettings();
+                
+                newTopics.forEach(topicInfo => {
+                    userSettings[topicInfo.name] = true;
+                });
+                
+                saveUserSettings(userSettings);
+                renderTopicList();
+                
+                showToast(`已启用全部${newTopics.length}个新专题`);
+                document.getElementById('newTopicsSection').style.display = 'none';
+            };
+            
+            // 初始化新专题区域
+            renderNewTopicsSection();
+            
+            // 绑定一键启用按钮事件
+            document.getElementById('addAllNewTopicsBtn').addEventListener('click', enableAllNewTopics);
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('小程序端专题列表页初始化');
+            
+            // 强制清除localStorage中的newTopics，确保新专题显示
+            localStorage.removeItem('newTopics');
+            
+            renderTopicList();
+            
+            // 初始化巡查走访显示状态（默认显示前三名）
+            initPatrolRecordsDisplay();
+            
+            // 初始化备忘录列表
+            renderMemoList();
+            
+            // 初始化新专题发现功能
+            initNewTopicsDiscovery();
+            
+            // 设置按钮事件
+            document.getElementById('settingsButton').addEventListener('click', openSettingsModal);
+            
+            // 关闭设置面板事件
+            document.getElementById('closeSettings').addEventListener('click', closeSettingsModal);
+            
+            // 应用设置事件
+            document.getElementById('applySettings').addEventListener('click', applyUserSettings);
+            
+            // 重置设置事件
+            document.getElementById('resetSettings').addEventListener('click', resetUserSettings);
+            
+            // 全选/取消全选事件
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#settingsContent input[type="checkbox"][data-topic]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateSelectedCount();
+            });
+            
+            // 点击设置面板外部关闭
+            document.getElementById('settingsModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeSettingsModal();
+                }
+            });
+            
+            // 监听设置面板内复选框变化
+            document.addEventListener('change', function(e) {
+                if (e.target.matches('#settingsContent input[type="checkbox"][data-topic]')) {
+                    updateSelectedCount();
+                }
+            });
+            
+            // 详情弹框事件监听器
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            
+            // 点击弹框外部关闭
+            document.getElementById('recordModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        });
+
+        // 初始化巡查走访显示状态
+        function initPatrolRecordsDisplay() {
+            // 默认显示前三名记录，如需演示空状态，可调用 showEmptyState()
+            showTopThreeRecords();
+        }
+
+        // 显示前三名巡查记录
+        function showTopThreeRecords() {
+            const recordsContainer = document.getElementById('patrolRecordsContainer');
+            const emptyContainer = document.getElementById('emptyStateContainer');
+            
+            if (recordsContainer && emptyContainer) {
+                recordsContainer.style.display = 'block';
+                emptyContainer.style.display = 'none';
+            }
+            
+            showToast('显示当日前三名巡查记录');
+        }
+
+        // 显示空状态（用于演示）
+        function showEmptyState() {
+            const recordsContainer = document.getElementById('patrolRecordsContainer');
+            const emptyContainer = document.getElementById('emptyStateContainer');
+            
+            if (recordsContainer && emptyContainer) {
+                recordsContainer.style.display = 'none';
+                emptyContainer.style.display = 'block';
+            }
+            
+            showToast('当日暂无巡查记录');
+        }
+
+        // 切换显示状态（用于测试）
+        function togglePatrolDisplay() {
+            const recordsContainer = document.getElementById('patrolRecordsContainer');
+            const isShowingRecords = recordsContainer.style.display !== 'none';
+            
+            if (isShowingRecords) {
+                showEmptyState();
+            } else {
+                showTopThreeRecords();
+            }
+        }
+
+        // 查看巡查走访记录详情
+        function viewRecord(id) {
+            console.log('查看记录:', id);
+            // 根据ID加载不同的记录数据
+            loadViewData(id);
+            renderModalFooterBtns(id);
+            document.getElementById('recordModal').classList.remove('hidden');
+        }
+
+        // 关闭详情弹框
+        function closeModal() {
+            document.getElementById('recordModal').classList.add('hidden');
+        }
+
+        // 加载查看数据（模拟）
+        function loadViewData(id) {
+            // 模拟不同记录的数据
+            const mockData = {
+                // 备忘录相关数据
+                101: {
+                    location: '惠新南里5号院2号楼门禁处',
+                    target: '物业管理员',
+                    time: '2025-01-25 11:15:00',
+                    creator: '高明',
+                    description: '门禁系统故障，居民无法正常刷卡进入，已经影响了2天时间，需要紧急维修处理。多位居民反映无法正常进出，给生活造成不便。',
+                    resident: '物业管理员 王师傅',
+                    residentTags: ['物业人员', '维修负责人'],
+                    residentRemarks: '负责小区门禁系统维护，技术熟练，联系方式：138XXXX5678。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已联系门禁系统供应商，等待技术人员到场检修。预计需要更换主控模块。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '门禁故障现场图.jpg', type: 'image', size: '1.2MB' },
+                        { name: '故障报告单.pdf', type: 'file', size: '180KB' }
+                    ]
+                },
+                102: {
+                    location: '惠新南里5号院垃圾收集点',
+                    target: '环卫负责人',
+                    time: '2025-01-25 16:20:00',
+                    creator: '王芳',
+                    description: '垃圾收集点环境卫生状况较差，垃圾桶满溢，周围有散落垃圾，气味较重，影响周边居民生活环境。',
+                    resident: '环卫负责人 张师傅',
+                    residentTags: ['环卫人员'],
+                    residentRemarks: '负责小区垃圾清运工作，需要协调增加清运频次。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已通知保洁公司增加清运频次，从每日一次调整为每日两次。同时要求加强周边清洁。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '垃圾收集点现状.jpg', type: 'image', size: '950KB' }
+                    ]
+                },
+                103: {
+                    location: '惠新南里5号院3号楼电梯',
+                    target: '电梯维保人员',
+                    time: '2025-01-25 15:45:00',
+                    creator: '李明',
+                    description: '3号楼电梯运行时发出异常响声，可能存在机械故障，为确保居民安全，需要专业技术人员紧急检修。',
+                    resident: '电梯维保公司 技术员',
+                    residentTags: ['维保人员', '技术专家'],
+                    residentRemarks: '持有电梯维修资质，经验丰富，24小时值班电话：400-XXX-XXXX。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已联系电梯维保公司，技术人员预计明天上午到场进行全面检测，必要时停梯维修。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '电梯异响录音.mp3', type: 'audio', size: '2.1MB' },
+                        { name: '电梯运行记录.pdf', type: 'file', size: '320KB' }
+                    ]
+                },
+                104: {
+                    location: '惠新南里5号院东侧道路',
+                    target: '小区电工',
+                    time: '2025-01-24 19:30:00',
+                    creator: '高明',
+                    description: '小区东侧道路多盏路灯不亮，影响夜间居民通行安全，特别是老年人和儿童出行存在安全隐患。',
+                    resident: '小区电工 刘师傅',
+                    residentTags: ['电工', '维修人员'],
+                    residentRemarks: '小区专职电工，熟悉小区电路布线，负责日常电路维护。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已检查发现是线路老化导致，需要更换部分电缆和灯具。已申请维修材料采购。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '路灯不亮区域图.jpg', type: 'image', size: '800KB' },
+                        { name: '电路检修报告.pdf', type: 'file', size: '250KB' }
+                    ]
+                },
+                105: {
+                    location: '惠新南里5号院中心绿化带',
+                    target: '绿化管理员',
+                    time: '2025-01-24 10:20:00',
+                    creator: '王芳',
+                    description: '中心绿化带部分植物因冬季低温和缺乏养护出现枯死现象，影响小区整体环境美观，需要及时补种。',
+                    resident: '绿化公司 管理员',
+                    residentTags: ['绿化人员'],
+                    residentRemarks: '专业绿化养护人员，定期负责小区植物养护工作。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已联系绿化公司制定补种方案，选择适合冬季种植的耐寒植物品种。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '绿化带现状.jpg', type: 'image', size: '1.1MB' },
+                        { name: '补种方案.pdf', type: 'file', size: '400KB' }
+                    ]
+                },
+                1: {
+                    location: '惠新南里5号院3号楼1单元',
+                    target: '张燕',
+                    time: '2025-01-25 14:30:00',
+                    creator: '高明',
+                    description: '居民反映楼道灯不亮，影响夜间出行安全。经现场查看，确实存在照明问题，需要及时维修。',
+                    resident: '张燕 (3号楼101)',
+                    residentTags: ['高龄老人', '热心居民'],
+                    residentRemarks: '热心邻里，经常反映小区问题。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系物业维修人员，预计明天上午进行维修。',
+                    completionStatus: '维修已完成，楼道照明恢复正常，居民表示满意。',
+                    attachments: [
+                        { name: '楼道照明问题.jpg', type: 'image', size: '245KB' },
+                        { name: '现场录音.mp3', type: 'audio', size: '1.2MB' }
+                    ]
+                },
+                2: {
+                    location: '惠新南里5号院2号楼门禁',
+                    target: '物业管理员',
+                    time: '2025-01-25 11:15:00',
+                    creator: '高明',
+                    description: '门禁系统故障，居民无法正常刷卡进入，需要紧急维修。',
+                    resident: '物业管理员',
+                    residentTags: ['物业人员'],
+                    residentRemarks: '负责门禁系统维护，反应及时。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已联系门禁系统维修公司，等待技术人员上门。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '门禁故障照片.jpg', type: 'image', size: '890KB' }
+                    ]
+                },
+                3: {
+                    location: '惠新南里5号院独居老人家中',
+                    target: '李奶奶',
+                    time: '2025-01-25 09:45:00',
+                    creator: '高明',
+                    description: '定期走访独居老人，了解生活状况和健康情况，提供必要的关怀和帮助。',
+                    resident: '李奶奶 (1号楼203)',
+                    residentTags: ['独居老人', '高龄老人'],
+                    residentRemarks: '身体健康，生活能够自理，但需要定期关怀。',
+                    needFollowUp: '否',
+                    disposalCompleted: '-',
+                    disposalSituation: '常规关怀走访，无需特殊处置。',
+                    completionStatus: '',
+                    attachments: []
+                },
+                4: {
+                    location: '惠新南里5号院垃圾收集点',
+                    target: '-',
+                    time: '2025-01-25 16:20:00',
+                    creator: '王芳',
+                    description: '垃圾收集点环境卫生较差，垃圾桶满溢，周围有散落垃圾，需要加强清理。',
+                    resident: '-',
+                    residentTags: [],
+                    residentRemarks: '无相关居民。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已通知保洁公司加强清理频次，增加垃圾清运次数。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '垃圾收集点现状.jpg', type: 'image', size: '1.5MB' }
+                    ]
+                },
+                5: {
+                    location: '惠新南里5号院绿化带',
+                    target: '-',
+                    time: '2025-01-25 13:10:00',
+                    creator: '王芳',
+                    description: '绿化带部分植物损坏，需要修复和补种，保持小区绿化环境。',
+                    resident: '-',
+                    residentTags: [],
+                    residentRemarks: '无相关居民。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已联系绿化公司进行修复和补种。',
+                    completionStatus: '绿化带修复完成，补种了新的植物。',
+                    attachments: [
+                        { name: '绿化带损坏前.jpg', type: 'image', size: '1.1MB' },
+                        { name: '绿化带修复后.jpg', type: 'image', size: '1.3MB' }
+                    ]
+                },
+                6: {
+                    location: '惠新南里5号院3号楼',
+                    target: '投诉居民',
+                    time: '2025-01-25 10:30:00',
+                    creator: '王芳',
+                    description: '居民投诉楼上邻居夜间噪音扰民，影响正常休息，需要协调处理。',
+                    resident: '投诉居民 (3号楼201)',
+                    residentTags: ['普通居民'],
+                    residentRemarks: '对噪音比较敏感，希望能够妥善解决。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '已与楼上居民沟通，要求注意夜间噪音控制。',
+                    completionStatus: '双方达成谅解，楼上居民承诺注意噪音控制。',
+                    attachments: [
+                        { name: '噪音投诉记录.pdf', type: 'file', size: '120KB' }
+                    ]
+                },
+                7: {
+                    location: '惠新南里5号院3号楼电梯',
+                    target: '电梯维保人员',
+                    time: '2025-01-25 15:45:00',
+                    creator: '李明',
+                    description: '电梯运行时有异响，可能存在安全隐患，需要专业检查维修。',
+                    resident: '电梯维保人员',
+                    residentTags: ['维保人员'],
+                    residentRemarks: '专业维保人员，技术过硬。',
+                    needFollowUp: '是',
+                    disposalCompleted: '否',
+                    disposalSituation: '已联系电梯维保公司，安排专业技术人员检查。',
+                    completionStatus: '',
+                    attachments: [
+                        { name: '电梯异响录音.mp3', type: 'audio', size: '800KB' }
+                    ]
+                },
+                8: {
+                    location: '惠新南里5号院停车区',
+                    target: '纠纷双方',
+                    time: '2025-01-25 12:20:00',
+                    creator: '李明',
+                    description: '两位居民因停车位使用发生纠纷，需要进行调解协商。',
+                    resident: '纠纷双方居民',
+                    residentTags: ['车主'],
+                    residentRemarks: '双方都是合理诉求，需要协调解决。',
+                    needFollowUp: '是',
+                    disposalCompleted: '是',
+                    disposalSituation: '组织双方进行协商调解，制定停车位使用规则。',
+                    completionStatus: '纠纷已解决，双方达成停车位轮流使用协议。',
+                    attachments: [
+                        { name: '停车位纠纷协议.pdf', type: 'file', size: '200KB' }
+                    ]
+                }
+            };
+
+            const data = mockData[id] || mockData[1]; // 默认使用第一条数据
+
+            // 填充数据到查看弹框
+            document.getElementById('viewLocation').textContent = data.location;
+            document.getElementById('viewTarget').textContent = data.target;
+            document.getElementById('viewTime').textContent = data.time;
+            document.getElementById('viewCreator').textContent = data.creator;
+            document.getElementById('viewDescription').textContent = data.description;
+            document.getElementById('viewResident').textContent = data.resident;
+            document.getElementById('viewResidentRemarks').textContent = data.residentRemarks;
+            document.getElementById('viewNeedFollowUp').textContent = data.needFollowUp;
+            document.getElementById('viewDisposalCompleted').textContent = data.disposalCompleted;
+            document.getElementById('viewDisposalSituation').textContent = data.disposalSituation;
+            document.getElementById('viewCompletionStatus').textContent = data.completionStatus;
+
+            // 填充居民标签
+            const tagsContainer = document.getElementById('viewResidentTags');
+            const tagList = tagsContainer.querySelector('.tag-list');
+            tagList.innerHTML = '';
+            data.residentTags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'tag-item';
+                tagElement.textContent = tag;
+                tagList.appendChild(tagElement);
+            });
+
+            // 填充附件列表
+            const attachmentContainer = document.getElementById('viewAttachmentList');
+            attachmentContainer.innerHTML = '';
+            if (data.attachments.length === 0) {
+                attachmentContainer.innerHTML = '<div style="text-align: center; color: #9ca3af; font-size: 12px; padding: 16px;">暂无附件</div>';
+            } else {
+                data.attachments.forEach(attachment => {
+                    let iconClass = 'fa-file';
+                    if (attachment.type === 'image') iconClass = 'fa-image';
+                    else if (attachment.type === 'audio') iconClass = 'fa-file-audio';
+                    else if (attachment.type === 'file') iconClass = 'fa-file-pdf';
+                    
+                    const attachmentElement = document.createElement('div');
+                    attachmentElement.className = 'attachment-item';
+                    attachmentElement.innerHTML = `
+                        <i class="fas ${iconClass} attachment-icon"></i>
+                        <div class="attachment-info">
+                            <div class="attachment-name">${attachment.name}</div>
+                            <div class="attachment-size">${attachment.size}</div>
+                        </div>
+                    `;
+                    attachmentContainer.appendChild(attachmentElement);
+                });
+            }
+        }
+
+        // 新上线专题功能
+        function initNewTopicsDiscovery() {
+            // 获取新上线的专题（模拟数据）
+            function fetchNewTopics() {
+                // 检查localStorage中是否有新专题数据
+                const storedNewTopics = localStorage.getItem('newTopics');
+                if (storedNewTopics) {
+                    return JSON.parse(storedNewTopics);
+                }
+                
+                // 模拟新专题数据
+                const newTopics = [
+                    {id: 201, name: "防汛应急专题", icon: "fa-umbrella", color: "#3b82f6", category: "巡查走访"},
+                    {id: 202, name: "志愿者服务专题", icon: "fa-hands-helping", color: "#10b981", category: "宣传活动"},
+                    {id: 203, name: "社区文创专题", icon: "fa-paint-brush", color: "#8b5cf6", category: "宣传活动"}
+                ];
+                
+                // 存储到localStorage
+                localStorage.setItem('newTopics', JSON.stringify(newTopics));
+                return newTopics;
+            }
+            
+            // 初始化新专题显示
+            function initNewTopicsDisplay() {
+                const newTopics = fetchNewTopics();
+                const section = document.getElementById('newTopicsSection');
+                
+                if (newTopics.length > 0) {
+                    renderNewTopicsSection(newTopics);
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            }
+            
+            // 渲染新专题区域
+            function renderNewTopicsSection(newTopics) {
+                const grid = document.getElementById('newTopicsGrid');
+                grid.innerHTML = '';
+                
+                newTopics.forEach(topic => {
+                    const topicCard = document.createElement('div');
+                    topicCard.className = 'new-topic-card';
+                    topicCard.innerHTML = `
+                        <i class="fas ${topic.icon} topic-icon" style="color: ${topic.color};"></i>
+                        <div class="topic-name">${topic.name}</div>
+                        <div class="topic-category">分类：${topic.category}</div>
+                        <div class="topic-actions">
+                            <button class="enable-btn" data-id="${topic.id}">启用</button>
+                            <button class="dismiss-btn" data-id="${topic.id}">暂不启用</button>
+                        </div>
+                    `;
+                    
+                    // 添加按钮事件监听器
+                    const enableBtn = topicCard.querySelector('.enable-btn');
+                    const dismissBtn = topicCard.querySelector('.dismiss-btn');
+                    
+                    enableBtn.addEventListener('click', () => enableNewTopic(topic.id));
+                    dismissBtn.addEventListener('click', () => dismissNewTopic(topic.id));
+                    
+                    grid.appendChild(topicCard);
+                });
+            }
+            
+            // 启用新专题
+            function enableNewTopic(topicId) {
+                const newTopics = fetchNewTopics();
+                const topicInfo = newTopics.find(topic => topic.id == topicId);
+                
+                if (topicInfo) {
+                    // 找到对应的分类并添加专题
+                    const matchedCategory = topicCategories.find(cat => cat.name === topicInfo.category);
+                    if (matchedCategory && !matchedCategory.topics.includes(topicInfo.name)) {
+                        // 添加到对应分类的topics数组
+                        matchedCategory.topics.push(topicInfo.name);
+                    }
+                    
+                    // 将专题添加到用户设置中
+                    const userSettings = loadUserSettings();
+                    userSettings[topicInfo.name] = true;
+                    saveUserSettings(userSettings);
+                    
+                    // 重新渲染专题列表
+                    renderTopicList();
+                    
+                    showToast(`专题"${topicInfo.name}"已启用，将在工作专区中显示`);
+                }
+                
+                // 从新专题列表中移除
+                removeNewTopic(topicId);
+            }
+            
+            // 暂不启用新专题
+            function dismissNewTopic(topicId) {
+                const newTopics = fetchNewTopics();
+                const topicInfo = newTopics.find(topic => topic.id == topicId);
+                
+                if (topicInfo) {
+                    showToast(`暂不启用"${topicInfo.name}"，可随时在专题设置中启用`);
+                }
+                
+                // 从新专题列表中移除
+                removeNewTopic(topicId);
+            }
+            
+            // 从新专题列表中移除专题
+            function removeNewTopic(topicId) {
+                const newTopics = fetchNewTopics().filter(topic => topic.id != topicId);
+                localStorage.setItem('newTopics', JSON.stringify(newTopics));
+                
+                // 重新初始化显示
+                initNewTopicsDisplay();
+            }
+            
+            // 一键启用全部新专题
+            function enableAllNewTopics() {
+                const newTopics = fetchNewTopics();
+                if (newTopics.length === 0) {
+                    showToast('暂无新专题需要启用');
+                    return;
+                }
+                
+                const userSettings = loadUserSettings();
+                
+                // 启用所有新专题
+                newTopics.forEach(topic => {
+                    // 找到对应的分类并添加专题
+                    const matchedCategory = topicCategories.find(cat => cat.name === topic.category);
+                    if (matchedCategory && !matchedCategory.topics.includes(topic.name)) {
+                        // 添加到对应分类的topics数组
+                        matchedCategory.topics.push(topic.name);
+                    }
+                    
+                    userSettings[topic.name] = true;
+                });
+                
+                saveUserSettings(userSettings);
+                renderTopicList();
+                
+                showToast(`已启用全部${newTopics.length}个新专题，已显示在对应分类中`);
+                
+                // 清空新专题列表
+                localStorage.setItem('newTopics', JSON.stringify([]));
+                document.getElementById('newTopicsSection').style.display = 'none';
+            }
+            
+            // 绑定一键启用按钮事件
+            document.getElementById('addAllNewTopicsBtn').addEventListener('click', enableAllNewTopics);
+            
+            // 初始化显示
+            initNewTopicsDisplay();
+            
+            // 定期检查新专题（模拟）
+            setInterval(() => {
+                // 在实际项目中，这里应该调用API检查是否有新专题
+                // 这里为了演示，我们不做任何操作
+            }, 5 * 60 * 1000); // 每5分钟检查一次
+        }
+
+        // 渲染弹框底部按钮（支持本人记录显示修改/删除）
+        function renderModalFooterBtns(recordId) {
+            const footer = document.getElementById('modalFooterBtns');
+            if (!footer) return;
+            // 备忘录ID范围（本人创建）
+            const myIds = [101,102,103,104,105];
+            if (myIds.includes(recordId)) {
+                footer.innerHTML = `
+                    <button class="btn-primary" id="editRecordBtn" style="min-width:88px;margin-right:12px;">修改</button>
+                    <button class="btn-default" id="deleteRecordBtn" style="min-width:88px;color:#ef4444;border-color:#ef4444;">删除</button>
+                `;
+                // 绑定事件
+                document.getElementById('editRecordBtn').onclick = function() {
+                    showToast('进入修改流程（可实现跳转或弹窗编辑）');
+                };
+                document.getElementById('deleteRecordBtn').onclick = function() {
+                    if(confirm('确定要删除该记录吗？')){
+                        showToast('已删除（此处应实现实际删除逻辑）');
+                        closeModal();
+                    }
+                };
+            } else {
+                footer.innerHTML = `<button class=\"btn-close\" id=\"closeModalBtn\">关闭</button>`;
+                document.getElementById('closeModalBtn').onclick = closeModal;
+            }
+        }
+
+        // 社区治理展开/收起效果
+        (function() {
+            var expanded = false;
+            var btn = document.getElementById('toggleGovernanceBtn');
+            var topics = document.getElementById('governanceTopics');
+            var topicItems = topics.querySelectorAll('.governance-topic');
+            function updateView() {
+                if (expanded) {
+                    topics.style.maxHeight = '1000px';
+                    btn.textContent = '收起';
+                    topicItems.forEach(function(item) { item.style.display = 'flex'; });
+                } else {
+                    topics.style.maxHeight = '120px';
+                    btn.textContent = '展开';
+                    topicItems.forEach(function(item, idx) {
+                        item.style.display = idx < 3 ? 'flex' : 'none';
+                    });
+                }
+            }
+            btn.addEventListener('click', function() {
+                expanded = !expanded;
+                updateView();
+            });
+            updateView();
+        })();
+
+        // 月度工作统计仿真数据
+        const workStatsTopics = ["安全事故", "安全隐患", "环境检查", "台账更新", "居民诉求"];
+        const workStatsCommunities = [
+          { name: "街道汇总", data: [8, 15, 12, 10, 6] },
+          { name: "碧水园社区", data: [2, 5, 3, 4, 1] },
+          { name: "星光里社区", data: [1, 3, 2, 3, 2] },
+          { name: "和谐家园社区", data: [0, 4, 5, 2, 1] },
+          { name: "阳光花园社区", data: [1, 2, 3, 3, 0] },
+          { name: "幸福里社区", data: [2, 1, 2, 1, 1] },
+          { name: "春晖苑社区", data: [1, 2, 2, 2, 1] },
+          { name: "锦绣社区", data: [0, 1, 1, 2, 0] },
+          { name: "怡景社区", data: [1, 2, 1, 1, 1] },
+          { name: "翠竹园社区", data: [1, 1, 2, 1, 0] },
+          { name: "康乐社区", data: [0, 2, 1, 2, 1] },
+          { name: "瑞和社区", data: [1, 1, 1, 1, 1] },
+          { name: "阳光新城社区", data: [2, 2, 2, 2, 2] }
+        ];
+        // 只显示前三名社区（不含街道汇总）
+        function renderWorkStatsTableBody() {
+          const body = document.getElementById('workStatsTableBody');
+          let html = `<tr style="background: #e3f2fd;">
+            <td style="font-weight: 600; color: #1976d2; padding: 8px 10px;">${workStatsCommunities[0].name}</td>
+            ${workStatsCommunities[0].data.map(num => `<td style="color: #1976d2; font-weight: 600; text-align: center;">${num}</td>`).join('')}
+          </tr>`;
+          const topCommunities = workStatsCommunities.slice(1)
+            .sort((a, b) => b.data.reduce((s, n) => s + n, 0) - a.data.reduce((s, n) => s + n, 0))
+            .slice(0, 3);
+          topCommunities.forEach(c => {
+            html += `<tr>
+              <td style="color: #333; padding: 8px 10px;">${c.name}</td>
+              ${c.data.map(num => `<td style="text-align: center; color: #333;">${num}</td>`).join('')}
+            </tr>`;
+          });
+          body.innerHTML = html;
+        }
+        function renderWorkStatsTableModalBody() {
+          const body = document.getElementById('workStatsTableModalBody');
+          // 当前渲染逻辑不变，因为筛选只是显示，不实际过滤
+          let html = workStatsCommunities.map(c => `
+            <tr${c.name === '街道汇总' ? ' style=\"background:#e3f2fd;\"' : ''}>
+              <td style=\"${c.name === '街道汇总' ? 'font-weight:600;color:#1976d2;' : 'color:#333;'}padding:8px 10px;\">${c.name}</td>
+              ${c.data.map(num => `<td style=\"text-align:center;color:${c.name === '街道汇总' ? '#1976d2;font-weight:600;' : '#333;'}\">${num}</td>`).join('')}
+            </tr>
+          `).join('');
+          body.innerHTML = html;
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+          renderWorkStatsTableBody();
+          renderModalMonthSelect(); // 初始化弹框内的月份选择器
+
+          document.getElementById('workTableMoreBtn').onclick = function() {
+            renderWorkStatsTableModalBody(); // 渲染弹框表格（目前无数据过滤）
+            document.getElementById('workStatsTableModal').style.display = 'flex';
+          };
+          document.getElementById('closeWorkStatsTableModal').onclick = function() {
+            document.getElementById('workStatsTableModal').style.display = 'none';
+          };
+          document.getElementById('workStatsTableModal').onclick = function(e) {
+            if (e.target === this) document.getElementById('workStatsTableModal').style.display = 'none';
+          };
+        });
+
+        // 新增：为弹框生成月份选项
+        function renderModalMonthSelect() {
+          const select = document.getElementById('modalMonthSelect');
+          if (!select) return;
+          const now = new Date();
+          let optionsHtml = '';
+          for(let i=0; i<6; i++){
+            const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+            const monthStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
+            optionsHtml += `<option value="${monthStr}"${i===0 ? ' selected' : ''}>${monthStr}</option>`;
+          }
+          select.innerHTML = optionsHtml;
+        }
+    </script>
+</body>
+</html>

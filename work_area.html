@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作专区 - 社小智</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+        .top-nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            height: 64px;
+        }
+        .nav-item {
+            padding: 0 16px;
+            color: #333;
+            position: relative;
+            height: 64px;
+            line-height: 64px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .nav-item:hover {
+            color: #1890ff;
+        }
+        .nav-item.active {
+            color: #1890ff;
+            font-weight: 500;
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 16px;
+            height: 2px;
+            background-color: #1890ff;
+        }
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .tab-button.active {
+            border-color: #1890ff;
+            color: #1890ff;
+            font-weight: bold;
+        }
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+        }
+        .topic-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+            position: relative;
+        }
+        
+        /* 新专题卡片中的按钮样式 */
+        .new-topic button {
+            position: relative;
+            z-index: 5;
+        }
+        .topic-icon:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+            border-color: #d0d0d0;
+        }
+        .topic-icon i {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .topic-icon span {
+            font-size: 14px;
+            color: #333;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        .logo-text {
+            color: #1890ff;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .search-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 0 12px;
+            width: auto;
+            max-width: 400px;
+            min-width: 300px;
+            margin-left: 15px;
+            flex: none;
+            background-color: #f9f9f9;
+        }
+        .compact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            background-color: #fff;
+            border: none;
+            border-radius: 0;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* 设置面板相关样式 */
+        .settings-button {
+            background-color: #fff;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border: none;
+            font-size: 14px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            color: #333;
+        }
+        .settings-button:hover {
+            color: #1890ff;
+        }
+        .settings-button i {
+            margin-right: 8px;
+        }
+        .settings-button span {
+            display: inline;
+        }
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .settings-panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .settings-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .settings-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(80vh - 130px);
+        }
+        .settings-footer {
+            padding: 12px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .settings-category {
+            margin-bottom: 24px;
+        }
+        .settings-category-title {
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #1890ff;
+            display: flex;
+            align-items: center;
+        }
+        .settings-category-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+        .settings-item:hover {
+            background-color: #f5f5f5;
+        }
+        .settings-item input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        .settings-item label {
+            cursor: pointer;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* 推荐标记样式 */
+        .recommended-mark {
+            display: inline-block;
+            font-size: 12px;
+            padding: 1px 4px;
+            margin-left: 4px;
+            background-color: #f56565;
+            color: white;
+            border-radius: 2px;
+            vertical-align: middle;
+        }
+        
+        /* 新专题红点标识样式 */
+        .new-topic-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background-color: #ff4d4f;
+            border-radius: 50%;
+            border: 1px solid white;
+            z-index: 10;
+        }
+        
+        .btn-primary {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #40a9ff;
+        }
+        .btn-default {
+            background-color: white;
+            color: rgba(0, 0, 0, 0.65);
+            border: 1px solid #d9d9d9;
+            padding: 7px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-default:hover {
+            color: #40a9ff;
+            border-color: #40a9ff;
+        }
+        .topic-hidden {
+            display: none !important;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 640px) {
+            .search-box {
+                max-width: 140px;
+            }
+            .settings-button {
+                padding: 6px 8px;
+            }
+            .settings-button i {
+                margin-right: 0;
+            }
+            .settings-button span {
+                display: none;
+            }
+            .compact-header h2 {
+                font-size: 1rem;
+                margin-right: 8px;
+            }
+        }
+        
+        /* 新专题相关样式 */
+        .new-topic {
+            position: relative;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        
+        .new-topic:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
+        }
+        
+        .new-topic .enable-topic-btn,
+        .new-topic .dismiss-topic-btn {
+            pointer-events: auto;
+        }
+        
+        #newTopicsBadge .tooltip-content {
+            top: 100%;
+            margin-top: 5px;
+            min-width: 200px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* 适配小程序的样式 */
+        @media (max-width: 640px) {
+            #newTopicsBadge .tooltip-content {
+                right: -20px;
+                width: 220px;
+            }
+            
+            #newTopicsSection .topic-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+        
+        /* 主要内容区域样式 */
+        .content-area {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        /* 专题网格容器样式 */
+        .category-container {
+            margin-bottom: 24px;
+            background-color: #f9fafc;
+            border-radius: 6px;
+            padding: 16px;
+            border: 1px solid #eaeaea;
+        }
+        
+        /* 最后一个分类容器无底部边距 */
+        .category-container:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* 分类标题容器 */
+        .category-header-container {
+            background-color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 6px 6px 0 0;
+            border: 1px solid #eaeaea;
+            border-bottom: none;
+            margin: -16px -16px 16px -16px;
+        }
+        
+        /* 分类标题样式 */
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            position: relative;
+            padding-left: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="content-wrapper px-4 flex items-center justify-between h-full">
+            <!-- 左侧Logo -->
+            <div class="flex items-center">
+                <a href="#" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#1890ff">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                    <div class="ml-2">
+                        <div class="logo-text">社小智</div>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- 中间导航菜单 -->
+            <nav class="hidden md:flex">
+                <a href="#" class="nav-item">首页</a>
+                <a href="#" class="nav-item">工单办理助手</a>
+                <a href="#" class="nav-item">公文模板</a>
+                <a href="#" class="nav-item">找找云文档</a>
+                <a href="#" class="nav-item">工单分析办理PRO</a>
+                <a href="#" class="nav-item">社情民意助手</a>
+                <a href="#" class="nav-item active">工作专区</a>
+            </nav>
+            
+            <!-- 右侧用户信息 -->
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                    <img src="https://via.placeholder.com/32" alt="用户头像" class="rounded-full">
+                </div>
+                <span class="text-gray-700">刘杨</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 替换紧凑的搜索栏和标题区域 -->
+    <div class="content-wrapper px-4">
+        <div class="compact-header">
+            <div class="flex items-center ml-4">
+                <h2 class="text-xl font-semibold text-gray-800">工作专区</h2>
+                <div class="search-box flex items-center">
+                    <span class="text-gray-400 mr-2">🔍</span>
+                    <input type="text" placeholder="输入关键词搜索专题" class="outline-none border-none py-2 w-full bg-transparent">
+                    <button class="text-blue-500 hover:text-blue-700 font-medium text-sm ml-2 flex-shrink-0">搜索</button>
+                </div>
+            </div>
+            <div class="flex items-center mr-4">
+                <button id="settingsButton" class="settings-button" onclick="document.getElementById('settingsModal').style.display='flex'; document.body.style.overflow='hidden';">
+                    <i class="fas fa-cog mr-2"></i>
+                    专题设置
+                </button>
+                <!-- 完全移除新专题数字徽章 -->
+                <style>
+                    #newTopicsBadge {
+                        display: none !important;
+                    }
+                </style>
+                <div id="newTopicsBadge" class="ml-2 relative cursor-pointer" style="display: none;">
+                    <div class="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</div>
+                    <div class="tooltip-content hidden absolute right-0 bg-white shadow-lg rounded p-3 z-10 w-64">
+                        <div class="font-medium text-sm mb-2">发现3个新专题</div>
+                        <div class="text-xs mb-1">
+                            <span class="text-blue-600 hover:underline cursor-pointer">防汛应急专题</span>
+                            <span class="text-gray-500 text-xs">（社区安全与应急管理）</span>
+            </div>
+                        <div class="text-xs mb-1">
+                            <span class="text-blue-600 hover:underline cursor-pointer">志愿者服务专题</span>
+                            <span class="text-gray-500 text-xs">（文化教育与精神文明建设）</span>
+                        </div>
+                        <div class="text-xs mb-1">
+                            <span class="text-blue-600 hover:underline cursor-pointer">社区文创专题</span>
+                            <span class="text-gray-500 text-xs">（文化教育与精神文明建设）</span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t text-xs text-center">
+                            <span id="addAllNewTopics" class="text-blue-600 hover:underline cursor-pointer">一键启用全部</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置面板 -->
+    <div id="settingsModal" class="settings-modal">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h3 class="text-lg font-medium">专题显示设置</h3>
+                <button id="closeSettings" class="text-gray-500 hover:text-gray-700" onclick="document.getElementById('settingsModal').style.display='none'; document.body.style.overflow='';">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="settings-body">
+                <div id="settingsActionContent">
+                    <!-- 专题设置内容将通过JS动态生成 -->
+                </div>
+            </div>
+            <div class="settings-footer">
+                <button id="resetSettings" class="btn-default" onclick="resetUserSettings()">
+                    恢复默认
+                </button>
+                <button id="applySettings" class="btn-primary" onclick="applyUserSettings()">
+                    应用设置
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <main class="content-wrapper px-4 mt-6 mb-8">
+        <!-- 分类标题已移除 -->
+
+        <!-- 新专题专区 -->
+        <div id="newTopicsSection" class="content-area mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium flex items-center">
+                    <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded mr-2">新</span>
+                    新上线专题
+                </h3>
+                <div class="text-sm text-blue-600 hover:underline cursor-pointer" id="addAllNewTopicsBtn">一键启用全部</div>
+            </div>
+            <div class="topic-grid">
+                <!-- 新专题项 -->
+                <div class="topic-icon new-topic">
+                    <div class="absolute top-1 right-1 bg-red-500 w-2 h-2 rounded-full"></div>
+                    <i class="fas fa-umbrella text-blue-500"></i>
+                    <span>防汛应急专题</span>
+                    <div class="text-xs text-gray-500 mt-1">分类：巡查走访</div>
+                    <div class="flex space-x-1 mt-2">
+                        <button class="enable-topic-btn flex-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded" data-id="101">启用</button>
+                        <button class="dismiss-topic-btn flex-1 text-xs bg-gray-300 hover:bg-gray-400 text-gray-700 px-2 py-1 rounded" data-id="101">暂不启用</button>
+                    </div>
+                </div>
+                <div class="topic-icon new-topic">
+                    <div class="absolute top-1 right-1 bg-red-500 w-2 h-2 rounded-full"></div>
+                    <i class="fas fa-hands-helping text-green-500"></i>
+                    <span>志愿者服务专题</span>
+                    <div class="text-xs text-gray-500 mt-1">分类：活动组织</div>
+                    <div class="flex space-x-1 mt-2">
+                        <button class="enable-topic-btn flex-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded" data-id="102">启用</button>
+                        <button class="dismiss-topic-btn flex-1 text-xs bg-gray-300 hover:bg-gray-400 text-gray-700 px-2 py-1 rounded" data-id="102">暂不启用</button>
+                    </div>
+                </div>
+                <div class="topic-icon new-topic">
+                    <div class="absolute top-1 right-1 bg-red-500 w-2 h-2 rounded-full"></div>
+                    <i class="fas fa-paint-brush text-purple-500"></i>
+                    <span>社区文创专题</span>
+                    <div class="text-xs text-gray-500 mt-1">分类：宣传教育</div>
+                    <div class="flex space-x-1 mt-2">
+                        <button class="enable-topic-btn flex-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded" data-id="103">启用</button>
+                        <button class="dismiss-topic-btn flex-1 text-xs bg-gray-300 hover:bg-gray-400 text-gray-700 px-2 py-1 rounded" data-id="103">暂不启用</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 专题展示区 -->
+        <div id="topicDisplayArea" class="content-area">
+            <!-- 专题内容将通过JS动态插入 -->
+        </div>
+    </main>
+
+    <script>
+        const actionCategories = [
+            {
+                name: "巡查走访",
+                icon: "fas fa-bullhorn",
+                color: "text-red-500",
+                topics: [
+                    "恐怖行为报告", "间谍行为报告", "禁毒行为报告", "非法集资报告", "违法行为报告", "社区矫正协助", "安置帮教协助", "安全隐患报告", "灾害应急响应", "防汛应急专题", "教育诉求反馈", "就业困难反馈", "养老服务反馈", "医疗保障反馈", "慈善救助反馈", "残疾人保障反馈", "困境儿童反馈", "家暴行为报告", "军属困难反馈", "退役军人反馈", "艾滋病防治反馈", "精神卫生反馈", "传染病防控反馈", "动物防疫反馈", "食品安全反馈", "文明行为监督", "学前教育反馈", "适龄入学反馈", "社会实践反馈", "家庭教育反馈", "生活垃圾分类违规", "垃圾分类督导", "门前三包违规", "养犬违规行为", "节水违规行为", "违建行为报告", "排污行为报告", "破坏生态行为", "噪声污染报告", "损绿毁绿行为", "租赁纠纷反馈", "居民诉求反馈", "智慧停车管理", "经济普查反馈", "污染源普查反馈", "人口普查反馈", "宗教违法报告"
+                ]
+            },
+            {
+                name: "工作总结",
+                icon: "fas fa-file-alt",
+                color: "text-blue-500",
+                topics: [
+                    "治安任务总结", "教育政策总结", "就业帮扶总结", "养老服务总结", "医疗保障总结", "慈善项目总结", "残疾人服务总结", "困境儿童服务总结", "家暴干预总结", "军属服务总结", "退役军人服务总结", "艾滋防控总结", "精神卫生总结", "传染病防控总结", "动物防疫总结", "食品安全总结", "文化活动总结", "学前教育总结", "家教指导总结", "环境整治总结", "物业监管总结", "人口普查总结", "经济普查总结", "宗教事务总结"
+                ]
+            },
+            {
+                name: "活动组织",
+                icon: "fas fa-calendar-alt",
+                color: "text-green-500",
+                topics: [
+                    "治安宣传活动", "法律宣传活动", "社区文体活动", "志愿服务活动", "志愿者服务专题", "教育宣传活动", "就业帮扶活动", "养老服务活动", "医疗义诊活动", "慈善公益活动", "残疾人关怀活动", "困境儿童关爱活动", "家暴预防讲座", "军属慰问活动", "退役军人座谈", "艾滋病宣传日", "精神健康讲座", "传染病防控演练", "动物防疫宣传", "食品安全培训", "爱国卫生运动", "文化节庆活动", "历史名城宣传", "学前教育开放日", "家长课堂活动", "环境整治志愿行", "业主委员会成立大会", "社区议事协商会", "防灾减灾演练", "纠纷调解活动", "法律咨询活动", "献血动员活动", "义务植树活动"
+                ]
+            },
+            {
+                name: "宣传教育",
+                icon: "fas fa-bullhorn",
+                color: "text-yellow-500",
+                topics: [
+                    "治安政策宣传", "社区矫正宣传", "安全防范宣传", "灾害应急宣传", "教育政策宣传", "就业政策宣传", "养老政策宣传", "医疗政策宣传", "慈善政策宣传", "残疾人政策宣传", "困境儿童政策宣传", "家暴法律宣传", "军属政策宣传", "退役军人政策宣传", "艾滋病防治宣传", "精神卫生宣传", "传染病防控宣传", "动物防疫宣传", "食品安全宣传", "文明行为宣传", "学前教育宣传", "家庭教育宣传", "垃圾分类宣传", "门前三包宣传", "养犬管理宣传", "节能节水宣传", "环境保护宣传", "社区文创专题", "宗教政策宣传"
+                ]
+            },
+            {
+                name: "巡查走访",
+                icon: "fas fa-walking",
+                color: "text-purple-500",
+                topics: [
+                    "治安巡逻检查", "安全隐患巡查", "社区矫正走访", "安置帮教走访", "教育帮扶走访", "就业困难走访", "养老服务走访", "医疗保障走访", "慈善救助走访", "残疾人走访", "困境儿童走访", "家暴高风险走访", "军属走访慰问", "退役军人走访", "艾滋病重点人群走访", "精神障碍患者走访", "传染病易感人群走访", "动物防疫巡查", "食品安全巡查", "文明行为巡查", "学前教育巡查", "适龄儿童入学巡查", "家庭教育走访", "环境卫生巡查", "垃圾分类巡查", "门前三包巡查", "养犬管理巡查", "节水节能巡查", "违建违排巡查", "绿化损毁巡查", "噪音扰民巡查", "租赁秩序巡查", "居民诉求走访", "宗教场所巡查"
+                ]
+            }
+        ];
+
+        // 已移除业务分类
+
+        // 推荐的专题列表
+        const recommendedTopics = [
+            // 巡查走访类
+            "安全隐患报告", "食品安全反馈", 
+            
+            // 工作总结类
+            "治安任务总结", "环境整治总结",
+            
+            // 活动组织类
+            "社区文体活动", "志愿者服务活动",
+            
+            // 宣传教育类
+            "安全防范宣传", "环境保护宣传",
+            
+            // 巡查走访类
+            "治安巡逻检查", "环境卫生巡查"
+        ];
+
+        // 新上线专题列表（模拟后台数据，实际应从API获取）
+        const newOnlineTopics = [
+            "防汛应急专题",
+            "志愿者服务专题", 
+            "社区文创专题",
+            "智慧停车管理",
+            "垃圾分类督导"
+        ];
+
+        // 检查是否为新上线专题
+        function isNewOnlineTopic(topicName) {
+            return newOnlineTopics.includes(topicName);
+        }
+
+        // 获取专题图标函数
+        function getTopicIcon(topicName) {
+            // 根据专题名称中的关键词确定合适的图标
+            // 为特定专题提供精确匹配
+            if (topicName === "安全防范宣传") return 'fa-shield-alt';
+            if (topicName === "环境保护宣传") return 'fa-leaf';
+            
+            // 一般性匹配规则
+            if (topicName.includes('恐怖') || topicName.includes('间谍')) return 'fa-skull';
+            if (topicName.includes('禁毒')) return 'fa-pills';
+            if (topicName.includes('非法集资')) return 'fa-money-bill';
+            if (topicName.includes('违法')) return 'fa-gavel';
+            if (topicName.includes('矫正') || topicName.includes('帮教')) return 'fa-user-shield';
+            if (topicName.includes('安全隐患')) return 'fa-exclamation-triangle';
+            if (topicName.includes('灾害') || topicName.includes('防灾')) return 'fa-cloud-showers-heavy';
+            if (topicName.includes('教育') || topicName.includes('学前')) return 'fa-school';
+            if (topicName.includes('就业') || topicName.includes('帮扶')) return 'fa-briefcase';
+            if (topicName.includes('养老')) return 'fa-user-nurse';
+            if (topicName.includes('医疗') || topicName.includes('义诊')) return 'fa-stethoscope';
+            if (topicName.includes('慈善') || topicName.includes('救助')) return 'fa-hand-holding-heart';
+            if (topicName.includes('残疾人')) return 'fa-wheelchair';
+            if (topicName.includes('儿童')) return 'fa-child';
+            if (topicName.includes('家暴')) return 'fa-house-damage';
+            if (topicName.includes('军属') || topicName.includes('退役军人')) return 'fa-medal';
+            if (topicName.includes('艾滋')) return 'fa-ribbon';
+            if (topicName.includes('精神') || topicName.includes('心理')) return 'fa-brain';
+            if (topicName.includes('传染病')) return 'fa-virus';
+            if (topicName.includes('动物') || topicName.includes('防疫')) return 'fa-paw';
+            if (topicName.includes('食品安全')) return 'fa-utensils';
+            if (topicName.includes('文明')) return 'fa-award';
+            if (topicName.includes('实践')) return 'fa-hands-helping';
+            if (topicName.includes('家庭教育')) return 'fa-home';
+            if (topicName.includes('垃圾') || topicName.includes('门前三包')) return 'fa-trash';
+            if (topicName.includes('养犬')) return 'fa-dog';
+            if (topicName.includes('节水') || topicName.includes('节能')) return 'fa-tint';
+            if (topicName.includes('违建') || topicName.includes('排污')) return 'fa-building';
+            if (topicName.includes('生态') || topicName.includes('绿')) return 'fa-leaf';
+            if (topicName.includes('噪声')) return 'fa-volume-up';
+            if (topicName.includes('租赁') || topicName.includes('物业')) return 'fa-key';
+            if (topicName.includes('诉求')) return 'fa-comments';
+            if (topicName.includes('普查')) return 'fa-clipboard-list';
+            if (topicName.includes('宗教')) return 'fa-place-of-worship';
+            if (topicName.includes('总结')) return 'fa-chart-bar';
+            if (topicName.includes('宣传') || topicName.includes('法律')) return 'fa-megaphone';
+            if (topicName.includes('社区文体')) return 'fa-volleyball-ball';
+            if (topicName.includes('志愿')) return 'fa-hands';
+            if (topicName.includes('讲座')) return 'fa-chalkboard-teacher';
+            if (topicName.includes('演练')) return 'fa-people-carry';
+            if (topicName.includes('培训')) return 'fa-user-graduate';
+            if (topicName.includes('卫生')) return 'fa-broom';
+            if (topicName.includes('文化') || topicName.includes('节庆')) return 'fa-music';
+            if (topicName.includes('历史')) return 'fa-monument';
+            if (topicName.includes('开放日')) return 'fa-door-open';
+            if (topicName.includes('课堂')) return 'fa-book-reader';
+            if (topicName.includes('环境')) return 'fa-tree';
+            if (topicName.includes('委员会')) return 'fa-users-cog';
+            if (topicName.includes('协商') || topicName.includes('议事')) return 'fa-comments';
+            if (topicName.includes('纠纷') || topicName.includes('调解')) return 'fa-balance-scale';
+            if (topicName.includes('咨询')) return 'fa-question-circle';
+            if (topicName.includes('献血')) return 'fa-tint';
+            if (topicName.includes('植树')) return 'fa-seedling';
+            if (topicName.includes('政策')) return 'fa-scroll';
+            if (topicName.includes('巡查') || topicName.includes('巡逻') || topicName.includes('走访')) return 'fa-route';
+            
+            // 额外补充的图标匹配规则
+            if (topicName.includes('座谈')) return 'fa-users';
+            if (topicName.includes('关怀') || topicName.includes('关爱')) return 'fa-heart';
+            if (topicName.includes('爱国')) return 'fa-flag';
+            if (topicName.includes('适龄入学')) return 'fa-user-graduate';
+            if (topicName.includes('家教')) return 'fa-chalkboard-teacher';
+            if (topicName.includes('损绿') || topicName.includes('毁绿')) return 'fa-cut';
+            if (topicName.includes('污染源')) return 'fa-smog';
+            if (topicName.includes('慰问')) return 'fa-gift';
+            if (topicName.includes('应急')) return 'fa-first-aid';
+            if (topicName.includes('居民')) return 'fa-home';
+            if (topicName.includes('重点人群')) return 'fa-user-friends';
+            if (topicName.includes('易感人群')) return 'fa-user-shield';
+            if (topicName.includes('义务')) return 'fa-handshake';
+            if (topicName.includes('扰民')) return 'fa-dizzy';
+            
+            // 默认图标
+            return 'fa-file-alt';
+        }
+        
+        // 获取专题图标颜色
+        function getTopicColor(topicName, categoryColor) {
+            // 使用分类颜色，但也可以根据专题名称细化
+            return categoryColor;
+        }
+
+        const topicDisplayArea = document.getElementById('topicDisplayArea');
+        const tabAction = document.getElementById('tabAction');
+        const tabBusiness = document.getElementById('tabBusiness');
+
+        // 保存用户设置到本地存储
+        function saveUserSettings(type, settings) {
+            localStorage.setItem(`topicSettings_${type}`, JSON.stringify(settings));
+        }
+
+        // 从本地存储加载用户设置
+        function loadUserSettings(type) {
+            const settings = localStorage.getItem(`topicSettings_${type}`);
+            // 设置不存在的话，立即初始化一个新的设置
+            if (!settings) {
+                if (type === 'action') {
+                    // 初始化动作分类设置，只显示推荐的专题
+                    const defaultSettings = {};
+                    actionCategories.forEach(category => {
+                        category.topics.forEach(topic => {
+                            // 只有在推荐列表中的专题默认显示，其他专题默认不显示
+                            defaultSettings[topic] = recommendedTopics.includes(topic);
+                        });
+                    });
+                    saveUserSettings(type, defaultSettings);
+                    return defaultSettings;
+                } else if (type === 'business') {
+                    // 初始化业务分类设置，只显示推荐的专题
+                    const defaultSettings = {};
+                    businessCategories.forEach(category => {
+                        category.topics.forEach(topic => {
+                            // 只有在推荐列表中的专题默认显示，其他专题默认不显示
+                            defaultSettings[topic] = recommendedTopics.includes(topic);
+                        });
+                    });
+                    saveUserSettings(type, defaultSettings);
+                    return defaultSettings;
+                }
+            }
+            return settings ? JSON.parse(settings) : null;
+        }
+
+        // 初始化用户设置
+        function initializeUserSettings() {
+            // 加载设置，loadUserSettings内部会自动初始化设置
+            const userSettings = loadUserSettings('action');
+            console.log('已加载专题设置:', userSettings);
+            
+            // 确保所有专题都有设置值（只有推荐专题默认显示）
+            actionCategories.forEach(category => {
+                category.topics.forEach(topic => {
+                    if (userSettings && userSettings[topic] === undefined) {
+                        // 只有在推荐列表中的专题默认显示，其他专题默认不显示
+                        userSettings[topic] = recommendedTopics.includes(topic);
+                    }
+                });
+            });
+            
+            // 保存确保完整性的设置
+            if (userSettings) saveUserSettings('action', userSettings);
+        }
+
+        // 根据用户设置渲染专题
+        function renderTopics(categories) {
+            const userSettings = loadUserSettings('action');
+
+            // 调试日志
+            console.log(`正在渲染专题，设置状态:`, userSettings);
+
+            topicDisplayArea.innerHTML = ''; // 清空之前的内容
+            
+            // 遍历所有分类
+            categories.forEach(category => {
+                // 检查当前分类是否有推荐显示的专题
+                const hasVisibleTopics = category.topics.some(topic => 
+                    userSettings[topic] || 
+                    (userSettings[topic] === undefined && recommendedTopics.includes(topic))
+                );
+                
+                // 只有当分类中有可见专题时才显示该分类
+                if (hasVisibleTopics) {
+                    // 创建分类容器
+                    const categoryContainer = document.createElement('div');
+                    categoryContainer.className = 'category-container';
+                    
+                    // 创建分类标题
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'category-header-container';
+                    categoryHeader.innerHTML = `
+                        <h3 class="category-title">
+                            <i class="fas fa-folder mr-2 text-gray-600"></i>${category.name}
+                        </h3>
+                    `;
+                    categoryContainer.appendChild(categoryHeader);
+                    
+                    // 创建包含专题的网格
+                    const topicsGrid = document.createElement('div');
+                    topicsGrid.className = 'topic-grid';
+                    
+                    let visibleTopicsCount = 0;
+                    
+                    // 添加符合条件的专题
+                    category.topics.forEach(topicName => {
+                        // 检查用户设置决定是否显示该专题
+                        const isVisible = userSettings[topicName] || 
+                            (userSettings[topicName] === undefined && recommendedTopics.includes(topicName));
+                        
+                        if (isVisible) {
+                            const topicIcon = document.createElement('a');
+                            topicIcon.href = `topic_detail_template.html?topic=${encodeURIComponent(topicName)}`;
+                            topicIcon.className = 'topic-icon';
+                            
+                            const icon = getTopicIcon(topicName);
+                            const color = getTopicColor(topicName, category.color);
+                            
+                            topicIcon.innerHTML = `
+                                <i class="fas ${icon} ${color}"></i>
+                                <span>${topicName}</span>
+                            `;
+                            
+                            topicsGrid.appendChild(topicIcon);
+                            visibleTopicsCount++;
+                        }
+                    });
+                    
+                    if (visibleTopicsCount > 0) {
+                        console.log(`${category.name}分类下有${visibleTopicsCount}个可见专题`);
+                        categoryContainer.appendChild(topicsGrid);
+                        topicDisplayArea.appendChild(categoryContainer);
+                    }
+                }
+            });
+        }
+
+        // 生成设置面板内容
+        function generateSettingsContent(categories, containerId) {
+            const container = document.getElementById(containerId);
+            const settingsType = 'action';
+            const userSettings = loadUserSettings(settingsType);
+            
+            container.innerHTML = '';
+            
+            // 添加全选/全不选控件
+            const selectAllContainer = document.createElement('div');
+            selectAllContainer.className = 'mb-4 pb-2 border-b border-gray-200';
+            selectAllContainer.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div class="settings-item">
+                        <input type="checkbox" id="selectAll_${settingsType}" ${areAllSelected(userSettings) ? 'checked' : ''}>
+                        <label for="selectAll_${settingsType}">全选/取消全选</label>
+                    </div>
+                    <span class="text-sm text-gray-500">已选 ${countSelectedTopics(userSettings)} 个专题</span>
+                </div>
+            `;
+            container.appendChild(selectAllContainer);
+            
+            // 为每个分类创建设置项
+            categories.forEach(category => {
+                const categorySection = document.createElement('div');
+                categorySection.className = 'settings-category';
+                
+                categorySection.innerHTML = `
+                    <div class="settings-category-title">
+                        <i class="fas fa-folder mr-2 text-gray-600"></i>${category.name}
+                    </div>
+                `;
+                
+                const itemsContainer = document.createElement('div');
+                itemsContainer.className = 'settings-category-items';
+                
+                category.topics.forEach(topic => {
+                    const isChecked = userSettings[topic];
+                    const isRecommended = recommendedTopics.includes(topic);
+                    const isNewOnline = isNewOnlineTopic(topic);
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'settings-item';
+                    
+                    const uniqueId = `${settingsType}_${topic.replace(/\s+/g, '_')}`;
+                    
+                    // 为推荐专题添加标记
+                    const recommendedMark = isRecommended ? 
+                        `<span class="recommended-mark" title="推荐专题"><i class="fas fa-thumbs-up mr-1"></i>推荐</span>` : '';
+                    
+                    // 为新上线专题添加红点标识
+                    const newTopicDot = isNewOnline ? 
+                        `<div class="new-topic-dot" title="新上线专题"></div>` : '';
+                    
+                    itemDiv.innerHTML = `
+                        <input type="checkbox" id="${uniqueId}" ${isChecked ? 'checked' : ''} 
+                            data-topic="${topic}" data-type="${settingsType}">
+                        <label for="${uniqueId}" title="${topic}" class="flex items-center">
+                            <span class="mr-1">${topic}</span>
+                            ${recommendedMark}
+                        </label>
+                        ${newTopicDot}
+                    `;
+                    
+                    itemsContainer.appendChild(itemDiv);
+                });
+                
+                categorySection.appendChild(itemsContainer);
+                container.appendChild(categorySection);
+            });
+            
+            // 为全选/全不选添加事件监听
+            const selectAllCheckbox = document.getElementById(`selectAll_${settingsType}`);
+            selectAllCheckbox.addEventListener('change', function() {
+                const checkboxes = container.querySelectorAll('input[type="checkbox"][data-topic]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                
+                // 更新计数
+                updateSelectedCount(settingsType);
+            });
+            
+            // 为单个复选框添加事件监听，更新计数
+            const topicCheckboxes = container.querySelectorAll('input[type="checkbox"][data-topic]');
+            topicCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    updateSelectedCount(settingsType);
+                    
+                    // 检查是否需要更新全选复选框
+                    const allChecked = Array.from(topicCheckboxes).every(cb => cb.checked);
+                    selectAllCheckbox.checked = allChecked;
+                });
+            });
+        }
+        
+        // 检查是否所有专题都被选中
+        function areAllSelected(settings) {
+            for (const key in settings) {
+                if (!settings[key]) return false;
+            }
+            return true;
+        }
+        
+        // 计算已选专题数量
+        function countSelectedTopics(settings) {
+            let count = 0;
+            for (const key in settings) {
+                if (settings[key]) count++;
+            }
+            return count;
+        }
+        
+        // 更新已选专题计数
+        function updateSelectedCount(settingsType) {
+            const container = settingsType === 'action' ? 
+                document.getElementById('settingsActionContent') : 
+                document.getElementById('settingsBusinessContent');
+                
+            const checkboxes = container.querySelectorAll('input[type="checkbox"][data-topic]');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            
+            const countSpan = container.querySelector('.text-sm.text-gray-500');
+            if (countSpan) {
+                countSpan.textContent = `已选 ${checkedCount} 个专题`;
+            }
+        }
+
+        // 初始化设置面板和相关事件
+        function initializeSettingsModal() {
+            const settingsModal = document.getElementById('settingsModal');
+            const actionContent = document.getElementById('settingsActionContent');
+            
+            console.log('初始化设置面板');
+            
+            // 生成设置面板内容
+            generateSettingsContent(actionCategories, 'settingsActionContent');
+            
+            // 点击设置面板外部关闭
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+            
+            // 已移除设置选项卡切换功能
+        }
+        
+        // 显示提示信息
+        function showToast(message, duration = 2000) {
+            // 创建提示元素
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded shadow-lg z-50';
+            toast.textContent = message;
+            
+            // 添加到页面
+            document.body.appendChild(toast);
+            
+            // 定时移除
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                toast.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 500);
+            }, duration);
+        }
+
+        // 已移除标签切换功能
+
+// 新专题发现和提示功能
+        function initNewTopicsDiscovery() {
+            // 从服务器获取新上线的专题
+            function fetchNewTopics() {
+                // 实际项目中应该是API调用
+                // 这里模拟返回新专题数据
+                return [
+                    {id: 101, name: "防汛应急专题", icon: "fa-umbrella", color: "text-blue-500", category: "巡查走访"},
+                    {id: 102, name: "志愿者服务专题", icon: "fa-hands-helping", color: "text-green-500", category: "活动组织"},
+                    {id: 103, name: "社区文创专题", icon: "fa-paint-brush", color: "text-purple-500", category: "宣传教育"}
+                ];
+            }
+            
+            // 初始化新专题提示
+            function initNewTopicsBadge() {
+                const newTopics = fetchNewTopics();
+                const badge = document.getElementById('newTopicsBadge');
+                
+                if (newTopics.length > 0) {
+                    // 显示气泡数字
+                    badge.querySelector('div').textContent = newTopics.length;
+                    badge.style.display = 'block';
+                    
+                    // 设置气泡提示内容
+                    const tooltipContent = badge.querySelector('.tooltip-content');
+                    tooltipContent.querySelector('.font-medium').textContent = `发现${newTopics.length}个新专题`;
+                    
+                    // 清空旧内容
+                    tooltipContent.querySelectorAll('.text-xs.mb-1:not(.mt-2)').forEach(el => el.remove());
+                    
+                    // 添加新专题链接
+                    const addAllBtn = tooltipContent.querySelector('.mt-2');
+                    newTopics.forEach(topic => {
+                        const topicItem = document.createElement('div');
+                        topicItem.className = 'text-xs mb-1';
+                        topicItem.innerHTML = `
+                            <span class="text-blue-600 hover:underline cursor-pointer" data-id="${topic.id}">${topic.name}</span>
+                            <span class="text-gray-500 text-xs">（${topic.category}）</span>
+                        `;
+                        
+                        // 为专题名称添加点击事件
+                        topicItem.querySelector('.text-blue-600').addEventListener('click', () => enableTopic(topic.id));
+                        
+                        tooltipContent.insertBefore(topicItem, addAllBtn);
+                    });
+                    
+                    // 显示新专题专区
+                    renderNewTopicsSection(newTopics);
+                } else {
+                    badge.style.display = 'none';
+                    document.getElementById('newTopicsSection').style.display = 'none';
+                }
+            }
+            
+            // 渲染新专题专区
+            function renderNewTopicsSection(newTopics) {
+                const section = document.getElementById('newTopicsSection');
+                const grid = section.querySelector('.topic-grid');
+                grid.innerHTML = ''; // 清空现有内容
+                
+                newTopics.forEach(topic => {
+                    const topicEl = document.createElement('div');
+                    topicEl.className = 'topic-icon new-topic';
+                    topicEl.innerHTML = `
+                        <div class="absolute top-1 right-1 bg-red-500 w-2 h-2 rounded-full"></div>
+                        <i class="fas ${topic.icon} ${topic.color}"></i>
+                        <span>${topic.name}</span>
+                        <div class="text-xs text-gray-500 mt-1">分类：${topic.category}</div>
+                        <div class="flex space-x-1 mt-2">
+                            <button type="button" data-id="${topic.id}" class="enable-topic-btn flex-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded cursor-pointer z-10">启用</button>
+                            <button type="button" data-id="${topic.id}" class="dismiss-topic-btn flex-1 text-xs bg-gray-300 hover:bg-gray-400 text-gray-700 px-2 py-1 rounded cursor-pointer z-10">暂不启用</button>
+                        </div>
+                    `;
+                    grid.appendChild(topicEl);
+                    
+                    // 直接给按钮添加点击事件处理
+                    const enableBtn = topicEl.querySelector('.enable-topic-btn');
+                    const dismissBtn = topicEl.querySelector('.dismiss-topic-btn');
+                    
+                    if (enableBtn) {
+                        enableBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const id = this.getAttribute('data-id');
+                            console.log('直接点击启用按钮, ID:', id);
+                            if (id) enableTopic(id);
+                        });
+                    }
+                    
+                    if (dismissBtn) {
+                        dismissBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const id = this.getAttribute('data-id');
+                            console.log('直接点击暂不启用按钮, ID:', id);
+                            if (id) dismissTopic(id);
+                        });
+                    }
+                });
+                
+                section.style.display = newTopics.length > 0 ? 'block' : 'none';
+            }
+            
+            // 获取分类标签和颜色
+            function getCategoryTag(categoryName) {
+                // 根据分类名称返回简短标签和对应的颜色类
+                if (categoryName.includes('安全')) return { tagText: '安全', tagColor: 'bg-indigo-600' };
+                if (categoryName.includes('民生')) return { tagText: '民生', tagColor: 'bg-pink-500' };
+                if (categoryName.includes('卫生') || categoryName.includes('健康')) return { tagText: '健康', tagColor: 'bg-teal-500' };
+                if (categoryName.includes('治理') || categoryName.includes('环境')) return { tagText: '环境', tagColor: 'bg-orange-500' };
+                if (categoryName.includes('文化') || categoryName.includes('教育')) return { tagText: '文化', tagColor: 'bg-cyan-500' };
+                if (categoryName.includes('特殊人群') || categoryName.includes('关怀')) return { tagText: '关怀', tagColor: 'bg-lime-500' };
+                if (categoryName.includes('事务') || categoryName.includes('数据')) return { tagText: '数据', tagColor: 'bg-gray-500' };
+                
+                // 默认标签
+                return { tagText: '专题', tagColor: 'bg-blue-500' };
+            }
+
+            // 启用专题
+            function enableTopic(topicId) {
+                console.log(`启用专题ID: ${topicId}`);
+                // 实际项目中应发送请求到服务器启用专题
+                
+                // 获取专题信息
+                const newTopics = fetchNewTopics();
+                const topicInfo = newTopics.find(topic => topic.id == topicId);
+                
+                if (topicInfo) {
+                    // 将专题添加到对应分类并设置为显示
+                    // 找到对应的动作分类
+                    const matchedCategory = actionCategories.find(cat => cat.name === topicInfo.category);
+                    if (matchedCategory && !matchedCategory.topics.includes(topicInfo.name)) {
+                        // 添加到对应分类的topics数组
+                        matchedCategory.topics.push(topicInfo.name);
+                        
+                        // 更新用户设置，设置该专题为显示
+                        const userSettings = loadUserSettings('action');
+                        userSettings[topicInfo.name] = true;
+                        saveUserSettings('action', userSettings);
+                        
+                        // 重新渲染专题区域
+                        renderTopics(actionCategories);
+                    }
+                }
+                
+                // 模拟启用后效果
+                showToast(`专题已启用，将在您的工作专区中显示`);
+                
+                try {
+                    // 隐藏该专题卡片 - 使用更可靠的查询方式
+                    const cards = document.querySelectorAll('.topic-icon.new-topic');
+                    cards.forEach(card => {
+                        const btn = card.querySelector(`button.enable-topic-btn[data-id="${topicId}"]`);
+                        if (btn) {
+                            card.style.display = 'none';
+                        }
+                    });
+                } catch (err) {
+                    console.error('隐藏专题卡片错误:', err);
+                }
+                
+                // 从列表中移除该专题
+                removeTopicFromList(topicId);
+            }
+            
+            // 暂不启用专题
+            function dismissTopic(topicId) {
+                console.log(`暂不启用专题ID: ${topicId}`);
+                // 实际项目中应发送请求到服务器标记该专题为已拒绝
+                
+                // 提示用户
+                showToast(`暂不启用该专题，可随时在专题设置中启用`);
+                
+                try {
+                    // 隐藏该专题卡片 - 使用更可靠的查询方式
+                    const cards = document.querySelectorAll('.topic-icon.new-topic');
+                    cards.forEach(card => {
+                        const btn = card.querySelector(`button.dismiss-topic-btn[data-id="${topicId}"]`);
+                        if (btn) {
+                            card.style.display = 'none';
+                        }
+                    });
+                } catch (err) {
+                    console.error('隐藏专题卡片错误:', err);
+                }
+                
+                // 从列表中移除该专题
+                removeTopicFromList(topicId);
+            }
+            
+            // 从列表中移除专题
+            function removeTopicFromList(topicId) {
+                // 从列表中移除该专题
+                const newTopics = fetchNewTopics().filter(topic => topic.id != topicId);
+                localStorage.setItem('newTopics', JSON.stringify(newTopics));
+                
+                // 刷新新专题列表显示
+                initNewTopicsBadge();
+                
+                // 如果没有新专题了，隐藏新专题专区
+                if (newTopics.length === 0) {
+                    document.getElementById('newTopicsSection').style.display = 'none';
+                    document.getElementById('newTopicsBadge').style.display = 'none';
+                }
+            }
+            
+            // 批量启用所有新专题
+            function enableAllNewTopics() {
+                const newTopics = fetchNewTopics();
+                if (newTopics.length > 0) {
+                    const topicIds = newTopics.map(topic => topic.id);
+                    
+                    console.log(`批量启用专题: ${topicIds.join(', ')}`);
+                    
+                    // 将所有专题添加到对应分类并设置为显示
+                    const userSettings = loadUserSettings('action');
+                    
+                    newTopics.forEach(topicInfo => {
+                        // 找到对应的动作分类
+                        const matchedCategory = actionCategories.find(cat => cat.name === topicInfo.category);
+                        if (matchedCategory && !matchedCategory.topics.includes(topicInfo.name)) {
+                            // 添加到对应分类的topics数组
+                            matchedCategory.topics.push(topicInfo.name);
+                            
+                            // 设置该专题为显示
+                            userSettings[topicInfo.name] = true;
+                        }
+                    });
+                    
+                    // 保存设置
+                    saveUserSettings('action', userSettings);
+                    
+                    // 重新渲染专题区域
+                    renderTopics(actionCategories);
+                    
+                    // 实际项目中应发送请求到服务器批量启用专题
+                    showToast(`已启用全部${newTopics.length}个新专题，已显示在对应分类中`);
+                    
+                    // 清空新专题列表
+                    localStorage.setItem('newTopics', JSON.stringify([]));
+                    
+                    // 隐藏新专题相关UI
+                    document.getElementById('newTopicsSection').style.display = 'none';
+                    document.getElementById('newTopicsBadge').style.display = 'none';
+                }
+            }
+            
+            // 绑定事件
+            document.getElementById('newTopicsBadge').addEventListener('click', function(e) {
+                this.querySelector('.tooltip-content').classList.toggle('hidden');
+                e.stopPropagation(); // 阻止冒泡
+            });
+            
+            // 点击页面其他地方关闭提示
+            document.addEventListener('click', function() {
+                document.getElementById('newTopicsBadge').querySelector('.tooltip-content').classList.add('hidden');
+            });
+            
+            document.getElementById('addAllNewTopics').addEventListener('click', function(e) {
+                e.stopPropagation(); // 阻止冒泡
+                enableAllNewTopics();
+            });
+            
+            document.getElementById('addAllNewTopicsBtn').addEventListener('click', enableAllNewTopics);
+            
+            // 初始化
+            initNewTopicsBadge();
+            
+            // 定期检查新专题(每5分钟)
+            setInterval(initNewTopicsBadge, 5 * 60 * 1000);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 清除现有设置，确保使用最新的推荐专题逻辑
+            localStorage.removeItem('topicSettings_action');
+            
+            // 初始化用户设置
+            initializeUserSettings();
+            
+            // 初始化设置面板
+            initializeSettingsModal();
+            
+            // 初始化新专题发现功能
+            initNewTopicsDiscovery();
+            
+            // 渲染专题
+            renderTopics(actionCategories);
+            
+            // 确保分类展示区域可见
+            const topicDisplayArea = document.getElementById('topicDisplayArea');
+            if (topicDisplayArea) {
+                topicDisplayArea.style.display = 'block';
+            }
+            
+            // 调试信息
+            console.log('已加载的专题设置:', loadUserSettings('action'));
+        });
+
+        // 应用用户设置
+        function applyUserSettings() {
+            // 保存专题设置
+            const userSettings = {};
+            document.querySelectorAll('#settingsActionContent input[type="checkbox"][data-topic]').forEach(checkbox => {
+                userSettings[checkbox.dataset.topic] = checkbox.checked;
+            });
+            saveUserSettings('action', userSettings);
+            console.log('保存专题设置:', userSettings);
+            
+            // 重新渲染专题
+            renderTopics(actionCategories);
+            
+            // 隐藏新专题区域（用户已在设置中处理了新专题）
+            const newTopicsSection = document.getElementById('newTopicsSection');
+            if (newTopicsSection) {
+                newTopicsSection.style.display = 'none';
+            }
+            
+            // 隐藏新专题徽章
+            const newTopicsBadge = document.getElementById('newTopicsBadge');
+            if (newTopicsBadge) {
+                newTopicsBadge.style.display = 'none';
+            }
+            
+            // 关闭设置面板
+            document.getElementById('settingsModal').style.display = 'none';
+            document.body.style.overflow = '';
+            
+            // 显示成功提示
+            showToast('设置已成功应用');
+        }
+
+        // 重置用户设置
+        function resetUserSettings() {
+            if (confirm('确定要恢复默认设置吗？将只显示推荐的常用专题。')) {
+                // 删除现有设置
+                localStorage.removeItem('topicSettings_action');
+                
+                // 重新初始化默认设置（只显示推荐专题）
+                const userSettings = {};
+                
+                // 设置默认值
+                actionCategories.forEach(category => {
+                    category.topics.forEach(topic => {
+                        // 只有推荐专题默认显示
+                        userSettings[topic] = recommendedTopics.includes(topic);
+                    });
+                });
+                
+                // 保存默认设置
+                saveUserSettings('action', userSettings);
+                
+                // 更新设置面板
+                generateSettingsContent(actionCategories, 'settingsActionContent');
+                
+                // 重新渲染专题
+                renderTopics(actionCategories);
+                
+                showToast('已恢复推荐专题的默认设置');
+            }
+        }
+    </script>
+    
+    <!-- 底部版权信息 -->
+    <footer class="py-4 bg-white mt-8 border-t">
+        <div class="container mx-auto px-4">
+            <div class="text-center text-gray-500 text-sm">
+                © 2025 社小智平台 版权所有
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

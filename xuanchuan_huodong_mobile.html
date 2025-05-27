@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宣传活动 - 移动端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 移动端全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            width: 375px;
+            overflow-x: hidden;
+        }
+        
+        /* 移动端导航栏 */
+        .mobile-navbar {
+            height: 44px;
+            background-color: #2479CC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-navbar-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+        
+        .mobile-navbar-back {
+            position: absolute;
+            left: 16px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        /* 专题功能菜单样式 */
+        .topic-menu {
+            background-color: white;
+            display: flex;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 44px;
+            z-index: 99;
+            overflow-x: auto;
+            padding: 0 4px;
+        }
+        
+        .topic-menu-item {
+            flex: 0 0 auto;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 14px;
+            color: #666666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .topic-menu-item.active {
+            color: #2479CC;
+            border-bottom-color: #2479CC;
+            font-weight: 600;
+        }
+        
+        .topic-menu-item:active {
+            background-color: #f5f5f5;
+        }
+        
+        /* 专题标题区域 */
+        .topic-header {
+            background-color: #2479CC;
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .topic-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* 内容区域 */
+        .content-area {
+            padding: 16px 12px;
+        }
+        
+        /* 专题指引卡片 */
+        .guide-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .guide-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2479CC;
+        }
+        
+        .guide-btn {
+            background-color: #2479CC;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .guide-btn i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        .guide-content {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 3px solid #2479CC;
+        }
+        
+        .guide-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .guide-text.collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .guide-expand-btn {
+            background: none;
+            border: none;
+            color: #2479CC;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .guide-expand-btn i {
+            margin-left: 4px;
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .guide-expand-btn.expanded i {
+            transform: rotate(180deg);
+        }
+        
+        /* 活动日历卡片 */
+        .calendar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .calendar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .add-activity-btn {
+            background-color: #2479CC;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .add-activity-btn i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        /* 日历控制区 */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .month-nav {
+            display: flex;
+            align-items: center;
+        }
+        
+        .month-btn {
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 8px;
+            margin: 0 8px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .current-month {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .filter-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-select {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            background: white;
+        }
+        
+        .manage-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .manage-btn i {
+            margin-right: 2px;
+            font-size: 8px;
+        }
+        
+        /* 日历网格 */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #e5e5e5;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        
+        .calendar-weekday {
+            background-color: #f8f9fa;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .calendar-day {
+            background-color: white;
+            min-height: 60px;
+            padding: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .calendar-day.other-month {
+            background-color: #f8f9fa;
+            color: #ccc;
+        }
+        
+        .calendar-day-number {
+            font-size: 11px;
+            text-align: right;
+            margin-bottom: 2px;
+        }
+        
+        .calendar-event {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            font-size: 9px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin-bottom: 1px;
+            cursor: pointer;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .calendar-event.my-event {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .calendar-event.system-event {
+            background-color: #f5f5f5;
+            color: #666666;
+        }
+        
+        /* 我的活动列表 */
+        .activity-list {
+            margin-top: 16px;
+        }
+        
+        .activity-list-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .activity-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #2479CC;
+        }
+        
+        .activity-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .activity-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .activity-target {
+            color: #666;
+        }
+        
+        .activity-date {
+            color: #2479CC;
+            font-weight: 500;
+        }
+        
+        .activity-doc-group {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+        
+        .activity-doc-group.linked {
+            color: #2e7d32;
+        }
+        
+        .activity-doc-group.not-linked {
+            color: #666;
+        }
+        
+        .activity-doc-group i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        .activity-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .activity-action-btn {
+            background: none;
+            border: none;
+            color: #2479CC;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .activity-action-btn.delete {
+            color: #dc3545;
+        }
+        
+        /* 模态框样式 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-body {
+            padding: 16px;
+        }
+        
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        
+        .form-input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+        
+        .btn-primary {
+            background-color: #2479CC;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: #666;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .doc-group-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .doc-group-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .doc-group-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+        
+        .doc-group-btn.create {
+            background-color: #2479CC;
+            color: white;
+        }
+        
+        .doc-group-btn.link {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .doc-group-btn i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        .linked-group {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .linked-group-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .linked-group-info i {
+            color: #28a745;
+            margin-right: 8px;
+        }
+        
+        .linked-group-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #155724;
+        }
+        
+        .unlink-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* 工作流程抽屉样式 */
+        .workflow-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .workflow-content {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f7f7f7;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .workflow-drawer.show .workflow-content {
+            transform: translateX(0);
+        }
+        
+        .workflow-header {
+            height: 44px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .workflow-close {
+            color: #2479CC;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .workflow-title {
+            flex: 1;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            color: #000000;
+        }
+        
+        .workflow-body {
+            padding: 16px;
+        }
+        
+        .workflow-step {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .workflow-step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .workflow-step-icon.step-1 { background-color: #2479CC; }
+        .workflow-step-icon.step-2 { background-color: #28a745; }
+        .workflow-step-icon.step-3 { background-color: #ffc107; }
+        .workflow-step-icon.step-4 { background-color: #e91e63; }
+        .workflow-step-icon.step-5 { background-color: #9c27b0; }
+        
+        .workflow-step-content {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .workflow-step-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333333;
+        }
+        
+        .workflow-step-desc {
+            font-size: 12px;
+            color: #666666;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .workflow-step-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .workflow-file-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            background-color: #f0f0f0;
+            color: #333333;
+        }
+        
+        .workflow-file-tag i {
+            margin-right: 4px;
+        }
+        
+        .workflow-tip {
+            background-color: #fff3cd;
+            border-left: 3px solid #ffc107;
+            padding: 8px 12px;
+            margin-top: 8px;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .workflow-tip p {
+            font-size: 11px;
+            color: #856404;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .workflow-tip i {
+            color: #ffc107;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 移动端导航栏 -->
+    <div class="mobile-navbar">
+        <i class="fas fa-arrow-left mobile-navbar-back" onclick="history.back()"></i>
+        <div class="mobile-navbar-title" id="navbarTitle">宣传活动专题</div>
+    </div>
+
+    <!-- 专题功能菜单 -->
+    <div class="topic-menu">
+        <div class="topic-menu-item active" data-page="main">活动管理</div>
+        <div class="topic-menu-item" data-page="ai">AI助手</div>
+        <div class="topic-menu-item" data-page="cases">案例库</div>
+        <div class="topic-menu-item" data-page="materials">素材库</div>
+        <div class="topic-menu-item" data-page="records">使用记录</div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content-area">
+        <!-- 专题指引卡片 -->
+        <div class="guide-card">
+            <div class="guide-header">
+                <h2 class="guide-title">专题指引</h2>
+                <button class="guide-btn" id="workflowGuideBtn">
+                    <i class="fas fa-tasks"></i>
+                    工作流程
+                </button>
+            </div>
+            <div class="guide-content">
+                <p class="guide-text collapsed" id="guideText">
+                    社区宣传活动是提升居民参与度、增强社区凝聚力的重要载体。本专题围绕活动策划、宣传推广、组织实施、效果评估等关键环节，提供全流程指导和模板支持，助力打造有影响力的社区活动品牌。
+                    
+                    高质量的宣传活动应突出主题鲜明、形式多样、参与广泛的特点，通过精心策划和组织实施，有效传播正能量，弘扬社会主义核心价值观，增强社区文化软实力。活动组织过程中要注重创新方式方法，运用新媒体手段扩大宣传覆盖面。
+                    
+                    本专题提供社区宣传活动全流程指引，包括需求调研、方案制定、资源整合、现场执行、效果评估等环节，同时配套提供各类专业模板和工具，帮助基层工作者高效组织开展各类宣传教育活动，营造积极向上的社区文化氛围。
+                </p>
+                <button class="guide-expand-btn" id="guideExpandBtn">
+                    展开查看全部
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 活动日历卡片 -->
+        <div class="calendar-card">
+            <div class="calendar-header">
+                <h2 class="calendar-title">活动日历</h2>
+                <button class="add-activity-btn" id="addActivityBtn">
+                    <i class="fas fa-plus"></i>
+                    添加活动
+                </button>
+            </div>
+
+            <!-- 日历控制区 -->
+            <div class="calendar-controls">
+                <div class="month-nav">
+                    <button class="month-btn" id="prevMonthBtn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="current-month" id="currentMonth">2025年5月</span>
+                    <button class="month-btn" id="nextMonthBtn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="filter-controls">
+                    <select class="filter-select" id="activityFilter">
+                        <option value="all">全部活动</option>
+                        <option value="my">我的活动</option>
+                        <option value="system">活动提示</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 日历网格 -->
+            <div class="calendar-grid">
+                <!-- 星期标题 -->
+                <div class="calendar-weekday">日</div>
+                <div class="calendar-weekday">一</div>
+                <div class="calendar-weekday">二</div>
+                <div class="calendar-weekday">三</div>
+                <div class="calendar-weekday">四</div>
+                <div class="calendar-weekday">五</div>
+                <div class="calendar-weekday">六</div>
+
+                <!-- 日历日期 - 示例5月份 -->
+                <!-- 上月末尾 -->
+                <div class="calendar-day other-month">
+                    <div class="calendar-day-number">28</div>
+                </div>
+                <div class="calendar-day other-month">
+                    <div class="calendar-day-number">29</div>
+                </div>
+                <div class="calendar-day other-month">
+                    <div class="calendar-day-number">30</div>
+                </div>
+
+                <!-- 5月1日 -->
+                <div class="calendar-day" data-date="2025-05-01">
+                    <div class="calendar-day-number">1</div>
+                    <div class="calendar-event system-event" data-event-id="5">劳动节活动</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-02">
+                    <div class="calendar-day-number">2</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-03">
+                    <div class="calendar-day-number">3</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-04">
+                    <div class="calendar-day-number">4</div>
+                    <div class="calendar-event system-event" data-event-id="1">文艺排练</div>
+                </div>
+
+                <!-- 第二周 -->
+                <div class="calendar-day" data-date="2025-05-05">
+                    <div class="calendar-day-number">5</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-06">
+                    <div class="calendar-day-number">6</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-07">
+                    <div class="calendar-day-number">7</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-08">
+                    <div class="calendar-day-number">8</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-09">
+                    <div class="calendar-day-number">9</div>
+                    <div class="calendar-event system-event" data-event-id="2">议事会</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-10">
+                    <div class="calendar-day-number">10</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-11">
+                    <div class="calendar-day-number">11</div>
+                </div>
+
+                <!-- 第三周 -->
+                <div class="calendar-day" data-date="2025-05-12">
+                    <div class="calendar-day-number">12</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-13">
+                    <div class="calendar-day-number">13</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-14">
+                    <div class="calendar-day-number">14</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-15">
+                    <div class="calendar-day-number">15</div>
+                    <div class="calendar-event system-event" data-event-id="3">垃圾分类</div>
+                    <div class="calendar-event my-event" data-event-id="4">读书会</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-16">
+                    <div class="calendar-day-number">16</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-17">
+                    <div class="calendar-day-number">17</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-18">
+                    <div class="calendar-day-number">18</div>
+                </div>
+
+                <!-- 第四周 -->
+                <div class="calendar-day" data-date="2025-05-19">
+                    <div class="calendar-day-number">19</div>
+                    <div class="calendar-event system-event" data-event-id="5">健步走</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-20">
+                    <div class="calendar-day-number">20</div>
+                    <div class="calendar-event my-event" data-event-id="6">环保竞赛</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-21">
+                    <div class="calendar-day-number">21</div>
+                    <div class="calendar-event my-event" data-event-id="7">志愿招募</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-22">
+                    <div class="calendar-day-number">22</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-23">
+                    <div class="calendar-day-number">23</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-24">
+                    <div class="calendar-day-number">24</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-25">
+                    <div class="calendar-day-number">25</div>
+                    <div class="calendar-event system-event" data-event-id="7">邻里节</div>
+                </div>
+
+                <!-- 第五周 -->
+                <div class="calendar-day" data-date="2025-05-26">
+                    <div class="calendar-day-number">26</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-27">
+                    <div class="calendar-day-number">27</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-28">
+                    <div class="calendar-day-number">28</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-29">
+                    <div class="calendar-day-number">29</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-30">
+                    <div class="calendar-day-number">30</div>
+                    <div class="calendar-event system-event" data-event-id="8">文艺汇演</div>
+                </div>
+                <div class="calendar-day" data-date="2025-05-31">
+                    <div class="calendar-day-number">31</div>
+                </div>
+
+                <!-- 下月开始 -->
+                <div class="calendar-day other-month">
+                    <div class="calendar-day-number">1</div>
+                </div>
+            </div>
+
+            <!-- 我的活动列表 -->
+            <div class="activity-list">
+                <h3 class="activity-list-title">专题名称我的活动</h3>
+                
+                <div class="activity-item">
+                    <div class="activity-name">读书会活动</div>
+                    <div class="activity-meta">
+                        <span class="activity-target">面向社区青少年</span>
+                        <span class="activity-date">2025-05-15</span>
+                    </div>
+                    <div class="activity-doc-group linked">
+                        <i class="fas fa-folder"></i>
+                        <span>读书会活动文档群组</span>
+                    </div>
+                    <div class="activity-actions">
+                        <button class="activity-action-btn edit-activity" data-id="4">编辑</button>
+                        <button class="activity-action-btn delete delete-activity" data-id="4">删除</button>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-name">青少年环保知识竞赛</div>
+                    <div class="activity-meta">
+                        <span class="activity-target">面向社区青少年</span>
+                        <span class="activity-date">2025-05-20</span>
+                    </div>
+                    <div class="activity-doc-group not-linked">
+                        <i class="fas fa-folder-open"></i>
+                        <span>未关联文档群组</span>
+                    </div>
+                    <div class="activity-actions">
+                        <button class="activity-action-btn edit-activity" data-id="6">编辑</button>
+                        <button class="activity-action-btn delete delete-activity" data-id="6">删除</button>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-name">志愿者招募</div>
+                    <div class="activity-meta">
+                        <span class="activity-target">18-45岁居民</span>
+                        <span class="activity-date">2025-05-21</span>
+                    </div>
+                    <div class="activity-doc-group linked">
+                        <i class="fas fa-folder"></i>
+                        <span>志愿者招募活动群组 </span>
+                    </div>
+                    <div class="activity-actions">
+                        <button class="activity-action-btn edit-activity" data-id="7">编辑</button>
+                        <button class="activity-action-btn delete delete-activity" data-id="7">删除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工作流程引导抽屉 -->
+    <div class="workflow-drawer" id="workflowDrawer">
+        <div class="workflow-content">
+            <div class="workflow-header">
+                <div class="workflow-close" id="workflowCloseBtn">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <div class="workflow-title">工作流程指南</div>
+            </div>
+            <div class="workflow-body">
+                <!-- 步骤1 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon step-1">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">1. 活动策划与准备</div>
+                        <div class="workflow-step-desc">明确活动主题、目标人群、时间地点，制定详细的活动流程和预算计划。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-word"></i>
+                                活动策划方案
+                            </div>
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-excel"></i>
+                                活动预算表
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤2 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon step-2">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">2. 宣传推广与报名</div>
+                        <div class="workflow-step-desc">通过多渠道宣传活动信息，制作吸引人的宣传材料，建立便民的报名渠道。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-powerpoint"></i>
+                                宣传海报设计
+                            </div>
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-excel"></i>
+                                参与者报名表
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤3 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon step-3">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">3. 活动执行与管理</div>
+                        <div class="workflow-step-desc">按照活动流程组织实施，做好现场秩序维护和安全保障，及时记录活动过程。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-word"></i>
+                                活动现场记录
+                            </div>
+                            <div class="workflow-file-tag">
+                                <i class="fas fa-image"></i>
+                                活动照片集
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤4 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon step-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">4. 效果评估与反馈</div>
+                        <div class="workflow-step-desc">通过问卷调查、访谈等方式收集参与者反馈，分析活动达成效果。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-excel"></i>
+                                满意度调查
+                            </div>
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-word"></i>
+                                效果分析报告
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤5 -->
+                <div class="workflow-step">
+                    <div class="workflow-step-icon step-5">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">5. 总结宣传与推广</div>
+                        <div class="workflow-step-desc">撰写活动总结，提炼成功经验和创新做法，通过多媒体渠道宣传活动成果。</div>
+                        <div class="workflow-step-files">
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-word"></i>
+                                活动总结报告
+                            </div>
+                            <div class="workflow-file-tag">
+                                <i class="fas fa-newspaper"></i>
+                                新闻稿件
+                            </div>
+                            <div class="workflow-file-tag">
+                                <i class="far fa-file-powerpoint"></i>
+                                成果展示PPT
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加活动弹框 -->
+    <div class="modal-backdrop hidden" id="addActivityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">添加活动</h3>
+                <button class="modal-close" id="closeAddModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addActivityForm">
+                    <div class="form-group">
+                        <label class="form-label">活动名称 <span style="color: #dc3545;">*</span></label>
+                        <input type="text" class="form-input" id="activityName" placeholder="请输入活动名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">活动日期 <span style="color: #dc3545;">*</span></label>
+                        <input type="date" class="form-input" id="activityDate" value="2025-05-23">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">活动人群</label>
+                        <input type="text" class="form-input" id="activityTarget" placeholder="请输入活动面向的人群">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">活动描述</label>
+                        <textarea class="form-textarea" id="activityDescription" placeholder="请输入活动描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">云文档群组</label>
+                        <div class="doc-group-section" id="docGroupSection">
+                            <div id="selectedGroupDisplay" style="font-size:13px;color:#2479CC;margin-bottom:8px;display:none;"></div>
+                            <div class="doc-group-actions">
+                                <button type="button" class="doc-group-btn create" id="createGroupBtn">
+                                    <i class="fas fa-plus"></i>
+                                    创建群组
+                                </button>
+                                <button type="button" class="doc-group-btn link" id="linkGroupBtn">
+                                    <i class="fas fa-link"></i>
+                                    关联群组
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" id="cancelAddActivity">取消</button>
+                <button class="btn-primary" id="saveActivity">保存活动</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 群组选择弹窗 -->
+    <div class="modal-backdrop hidden" id="groupSelectModal">
+        <div class="modal-content" style="max-width:340px;max-height:80vh;overflow:hidden;">
+            <div class="modal-header">
+                <h3 class="modal-title">选择群组</h3>
+                <button class="modal-close" id="closeGroupSelectModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:0 0 8px 0;max-height:300px;overflow-y:auto;">
+                <ul id="groupList" style="list-style:none;margin:0;padding:0;">
+                    <!-- 群组项JS生成 -->
+                </ul>
+            </div>
+            <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;">
+                <button class="btn-outline" id="cancelGroupSelect">取消</button>
+                <button class="btn-primary" id="confirmGroupSelect">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑活动弹框 -->
+    <div class="modal-backdrop hidden" id="editActivityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">编辑活动</h3>
+                <button class="modal-close" id="closeEditModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editActivityForm">
+                    <div class="form-group">
+                        <label class="form-label">活动名称 <span style="color: #dc3545;">*</span></label>
+                        <input type="text" class="form-input" id="editActivityName" placeholder="请输入活动名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">活动日期 <span style="color: #dc3545;">*</span></label>
+                        <input type="date" class="form-input" id="editActivityDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">活动人群</label>
+                        <input type="text" class="form-input" id="editActivityTarget" placeholder="请输入活动面向的人群">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">活动描述</label>
+                        <textarea class="form-textarea" id="editActivityDescription" placeholder="请输入活动描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">云文档群组</label>
+                        <div id="editDocGroupSection">
+                            <!-- 已关联状态 -->
+                            <div class="linked-group hidden" id="linkedGroupDisplay">
+                                <div class="linked-group-info">
+                                    <i class="fas fa-folder"></i>
+                                    <span class="linked-group-name" id="linkedGroupName">群组名称</span>
+                                </div>
+                                <button type="button" class="unlink-btn" id="unlinkGroupBtn">取消关联</button>
+                            </div>
+                            <!-- 未关联状态 -->
+                            <div class="doc-group-section" id="editDocGroupActions">
+                                <p style="font-size: 12px; color: #666; margin: 0 0 8px 0;">创建或关联云文档群组可便于活动相关文件管理与协作</p>
+                                <div class="doc-group-actions">
+                                    <button type="button" class="doc-group-btn create" id="editCreateGroupBtn">
+                                        <i class="fas fa-plus"></i>
+                                        创建群组
+                                    </button>
+                                    <button type="button" class="doc-group-btn link" id="editLinkGroupBtn">
+                                        <i class="fas fa-link"></i>
+                                        关联群组
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger" id="deleteActivity" style="margin-right: auto;">删除活动</button>
+                <button class="btn-outline" id="cancelEditActivity">取消</button>
+                <button class="btn-primary" id="updateActivity">保存活动</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹框 -->
+    <div class="modal-backdrop hidden" id="deleteConfirmModal">
+        <div class="modal-content" style="max-width: 300px;">
+            <div class="modal-header">
+                <h3 class="modal-title">确认删除</h3>
+                <button class="modal-close" id="closeDeleteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="margin: 0; font-size: 13px; color: #666;">此操作无法撤销，确定要删除这个活动吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" id="cancelDelete">取消</button>
+                <button class="btn-danger" id="confirmDelete">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系统活动提示查看弹框 -->
+    <div class="modal-backdrop hidden" id="systemActivityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="systemActivityTitle">活动提示</h3>
+                <button class="modal-close" id="closeSystemModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="systemActivityContent">
+                    <!-- 系统活动详情内容 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="closeSystemActivity">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数中的专题名称
+        const urlParams = new URLSearchParams(window.location.search);
+        const topicName = urlParams.get('topicName') || urlParams.get('name');
+        
+        if (topicName) {
+            const decodedTopicName = decodeURIComponent(topicName);
+            document.getElementById('navbarTitle').textContent = decodedTopicName;
+            document.title = decodedTopicName + ' - 移动端';
+        }
+
+        // 模拟活动数据
+        let myActivities = [
+            {
+                id: 4,
+                name: '读书会活动',
+                date: '2025-05-15',
+                target: '面向社区青少年',
+                description: '组织青少年阅读分享交流活动',
+                docGroup: {
+                    id: 'group_001',
+                    name: '读书会活动文档群组',
+                    linked: true,
+                    fileCount: 12
+                }
+            },
+            {
+                id: 6,
+                name: '青少年环保知识竞赛',
+                date: '2025-05-20',
+                target: '面向社区青少年',
+                description: '通过竞赛形式普及环保知识',
+                docGroup: null
+            },
+            {
+                id: 7,
+                name: '志愿者招募',
+                date: '2025-05-21',
+                target: '18-45岁居民',
+                description: '招募社区志愿者，服务社区建设',
+                docGroup: {
+                    id: 'group_002',
+                    name: '志愿者招募活动群组',
+                    linked: true,
+                    fileCount: 8
+                }
+            }
+        ];
+
+        // 系统活动提示数据
+        const systemActivities = {
+            1: {
+                name: '文艺排练',
+                date: '2025-05-04',
+                time: '14:00-16:00',
+                location: '社区文化活动中心',
+                organizer: '社区文艺团队',
+                description: '为即将到来的社区文化节进行文艺节目排练，欢迎有文艺特长的居民参与。',
+                participants: '社区文艺爱好者',
+                requirements: '无特殊要求，欢迎各年龄段居民参与',
+                contact: '社区工作人员 张老师',
+                phone: '138-0000-1234'
+            },
+            2: {
+                name: '议事会',
+                date: '2025-05-09',
+                time: '19:00-21:00',
+                location: '社区会议室',
+                organizer: '社区居委会',
+                description: '讨论社区环境整治、停车管理等重要事项，征求居民意见和建议。',
+                participants: '全体居民',
+                requirements: '欢迎居民积极参与，共同建设美好社区',
+                contact: '社区主任 李主任',
+                phone: '138-0000-5678'
+            },
+            3: {
+                name: '垃圾分类',
+                date: '2025-05-15',
+                time: '09:00-11:00',
+                location: '社区广场',
+                organizer: '环保志愿者团队',
+                description: '垃圾分类知识宣传和实践活动，提高居民环保意识。',
+                participants: '全体居民',
+                requirements: '请携带家中可回收垃圾参与分类实践',
+                contact: '环保志愿者 王老师',
+                phone: '138-0000-9012'
+            },
+            5: {
+                name: '劳动节活动',
+                date: '2025-05-01',
+                time: '08:00-12:00',
+                location: '社区公园',
+                organizer: '社区居委会',
+                description: '庆祝五一劳动节，组织社区清洁美化活动，弘扬劳动精神。',
+                participants: '全体居民',
+                requirements: '请自备劳动工具，穿着适合劳动的服装',
+                contact: '社区工作人员 赵老师',
+                phone: '138-0000-3456'
+            },
+            7: {
+                name: '邻里节',
+                date: '2025-05-25',
+                time: '15:00-18:00',
+                location: '社区广场',
+                organizer: '社区居委会',
+                description: '增进邻里感情，促进社区和谐，设有游戏互动、美食分享等环节。',
+                participants: '全体居民及家庭',
+                requirements: '欢迎携带家庭自制美食分享',
+                contact: '社区工作人员 孙老师',
+                phone: '138-0000-7890'
+            },
+            8: {
+                name: '文艺汇演',
+                date: '2025-05-30',
+                time: '19:00-21:00',
+                location: '社区文化活动中心',
+                organizer: '社区文艺团队',
+                description: '展示社区文艺团队排练成果，丰富居民文化生活。',
+                participants: '全体居民',
+                requirements: '无特殊要求，欢迎观看演出',
+                contact: '文艺团队负责人 陈老师',
+                phone: '138-0000-2468'
+            }
+        };
+
+        let currentEditingActivity = null;
+
+        // 专题功能菜单切换
+        const topicMenuItems = document.querySelectorAll('.topic-menu-item');
+        
+        topicMenuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.getAttribute('data-page');
+                
+                if (page === 'main') {
+                    // 当前页面，不需要跳转
+                    return;
+                } else {
+                    // 跳转到功能区页面的对应tab
+                    const currentTopicName = document.getElementById('navbarTitle').textContent;
+                    const tabMapping = {
+                        'ai': 'ai',
+                        'cases': 'cases', 
+                        'materials': 'materials',
+                        'records': 'records'
+                    };
+                    const targetTab = tabMapping[page] || 'ai';
+                    const targetUrl = `gongneng_mobile.html?topicName=${encodeURIComponent(currentTopicName)}&tab=${targetTab}`;
+                    window.location.href = targetUrl;
+                }
+            });
+        });
+
+        // 专题指引展开/收起功能
+        const guideText = document.getElementById('guideText');
+        const guideExpandBtn = document.getElementById('guideExpandBtn');
+        let isExpanded = false;
+
+        guideExpandBtn.addEventListener('click', function() {
+            if (isExpanded) {
+                // 收起
+                guideText.classList.add('collapsed');
+                guideExpandBtn.innerHTML = '展开查看全部 <i class="fas fa-chevron-down"></i>';
+                guideExpandBtn.classList.remove('expanded');
+                isExpanded = false;
+            } else {
+                // 展开
+                guideText.classList.remove('collapsed');
+                guideExpandBtn.innerHTML = '收起 <i class="fas fa-chevron-up"></i>';
+                guideExpandBtn.classList.add('expanded');
+                isExpanded = true;
+            }
+        });
+
+        // 工作流程引导功能
+        const workflowGuideBtn = document.getElementById('workflowGuideBtn');
+        const workflowDrawer = document.getElementById('workflowDrawer');
+        const workflowCloseBtn = document.getElementById('workflowCloseBtn');
+
+        workflowGuideBtn.addEventListener('click', function() {
+            workflowDrawer.style.display = 'block';
+            setTimeout(() => {
+                workflowDrawer.classList.add('show');
+            }, 10);
+        });
+
+        function closeWorkflowDrawer() {
+            workflowDrawer.classList.remove('show');
+            setTimeout(() => {
+                workflowDrawer.style.display = 'none';
+            }, 300);
+        }
+
+        workflowCloseBtn.addEventListener('click', closeWorkflowDrawer);
+
+        // 点击抽屉外部关闭
+        workflowDrawer.addEventListener('click', function(e) {
+            if (e.target === workflowDrawer) {
+                closeWorkflowDrawer();
+            }
+        });
+
+        // 弹框功能
+        const addActivityModal = document.getElementById('addActivityModal');
+        const editActivityModal = document.getElementById('editActivityModal');
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const systemActivityModal = document.getElementById('systemActivityModal');
+
+        // 打开添加活动弹框
+        document.getElementById('addActivityBtn').addEventListener('click', function() {
+            resetAddForm();
+            addActivityModal.classList.remove('hidden');
+        });
+
+        // 关闭弹框
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+        }
+
+        // 关闭按钮事件
+        document.getElementById('closeAddModal').addEventListener('click', () => closeModal(addActivityModal));
+        document.getElementById('cancelAddActivity').addEventListener('click', () => closeModal(addActivityModal));
+        document.getElementById('closeEditModal').addEventListener('click', () => closeModal(editActivityModal));
+        document.getElementById('cancelEditActivity').addEventListener('click', () => closeModal(editActivityModal));
+        document.getElementById('closeDeleteModal').addEventListener('click', () => closeModal(deleteConfirmModal));
+        document.getElementById('cancelDelete').addEventListener('click', () => closeModal(deleteConfirmModal));
+        document.getElementById('closeSystemModal').addEventListener('click', () => closeModal(systemActivityModal));
+        document.getElementById('closeSystemActivity').addEventListener('click', () => closeModal(systemActivityModal));
+
+        // 点击弹框外部关闭
+        [addActivityModal, editActivityModal, deleteConfirmModal, systemActivityModal].forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // 重置添加表单
+        function resetAddForm() {
+            document.getElementById('activityName').value = '';
+            document.getElementById('activityDate').value = '2025-05-23';
+            document.getElementById('activityTarget').value = '';
+            document.getElementById('activityDescription').value = '';
+            resetDocGroupSection();
+        }
+
+        // 重置文档群组区域
+        function resetDocGroupSection() {
+            const docGroupSection = document.getElementById('docGroupSection');
+            docGroupSection.innerHTML = `
+                <div id="selectedGroupDisplay" style="font-size:13px;color:#2479CC;margin-bottom:8px;display:none;"></div>
+                <div class="doc-group-actions">
+                    <button type="button" class="doc-group-btn create" id="createGroupBtn">
+                        <i class="fas fa-plus"></i>
+                        创建群组
+                    </button>
+                    <button type="button" class="doc-group-btn link" id="linkGroupBtn">
+                        <i class="fas fa-link"></i>
+                        关联群组
+                    </button>
+                </div>
+            `;
+            
+            // 重新绑定事件
+            document.getElementById('createGroupBtn').addEventListener('click', function() {
+                openGroupSelectModal();
+            });
+            document.getElementById('linkGroupBtn').addEventListener('click', function() {
+                openGroupSelectModal();
+            });
+        }
+
+        // 群组模拟数据
+        const allGroups = [
+            {id:'group_001', name:'读书会活动文档群组'},
+            {id:'group_002', name:'志愿者招募活动群组'},
+            {id:'group_003', name:'端午节活动'},
+            {id:'group_004', name:'活动采集照片'},
+            {id:'group_005', name:'999'},
+            {id:'group_006', name:'喝非常好'},
+            {id:'group_007', name:'听说交朋友'},
+            {id:'group_008', name:'邀请开始活动策划'}
+        ];
+        let selectedGroupId = null;
+
+        // 打开群组选择弹窗
+        function openGroupSelectModal() {
+            const modal = document.getElementById('groupSelectModal');
+            const list = document.getElementById('groupList');
+            list.innerHTML = allGroups.map(g =>
+                `<li data-id="${g.id}" style="padding:12px 16px;display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:1px solid #f0f0f0;${selectedGroupId===g.id?'background:#e0f2fe;':''}">
+                    <i class="fas fa-users" style="color:#2479CC;"></i>
+                    <span style="flex:1;">${g.name}</span>
+                    <span style="color:#1890ff;font-size:14px;">${selectedGroupId===g.id?'<i class=\'fas fa-check-circle\'></i>':''}</span>
+                </li>`
+            ).join('');
+            modal.classList.remove('hidden');
+            // 单选逻辑
+            Array.from(list.children).forEach(li => {
+                li.onclick = function() {
+                    selectedGroupId = this.getAttribute('data-id');
+                    openGroupSelectModal(); // 重新渲染高亮
+                };
+            });
+        }
+        // 关闭群组选择弹窗
+        function closeGroupSelectModal() {
+            document.getElementById('groupSelectModal').classList.add('hidden');
+        }
+        // 绑定按钮事件
+        setTimeout(()=>{
+            document.getElementById('linkGroupBtn').onclick = openGroupSelectModal;
+            document.getElementById('closeGroupSelectModal').onclick = closeGroupSelectModal;
+            document.getElementById('cancelGroupSelect').onclick = closeGroupSelectModal;
+            document.getElementById('confirmGroupSelect').onclick = function() {
+                if(selectedGroupId){
+                    const group = allGroups.find(g=>g.id===selectedGroupId);
+                    document.getElementById('selectedGroupDisplay').style.display = 'block';
+                    document.getElementById('selectedGroupDisplay').textContent = '已关联群组：'+group.name;
+                }
+                closeGroupSelectModal();
+            };
+        },300);
+
+        // 保存活动
+        document.getElementById('saveActivity').addEventListener('click', function() {
+            const name = document.getElementById('activityName').value;
+            const date = document.getElementById('activityDate').value;
+            
+            if (!name.trim()) {
+                alert('请填写活动名称！');
+                return;
+            }
+            
+            if (!date) {
+                alert('请选择活动日期！');
+                return;
+            }
+            
+            const newActivity = {
+                id: Date.now(),
+                name: name,
+                date: date,
+                target: document.getElementById('activityTarget').value,
+                description: document.getElementById('activityDescription').value,
+                docGroup: null
+            };
+            
+            myActivities.push(newActivity);
+            updateActivityDisplay();
+            closeModal(addActivityModal);
+            alert('活动添加成功！');
+        });
+
+        // 编辑活动
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-activity')) {
+                const activityId = e.target.getAttribute('data-id');
+                const activity = myActivities.find(a => a.id == activityId);
+                if (activity) {
+                    currentEditingActivity = activity;
+                    populateEditForm(activity);
+                    editActivityModal.classList.remove('hidden');
+                }
+            }
+            
+            if (e.target.classList.contains('delete-activity')) {
+                const activityId = e.target.getAttribute('data-id');
+                const activity = myActivities.find(a => a.id == activityId);
+                if (activity) {
+                    currentEditingActivity = activity;
+                    deleteConfirmModal.classList.remove('hidden');
+                }
+            }
+        });
+
+        // 填充编辑表单
+        function populateEditForm(activity) {
+            document.getElementById('editActivityName').value = activity.name;
+            document.getElementById('editActivityDate').value = activity.date;
+            document.getElementById('editActivityTarget').value = activity.target;
+            document.getElementById('editActivityDescription').value = activity.description;
+            
+            // 更新文档群组显示
+            updateEditDocGroupDisplay(activity.docGroup);
+        }
+
+        // 更新编辑表单中的文档群组显示
+        function updateEditDocGroupDisplay(docGroup) {
+            const linkedDisplay = document.getElementById('linkedGroupDisplay');
+            const actionsDisplay = document.getElementById('editDocGroupActions');
+            const groupNameElement = document.getElementById('linkedGroupName');
+            
+            if (docGroup && docGroup.linked) {
+                linkedDisplay.classList.remove('hidden');
+                actionsDisplay.classList.add('hidden');
+                groupNameElement.textContent = `${docGroup.name} (${docGroup.fileCount}个文件)`;
+            } else {
+                linkedDisplay.classList.add('hidden');
+                actionsDisplay.classList.remove('hidden');
+            }
+        }
+
+        // 更新活动
+        document.getElementById('updateActivity').addEventListener('click', function() {
+            if (currentEditingActivity) {
+                const name = document.getElementById('editActivityName').value;
+                const date = document.getElementById('editActivityDate').value;
+                
+                if (!name.trim()) {
+                    alert('请填写活动名称！');
+                    return;
+                }
+                
+                if (!date) {
+                    alert('请选择活动日期！');
+                    return;
+                }
+                
+                currentEditingActivity.name = name;
+                currentEditingActivity.date = date;
+                currentEditingActivity.target = document.getElementById('editActivityTarget').value;
+                currentEditingActivity.description = document.getElementById('editActivityDescription').value;
+                
+                updateActivityDisplay();
+                closeModal(editActivityModal);
+                alert('活动更新成功！');
+            }
+        });
+
+        // 删除活动
+        document.getElementById('deleteActivity').addEventListener('click', function() {
+            deleteConfirmModal.classList.remove('hidden');
+        });
+
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            if (currentEditingActivity) {
+                const index = myActivities.findIndex(a => a.id === currentEditingActivity.id);
+                if (index > -1) {
+                    myActivities.splice(index, 1);
+                    updateActivityDisplay();
+                    closeModal(deleteConfirmModal);
+                    closeModal(editActivityModal);
+                    alert('活动删除成功！');
+                }
+            }
+        });
+
+        // 更新活动显示
+        function updateActivityDisplay() {
+            // 这里可以添加实际的DOM更新逻辑
+            console.log('Activities updated:', myActivities);
+        }
+
+        // 取消关联文档群组
+        document.getElementById('unlinkGroupBtn').addEventListener('click', function() {
+            if (currentEditingActivity && confirm('确定要取消关联文档群组吗？')) {
+                currentEditingActivity.docGroup = null;
+                updateEditDocGroupDisplay(null);
+                alert('文档群组关联已取消');
+            }
+        });
+
+        // 编辑表单中的创建和关联按钮
+        document.getElementById('editCreateGroupBtn').addEventListener('click', function() {
+            alert('创建群组功能（原型展示）');
+        });
+
+        document.getElementById('editLinkGroupBtn').addEventListener('click', function() {
+            alert('关联群组功能（原型展示）');
+        });
+
+        // 月份切换
+        document.getElementById('prevMonthBtn').addEventListener('click', function() {
+            alert('上个月功能（原型展示）');
+        });
+
+        document.getElementById('nextMonthBtn').addEventListener('click', function() {
+            alert('下个月功能（原型展示）');
+        });
+
+        // 活动筛选
+        document.getElementById('activityFilter').addEventListener('change', function() {
+            const filterValue = this.value;
+            console.log('Filter changed to:', filterValue);
+            // 这里可以添加筛选逻辑
+        });
+
+        // 显示系统活动详情
+        function showSystemActivity(eventId) {
+            const activity = systemActivities[eventId];
+            if (!activity) {
+                alert('活动信息不存在');
+                return;
+            }
+            
+            // 设置弹框标题
+            document.getElementById('systemActivityTitle').textContent = '查看活动提示';
+            
+            // 设置弹框内容 - 按照PC端截图样式
+            const contentDiv = document.getElementById('systemActivityContent');
+            contentDiv.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">活动名称</label>
+                    <div style="background-color: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px solid #e9ecef; font-size: 13px; color: #495057;">
+                        ${activity.name}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">活动日期</label>
+                    <div style="background-color: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px solid #e9ecef; font-size: 13px; color: #495057;">
+                        ${activity.date}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">活动人群</label>
+                    <div style="background-color: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px solid #e9ecef; font-size: 13px; color: #495057;">
+                        ${activity.participants}
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">活动描述</label>
+                    <div style="background-color: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px solid #e9ecef; font-size: 13px; color: #495057; line-height: 1.5; min-height: 60px;">
+                        ${activity.description}
+                    </div>
+                </div>
+            `;
+            
+            // 显示弹框
+            systemActivityModal.classList.remove('hidden');
+        }
+
+        // 日历事件点击处理
+        document.querySelectorAll('.calendar-event').forEach(event => {
+            event.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const eventId = this.getAttribute('data-event-id');
+                const eventType = this.classList.contains('my-event') ? 'my' : 'system';
+                
+                if (eventType === 'my') {
+                    const activity = myActivities.find(a => a.id == eventId);
+                    if (activity) {
+                        currentEditingActivity = activity;
+                        populateEditForm(activity);
+                        editActivityModal.classList.remove('hidden');
+                    }
+                } else {
+                    showSystemActivity(eventId);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
